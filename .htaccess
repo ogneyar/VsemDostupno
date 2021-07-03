@@ -1,0 +1,10 @@
+#DocumentRoot /var/www/u1366210/data/www/xn----9sbegbr4cary4h.xn--p1acf/web
+
+#DirectoryIndex web/index.php
+
+#Options +FollowSymLinks
+#IndexIgnore */*
+
+RewriteEngine on
+
+RewriteRule ^(.*)$  https://%{HTTP_HOST}/web/$1 [L,QSA]
