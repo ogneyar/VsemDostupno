@@ -140,10 +140,9 @@ class DefaultController extends BaseController
     
     public function actionEmail()
     {
-        $user_data = [
-            'number' => $this->identity->entity->number,
+        $user_data = [ 
+            'id' => $this->identity->entity->id,
             'firstname' => $this->identity->entity->firstname,
-            'patronymic' => $this->identity->entity->patronymic,
         ];
 
         return $this->render('email', [
