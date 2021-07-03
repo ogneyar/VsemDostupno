@@ -32,4 +32,5 @@ phpunit.phar
 /web
 web
 
-*/web.php
+/config
+config
