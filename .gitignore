@@ -29,8 +29,10 @@ phpunit.phar
 
 
 
-/web
 web
 
-/config
 config
+
+runtime
+
+.env

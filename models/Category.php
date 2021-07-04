@@ -449,11 +449,16 @@ class Category extends \yii\db\ActiveRecord
 
     public function getFormattedPurchaseDate()
     {
-        if (strtotime($this->purchase_timestamp) > 0) {
-            return Yii::$app->formatter->asDate($this->purchase_timestamp, 'long');
-        }
+       
+        // if (strtotime($this->purchase_timestamp) > 0) {
+        if ($this->purchase_timestamp != "0000-00-00 00:00:00") {
+            // echo($this->purchase_timestamp);
 
+            return Yii::$app->formatter->asDate($this->purchase_timestamp, 'long');
+        }            
+    
         return '';
+
     }
 
     public function getFormattedOrderDate()
