@@ -36,7 +36,7 @@ class FundController extends BaseController
     public function actionAdd()
     {
         $model = new Fund();
-        $model->name = $_POST{'name'};
+        $model->name = $_POST['name'];
         $model->percent = $_POST['percent'];
         if ($model->save()) {
             return true;

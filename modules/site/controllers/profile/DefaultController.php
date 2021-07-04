@@ -32,10 +32,12 @@ use app\models\Category;
 
 class DefaultController extends BaseController
 {
-	const WEB = "/web";
 
     public function behaviors()
     {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+
         return ArrayHelper::merge(parent::behaviors(), [
             'access' => [
                 'class' => AccessControl::className(),
@@ -60,7 +62,7 @@ class DefaultController extends BaseController
                         ],
                         'roles' => ['@'],
                         'denyCallback' => function ($rule, $action) {
-                            return $action->controller->redirect(self::WEB . '/profile');
+                            return $action->controller->redirect($baseUrl . 'profile');
                         },
                     ],
                     [
@@ -72,12 +74,12 @@ class DefaultController extends BaseController
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
                             if (in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
-                                $action->controller->redirect(self::WEB . '/admin')->send();
+                                $action->controller->redirect($baseUrl . 'admin')->send();
                                 exit();
                             }
 
                             if (Yii::$app->user->identity->entity->disabled) {
-                                $action->controller->redirect(self::WEB . '/profile/logout')->send();
+                                $action->controller->redirect($baseUrl . 'profile/logout')->send();
                                 exit();
                             }
 
@@ -122,6 +124,9 @@ class DefaultController extends BaseController
 
     public function actionLogout()
     {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+
         $cart = new Cart();
         $products = $cart->products;
         $cart->clear();
@@ -132,11 +137,14 @@ class DefaultController extends BaseController
             $cart->add($product, $product->cart_quantity);
         }
 
-        return $this->redirect(self::WEB . '/profile/login');
+        return $this->redirect($baseUrl . 'profile/login');
     }
 
     public function actionRegister()
     {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+        
         $get = Yii::$app->request->get();
         if (isset($get['token'])) {
             $register = Register::findOne(['token' => $get['token']]); 
@@ -154,11 +162,11 @@ class DefaultController extends BaseController
                 ]);
                 
                 Yii::$app->session->setFlash('profile-message', 'profile-register-success');
-                return $this->redirect(self::WEB . '/profile/message');
+                return $this->redirect($baseUrl . 'profile/message');
             }
 
             Yii::$app->session->setFlash('profile-message', 'profile-register-fail');
-            return $this->redirect(self::WEB . '/profile/message');
+            return $this->redirect($baseUrl . 'profile/message');
         }
 
         $model = new RegisterForm();
@@ -222,7 +230,7 @@ class DefaultController extends BaseController
                 $transaction->rollBack();
 
                 Yii::$app->session->setFlash('profile-message', 'profile-register-fail');
-                return $this->redirect(self::WEB . '/profile/message');
+                return $this->redirect($baseUrl . 'profile/message');
                 //throw new ForbiddenHttpException($e->getMessage());
             }
 
@@ -254,7 +262,7 @@ class DefaultController extends BaseController
             }
 
             Yii::$app->session->setFlash('profile-message', 'profile-entity-request');
-            return $this->redirect(self::WEB . '/profile/message');
+            return $this->redirect($baseUrl . 'profile/message');
         } else {
             
             $model->password =
@@ -270,13 +278,16 @@ class DefaultController extends BaseController
 
     public function actionForgotRequest()
     {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+        
         $model = new ForgotRequestForm();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $user = User::findOne(['email' => $model->email, 'disabled' => 0]);
 
             if (!$user) {
                 Yii::$app->session->setFlash('profile-message', 'profile-forgot-fail');
-                return $this->redirect(self::WEB . '/profile/message');
+                return $this->redirect($baseUrl . 'profile/message');
             }
 
             $forgot = Forgot::findOne(['user_id' => $user->id]);
@@ -289,7 +300,7 @@ class DefaultController extends BaseController
             Email::send('forgot', $user->email, ['url' => $forgot->url]);
 
             Yii::$app->session->setFlash('profile-message', 'profile-forgot-finish');
-            return $this->redirect(self::WEB . '/profile/message');
+            return $this->redirect($baseUrl . 'profile/message');
         } else {
             $menu_first_level = Category::find()->where(['parent' => 0, 'visibility' => 1])->all();
             return $this->render('forgot-request', [
@@ -301,6 +312,9 @@ class DefaultController extends BaseController
 
     public function actionForgotChange()
     {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+        
         $get = Yii::$app->request->get();
         if (isset($get['token'])) {
             $token = $get['token'];
@@ -323,7 +337,7 @@ class DefaultController extends BaseController
             $forgot->delete();
 
             Yii::$app->session->setFlash('profile-message', 'profile-forgot-success');
-            return $this->redirect(self::WEB . '/profile/message');
+            return $this->redirect($baseUrl . 'profile/message');
         } else {
             $model->password =
             $model->password_repeat = '';
@@ -352,6 +366,9 @@ class DefaultController extends BaseController
     }
     public function actionRegisterProvider()
     {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+        
         $model_provider = new Provider();
         $model_user = new User();
         if ($reg_tmp = ProviderRegData::getStepByIp(Yii::$app->getRequest()->getUserIP())) {
@@ -489,7 +506,7 @@ class DefaultController extends BaseController
                         }
                         
                         Yii::$app->session->setFlash('profile-message', 'profile-entity-request');
-                        return $this->redirect(self::WEB . '/profile/message');
+                        return $this->redirect($baseUrl . 'profile/message');
                     }
                 break;
             }
