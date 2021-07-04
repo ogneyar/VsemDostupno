@@ -38,7 +38,7 @@ Icon::map($this);
         <?php
             NavBar::begin([
                 'brandLabel' => Html::encode(Yii::$app->params['name']),
-                'brandUrl' => Url::to(['/admin']),
+                'brandUrl' => Url::to(['/']),
                 'options' => [
                     'class' => 'navbar-inverse navbar-fixed-top',
                 ],
