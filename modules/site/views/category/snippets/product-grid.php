@@ -27,7 +27,7 @@ use app\modules\purchase\models\PurchaseProduct;
                     <div class="col-md-3 product-item">
                         
                             <div style="height: 25px;">
-                                <h5 class="text-center" style="font-size: 20px;"><strong><?= $date ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
+                                <h5 class="text-center" style="font-size: 20px;"><strong><?= (isset($date) && strtotime($date) > 0) ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
                             </div>
                        
                         <div class="row">

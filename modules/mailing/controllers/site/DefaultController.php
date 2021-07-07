@@ -85,7 +85,7 @@ class DefaultController extends BaseController
             $model->subject = $_POST['subject'];
             $model->message = $_POST['message'];
             
-            if ($model->save()) {
+            if ($model->save() && !isset($_POST['with_out_email'])) {
                 $body = "Пользователь " . $model->user->fullName . " (" . $model->user->email . ", " . $model->user->phone . ") оставил сообщение:";
                 $body .= "<br><br>";
                 $body .= $model->getCategoryText($model->category);
@@ -94,7 +94,7 @@ class DefaultController extends BaseController
                 if ($emails = NoticeEmail::getEmails()) {
                     foreach ($emails as $email) {
                         $mail = Yii::$app->mailer->compose()
-                            ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
+                            ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']]) 
                             ->setTo($email)
                             ->setSubject("Сообщение от пользователя")
                             ->setHtmlBody($body);
@@ -103,11 +103,16 @@ class DefaultController extends BaseController
                     }
                 }
                 
-                Yii::$app->response->format = Response::FORMAT_JSON;
+                Yii::$app->response->format = Response::FORMAT_JSON; 
                 return [
                     'success' => true,
                 ];
             }
+        }else if (isset($_GET['re_subject'])) {
+
+            return $this->render('message', [
+                're_subject' => $_GET['re_subject']
+            ]);
         }
         
         return $this->render('message', [

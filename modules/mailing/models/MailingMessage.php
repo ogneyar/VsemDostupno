@@ -68,7 +68,7 @@ class MailingMessage extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::className(), ['id' => 'user_id']); 
     }
     
     public static function getCategoryText($cat)

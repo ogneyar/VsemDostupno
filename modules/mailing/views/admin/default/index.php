@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  <button id="mailing-info-btn" class="btn btn-success" type="button">' . 'Отправить' . '</button>',
 ]); ?>
 
-    <p style="display: none;" id="modal-title-ok">Рассылка будет произведена для</p>
+    <p style="display: none;" id="modal-title-ok">Рассылка будет произведена для</p> 
     <p style="display: none;" id="members-modal"><strong>Участников</strong></p>
     <p style="display: none;" id="partners-modal"><strong>Партнёров</strong></p>
     <p style="display: none;" id="providers-modal"><strong>Поставщиков</strong></p>

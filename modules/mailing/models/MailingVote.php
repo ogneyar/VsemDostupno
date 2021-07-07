@@ -6,6 +6,7 @@ use Yii;
 use yii\helpers\Url;
 use app\helpers\UtilsHelper;
 use app\models\Member;
+use app\models\Partner;
 use app\models\Provider;
 use app\models\User;
 use app\modules\mailing\models\MailingVoteStat;
@@ -15,6 +16,7 @@ use app\modules\mailing\models\MailingVoteStat;
  *
  * @property integer $id
  * @property integer $for_members
+ * @property integer $for_partners
  * @property integer $for_providers
  * @property string $subject
  * @property string $attachment
@@ -36,7 +38,7 @@ class MailingVote extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['for_members', 'for_providers'], 'integer'],
+            [['for_members', 'for_partners', 'for_providers'], 'integer'],
             [['subject'], 'required'],
             [['sent_date'], 'safe'],
             [['attachment'], 'string', 'max' => 255],
@@ -52,6 +54,7 @@ class MailingVote extends \yii\db\ActiveRecord
         return [
             'id' => 'Идентификатор',
             'for_members' => 'Отправка для пользователей',
+            'for_partners' => 'Отправка для партнёров',
             'for_providers' => 'Отправка для поставщиков',
             'subject' => 'Тема',
             'attachment' => 'Приложенные файлы',
@@ -68,15 +71,31 @@ class MailingVote extends \yii\db\ActiveRecord
                 foreach ($members as $rec) {
                     if ($rec->user->disabled != 1) {
                         $send_to[] = [
-                            'email' => $rec->user->email,
+                            'email' => $rec->user->email, 
                             'name' => $rec->user->respectedName,
                         ];
                     }
                 }
             }
         }
+
+        if ($data['for_partners']) {
+            $partners = Partner::find()->all();
+            if ($partners) {
+                foreach ($partners as $rec) {
+                    if ($rec->user->disabled != 1) {
+                        if (!isset($rec->user->member)) {
+                            $send_to[] = [
+                                'email' => $rec->user->email,
+                                'name' => $rec->user->respectedName,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
         
-        if ($data['for_providers']) {
+        if ($data['for_providers']) { 
             $providers = Provider::find()->all();
             if ($providers) {
                 foreach ($providers as $rec) {
@@ -112,6 +131,7 @@ class MailingVote extends \yii\db\ActiveRecord
             
             $mailing = new MailingVote();
             $mailing->for_members = $data['for_members'] ? 1 : 0;
+            $mailing->for_partners = $data['for_partners'] ? 1 : 0;
             $mailing->for_providers = $data['for_providers'] ? 1 : 0;
             $mailing->subject = $data['subject'];
             $mailing->attachment = $data['files_names'];

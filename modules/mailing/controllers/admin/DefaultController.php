@@ -11,6 +11,9 @@ use app\modules\mailing\models\MailingVote;
 use app\modules\mailing\models\MailingVoteStat;
 use app\modules\mailing\models\MailingProduct;
 use app\modules\mailing\models\MailingMessage;
+
+use app\models\EmailLetters;
+
 use app\models\User;
 
 /**
@@ -55,10 +58,14 @@ class DefaultController extends BaseController
             
             if ($category == 1) {
                 $data['subject'] = htmlspecialchars($_POST['subject']);
-                MailingNews::sendMailing($data);
+                // MailingNews::sendMailing($data);
+
+                EmailLetters::sendMailingNews($data);
             } elseif ($category == 5) {
                 $data['subject'] = htmlspecialchars($_POST['subject_vote']);
-                MailingVote::sendMailing($data);
+                // MailingVote::sendMailing($data); 
+
+                EmailLetters::sendMailingVote($data);
             }
         }
         

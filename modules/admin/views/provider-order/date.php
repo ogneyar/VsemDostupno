@@ -25,7 +25,7 @@ $this->registerJs($script, $this::POS_END);
 ?>
 
 <div class="purchase-date">
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?></h1> 
     
     <table class="table table-bordered">
         <thead>

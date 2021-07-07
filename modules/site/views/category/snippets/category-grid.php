@@ -20,7 +20,7 @@ use app\modules\purchase\models\PurchaseProduct;
                 <?php endif; ?>
                 <div class="col-md-3">
                     <div class="purchase-date-hdr">
-                        <h5 class="text-center" style="font-size: 20px;"><strong><?= isset($date) ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
+                        <h5 class="text-center" style="font-size: 20px;"><strong><?= (isset($date) && strtotime($date) > 0) ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
                     </div>
                     <?php $target = empty($categories[$inCount]->external_link) ? '_self' : '_blank' ?>
                     <?= Html::a(

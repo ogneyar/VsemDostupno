@@ -25,13 +25,16 @@ $this->params['breadcrumbs'] = [$this->title];
                     'items' => [
                         MailingMessage::CATEGORY_QUESTION => 'Вопрос',
                         MailingMessage::CATEGORY_CLAIM => 'Жалоба',
-                        MailingMessage::CATEGORY_PROPOSAL => 'Предложение',
+                        MailingMessage::CATEGORY_PROPOSAL => 'Предложение', 
                     ],
                 ]); ?>
             </div>
             <div class="form-group">
                 <label for="subject">Тема</label>
-                <?= Html::textInput('subject', null, ['class' => 'form-control', 'id' => 'subject']); ?>
+                <?php if (isset($re_subject)){ ?>
+                    <?= Html::textInput('subject', $re_subject, ['class' => 'form-control', 'id' => 'subject']); ?>
+                <?php }else {?>
+                    <?= Html::textInput('subject', null, ['class' => 'form-control', 'id' => 'subject']); }?>
             </div>
             <div class="form-group">
                 <label for="subject">Сообщение</label>

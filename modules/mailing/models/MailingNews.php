@@ -148,24 +148,24 @@ class MailingNews extends \yii\db\ActiveRecord
                 $count_exceptions++;
             }
             
-            if ($count_exceptions) {
-                $mail_to_me = Yii::$app->mailer->compose()
-                    ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-                    ->setTo("ya13th@mail.ru")
-                    ->setSubject($data['subject'])
-                    ->setHtmlBody("КОЛИЧЕСТВО ИСКЛЮЧЕНИЙ - " . $count_exceptions)
-                    ->send();
-            }else {
-                $mail_to_me = Yii::$app->mailer->compose()
-                    ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-                    ->setTo("ya13th@mail.ru")
-                    ->setSubject($data['subject'])
-                    ->setHtmlBody("send_to - " . implode("<br/>", $send_to))
-                    ->send();
-            }
+            // if ($count_exceptions) {
+            //     $mail_to_me = Yii::$app->mailer->compose()
+            //         ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
+            //         ->setTo("ya13th@mail.ru")
+            //         ->setSubject($data['subject'])
+            //         ->setHtmlBody("КОЛИЧЕСТВО ИСКЛЮЧЕНИЙ - " . $count_exceptions)
+            //         ->send();
+            // }else {
+            //     $mail_to_me = Yii::$app->mailer->compose()
+            //         ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
+            //         ->setTo("ya13th@mail.ru")
+            //         ->setSubject($data['subject'])
+            //         ->setHtmlBody("send_to - " . implode("<br/>", $send_to))
+            //         ->send();
+            // }
             
             $mailing = new MailingNews();
-            $mailing->for_members = $data['for_members'] ? 1 : 0;
+            $mailing->for_members = $data['for_members'] ? 1 : 0; 
             $mailing->for_partners = $data['for_partners'] ? 1 : 0;
             $mailing->for_providers = $data['for_providers'] ? 1 : 0;
             $mailing->for_candidates = $candidates_list;
@@ -175,16 +175,19 @@ class MailingNews extends \yii\db\ActiveRecord
             $mailing->save();
             
         } 
-        else {
-            if ($data['for_partners']) {
-                $mail_to_me = Yii::$app->mailer->compose()
-                    ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-                    ->setTo("ya13th@mail.ru")
-                    ->setSubject($data['subject'])
-                    ->setHtmlBody("count(send_to) пуст")
-                    ->send();
-            }
-        }
+        // else {
+        //     if ($data['for_partners']) {
+        //         $mail_to_me = Yii::$app->mailer->compose()
+        //             ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
+        //             ->setTo("ya13th@mail.ru")
+        //             ->setSubject($data['subject'])
+        //             ->setHtmlBody("count(send_to) пуст")
+        //             ->send();
+        //     }
+        // }
         
     }
+
+
+    
 }
