@@ -85,23 +85,23 @@ class DefaultController extends BaseController
             $model->subject = $_POST['subject'];
             $model->message = $_POST['message'];
             
-            if ($model->save() && !isset($_POST['with_out_email'])) {
-                $body = "Пользователь " . $model->user->fullName . " (" . $model->user->email . ", " . $model->user->phone . ") оставил сообщение:";
-                $body .= "<br><br>";
-                $body .= $model->getCategoryText($model->category);
-                $body .= "<br>";
-                $body .= $model->message;
-                if ($emails = NoticeEmail::getEmails()) {
-                    foreach ($emails as $email) {
-                        $mail = Yii::$app->mailer->compose()
-                            ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']]) 
-                            ->setTo($email)
-                            ->setSubject("Сообщение от пользователя")
-                            ->setHtmlBody($body);
+            if ($model->save()) {
+                // $body = "Пользователь " . $model->user->fullName . " (" . $model->user->email . ", " . $model->user->phone . ") оставил сообщение:";
+                // $body .= "<br><br>";
+                // $body .= $model->getCategoryText($model->category);
+                // $body .= "<br>";
+                // $body .= $model->message;
+                // if ($emails = NoticeEmail::getEmails()) {
+                //     foreach ($emails as $email) {
+                //         $mail = Yii::$app->mailer->compose()
+                //             ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']]) 
+                //             ->setTo($email)
+                //             ->setSubject("Сообщение от пользователя")
+                //             ->setHtmlBody($body);
                         
-                        $mail->send();
-                    }
-                }
+                //         $mail->send();
+                //     }
+                // }
                 
                 Yii::$app->response->format = Response::FORMAT_JSON; 
                 return [

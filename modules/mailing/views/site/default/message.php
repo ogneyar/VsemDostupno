@@ -41,7 +41,7 @@ $this->params['breadcrumbs'] = [$this->title];
                 <?= Html::textarea('message', null, ['class' => 'form-control', 'id' => 'message', 'rows' => 10, 'style' => 'resize: none;']); ?>
             </div>
             <div class="form-group">
-                <?= Html::button('Отправить', ['class' => 'btn btn-success', 'id' => 'send-mailing-message-btn', 'onclick' => 'sendMailingMessage()']) ?>
+                <?= Html::button('Отправить', ['class' => 'btn btn-success', 'id' => 'send-mailing-message-btn', 'onclick' => 'sendMailingMessage()']) ?> 
             </div>
         </div>
     <?php ActiveForm::end(); ?>

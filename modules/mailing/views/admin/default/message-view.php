@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]);?>
         </div>
         <div class="form-group">
-            <?= Html::a('Отправить', 'javascript:void(0)', ['class' => 'btn btn-success', 'id' => 'answer-message-send-btn']) ?>
+            <?= Html::a('Отправить', 'javascript:void(0)', ['class' => 'btn btn-success', 'id' => 'answer-message-send-btn']) ?> 
         </div>
     </div>
 </div>

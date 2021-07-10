@@ -4,6 +4,7 @@ namespace app\modules\mailing\controllers\admin;
 
 use Yii;
 use app\models\CandidateGroup;
+use app\models\EmailLetters;
 use yii\web\Response;
 use yii\data\ActiveDataProvider;
 use app\modules\mailing\models\MailingNews;
@@ -11,8 +12,6 @@ use app\modules\mailing\models\MailingVote;
 use app\modules\mailing\models\MailingVoteStat;
 use app\modules\mailing\models\MailingProduct;
 use app\modules\mailing\models\MailingMessage;
-
-use app\models\EmailLetters;
 
 use app\models\User;
 
@@ -141,15 +140,17 @@ class DefaultController extends BaseController
         if (isset($_POST['user_id'])) {
             $user = User::findOne($_POST['user_id']);
             $model = MailingMessage::findOne($_POST['id']);
-            $mail = Yii::$app->mailer->compose()
-                ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-                ->setTo($user->email)
-                ->setSubject($_POST['subject'])
-                ->setHtmlBody($_POST['message']);
-            
-            $mail->send();
+            // $mail = Yii::$app->mailer->compose()
+            //     ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
+            //     ->setTo($user->email)
+            //     ->setSubject($_POST['subject'])
+            //     ->setHtmlBody($_POST['message']);            
+            // $mail->send();
             $model->answered = 1;
             $model->save();
+
+            EmailLetters::send($_POST['user_id'],$_POST['subject'],$_POST['message']);
+            
             Yii::$app->response->format = Response::FORMAT_JSON;
             return [
                 'success' => true,
