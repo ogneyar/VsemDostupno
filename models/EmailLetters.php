@@ -92,10 +92,9 @@ class EmailLetters extends \yii\db\ActiveRecord
                 
 
                 echo Html::a('Удалить', 'javascript:void(0)', [
-                    'onclick' => 'getLetter('.$letter->id.');',
+                    'onclick' => 'delLetter('.$letter->id.');',
                     'class' => 'btn btn-danger',
-                    'style' => 'margin-left:40px;',
-                    'data-confirm' => "Вы уверены что хотите удалить письмо?"
+                    'style' => 'margin-left:40px;'
                 ]);
                 
 
@@ -113,6 +112,19 @@ class EmailLetters extends \yii\db\ActiveRecord
         
     }
 
+
+    public static function readLetter($id)
+    {
+        $letter = EmailLetters::findOne(['id' => $id]);
+        $letter->is_read = true;
+        $letter->save();
+    }
+
+    public static function deleteLetter($id)
+    {
+        $letter = EmailLetters::findOne(['id' => $id]);
+        $letter->delete();
+    }
 
     public static function sendMailingNews($data)
     {

@@ -121,18 +121,6 @@ class DefaultController extends BaseController
         ]);
     }
 
-    
-    public function actionEmail()
-    {
-        $user_data = [ 
-            'id' => $this->identity->entity->id,
-            'firstname' => $this->identity->entity->firstname,
-        ];
-
-        return $this->render('email', [
-            'user_data' => $user_data,
-        ]);
-    }
-    
+  
 
 }

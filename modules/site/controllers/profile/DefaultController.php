@@ -29,6 +29,8 @@ use app\models\ProviderHasCategory;
 use app\models\Candidate;
 use app\models\NoticeEmail;
 use app\models\Category;
+use app\models\EmailLetters;
+
 
 class DefaultController extends BaseController
 {
@@ -50,7 +52,7 @@ class DefaultController extends BaseController
                             'forgot-change',
                             'forgot-request',
                             'message',
-                            'register-provider',
+                            'register-provider',    
                         ],
                         'roles' => ['?'],
                     ],
@@ -58,10 +60,12 @@ class DefaultController extends BaseController
                         'allow' => false,
                         'actions' => [
                             'forgot-change',
-                            'forgot-request',
+                            'forgot-request',   
                         ],
                         'roles' => ['@'],
                         'denyCallback' => function ($rule, $action) {
+                            $config = require(__DIR__ . '/../../../../config/urlManager.php');
+                            $baseUrl = $config['baseUrl'];
                             return $action->controller->redirect($baseUrl . 'profile');
                         },
                     ],
@@ -69,10 +73,15 @@ class DefaultController extends BaseController
                         'allow' => true,
                         'actions' => [
                             'index',
-                            'message',
+                            'message',           
+                            'email',                                      
+                            'delete-letter',
+                            'read-letter',
                         ],
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
+                            $config = require(__DIR__ . '/../../../../config/urlManager.php');
+                            $baseUrl = $config['baseUrl'];
                             if (in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
                                 $action->controller->redirect($baseUrl . 'admin')->send();
                                 exit();
@@ -97,6 +106,18 @@ class DefaultController extends BaseController
             ],
         ]);
     }
+
+    
+    public function actionIndex()
+    {        
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+
+        return $this->redirect($baseUrl);
+
+    }
+
+
 
     public function actionLogin()
     {
@@ -364,6 +385,8 @@ class DefaultController extends BaseController
             'menu_first_level' => $menu_first_level ? $menu_first_level : [],
         ]);
     }
+
+
     public function actionRegisterProvider()
     {
         $config = require(__DIR__ . '/../../../../config/urlManager.php');
@@ -520,5 +543,43 @@ class DefaultController extends BaseController
            'menu_first_level' => $menu_first_level ? $menu_first_level : [],
         ]);
     }
+
+    
+    public function actionEmail()
+    {        
+        $user_data = [ 
+            'id' => $this->identity->entity->id,
+            'firstname' => $this->identity->entity->firstname,
+        ];
+
+        return $this->render('email', [
+            'user_data' => $user_data,
+        ]);
+
+    }
+
+    
+    public function actionReadLetter()
+    {        
+        if (isset($_POST['id'])) {
+            EmailLetters::readLetter($_POST['id']);                
+        }
+    }
+
+
+    public function actionDeleteLetter()
+    {        
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+
+        if (isset($_POST['id'])) {
+            EmailLetters::deleteLetter($_POST['id']);
+            return $this->redirect($baseUrl . 'profile/email');
+        }        
+
+        return $this->redirect($baseUrl);
+
+    }
+
 
 }

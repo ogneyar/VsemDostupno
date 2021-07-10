@@ -86,7 +86,7 @@ echo Nav::widget([
                 ],
                 [
                     'label' => Icon::show('envelope-o') . ' - Письма - ',
-                    'url' => Url::to(['/profile/provider/email']),
+                    'url' => Url::to(['/profile/email']),
                 ],
                 [
                     'label' => Icon::show('envelope-o') . 'Настройка рассылки',
@@ -101,7 +101,7 @@ echo Nav::widget([
                     'options' => ['id' => 'vote-menu-lnk'],
                 ],
                 [
-                    'label' => Icon::show('comments') . 'Жалобы, предложения',
+                    'label' => Icon::show('comments') . 'Вопросы, предложения',
                     'url' => Url::to(['/mailing/message']),
                     'visible' => Yii::$app->hasModule('mailing'),
                 ],

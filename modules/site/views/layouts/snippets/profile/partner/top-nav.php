@@ -79,7 +79,12 @@ echo Nav::widget([
                 ],
                 [
                     'label' => Icon::show('envelope-o') . ' - Письма - ',
-                    'url' => Url::to(['/profile/partner/email']),
+                    'url' => Url::to(['/profile/email']),
+                ],
+                [
+                    'label' => Icon::show('comments') . 'Вопросы, предложения',
+                    'url' => Url::to(['/mailing/message']),
+                    'visible' => Yii::$app->hasModule('mailing'),
                 ],
                 [
                     'label'=> Icon::show('search') . 'Поиск',
