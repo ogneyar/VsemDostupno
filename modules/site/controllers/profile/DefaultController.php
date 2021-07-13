@@ -352,9 +352,15 @@ class DefaultController extends BaseController
         }
 
         $model = new ForgotChangeForm(['token' => $token]);
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) { 
+
             $forgot->user->password = $model->password;
+            $forgot->user->password_repeat = $model->password_repeat;
+            // $forgot->user->scenario = 'admin_creation';
+            $forgot->user->scenario = 'user_login';
+            // var_dump($forgot->user->password);
             $forgot->user->save();
+            // echo("<script>console.log('".$forgot->user->password."')</script>");
             $forgot->delete();
 
             Yii::$app->session->setFlash('profile-message', 'profile-forgot-success');
