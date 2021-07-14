@@ -82,11 +82,17 @@ class MemberController extends BaseController
 
     public function actionIndex()
     {
+        if (isset($this->identity->entity->partner->id)) {
+            $partner_id = $this->identity->entity->partner->id;
+        }else {
+            $partner_id = null;
+        } 
+        
         $dataProvider = new ActiveDataProvider([
-            'query' => Member::find()->where('partner_id = :partner_id', [':partner_id' => $this->identity->entity->partner->id]),
+            'query' => Member::find()->where('partner_id = :partner_id', [':partner_id' => $partner_id]),
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
-
+            
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);

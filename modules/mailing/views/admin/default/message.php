@@ -4,6 +4,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
 
+use app\models\Member;
+use app\models\Partner;
+use app\models\Provider;
+
 $this->title = 'Вопросы, жалобы, предложения';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -23,7 +27,23 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'user_id',
                 'content' => function ($model) {
-                    return $model->user->fullName;
+
+                    if ($model->user->role === "member") {
+
+                        $member = Member::findOne(['user_id' => $model->user->id]);
+                        return Html::a($model->user->fullName, Url::to(['/admin/member/view', 'id' => $member->id]));
+
+                    }else if ($model->user->role === "partner") {
+
+                        $partner = Partner::findOne(['user_id' => $model->user->id]);
+                        return Html::a($model->user->fullName, Url::to(['/admin/partner/view', 'id' => $partner->id]));
+
+                    }else if ($model->user->role === "provider") {
+
+                        $provider = Provider::findOne(['user_id' => $model->user->id]);
+                        return Html::a($model->user->fullName, Url::to(['/admin/provider/view', 'id' => $provider->id]));
+
+                    }
                 }
             ],
             [
