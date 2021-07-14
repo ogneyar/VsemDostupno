@@ -12,6 +12,7 @@ use app\modules\mailing\models\MailingVote;
 use app\modules\mailing\models\MailingVoteStat;
 use app\modules\mailing\models\MailingProduct;
 use app\modules\mailing\models\MailingMessage;
+use yii\bootstrap\Modal;
 
 use app\models\User;
 

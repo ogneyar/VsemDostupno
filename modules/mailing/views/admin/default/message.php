@@ -46,7 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to(['message-view', 'id' => $model->id]));
                     },
                     'delete' => function ($url, $model) {
-                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::to(['message-delete', 'id' => $model->id]));
+                        // return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::to(['message-delete', 'id' => $model->id]));
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', 'javascript:void(0)', ['onclick' => 'messageConfirmDelete('.$model->id.')']);
                     },
                 ],
             ],

@@ -17,7 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
     
     <p>
         <?= Html::a('Ответить', 'javascript:void(0)', ['class' => 'btn btn-success', 'id' => 'answer-message-btn']) ?>
-        <?= Html::a('Удалить', Url::to(['message-delete', 'id' => $model->id]), ['class' => 'btn btn-danger']) ?>
+        <!-- <?//= Html::a('Удалить', Url::to(['message-delete', 'id' => $model->id]), ['class' => 'btn btn-danger']) ?>  -->
+        <?= Html::a('Удалить', 'javascript:void(0)', ['onclick' => 'messageConfirmDelete('.$model->id.')', 'class' => 'btn btn-danger']) ?>
     </p>
     
     <div id="answer-message-container" style="display: none;">

@@ -125,5 +125,5 @@ $this->params['breadcrumbs'][] = $this->title;
     <p style="display: none;" id="modal-title-empty-subject">Не указана тема сообщения, рассылка невозможна!</p>
     <p style="display: none;" id="modal-title-empty-message">Текст сообщения пуст, рассылка невозможна!</p>
 
-<?php Modal::end(); ?>
+<?php Modal::end(); ?> 
 <div class="loader">Подождите, идет отправка сообщений</div>
