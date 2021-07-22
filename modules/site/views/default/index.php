@@ -71,7 +71,9 @@ foreach ($panels as $panel) {
                 <?php for ($exCount = 0; $exCount < count($categories); $exCount += 4): ?>
                 <div class="row">
 
-                    <?php for ($inCount = $exCount; $inCount < $exCount + 4 && $inCount < count($categories); $inCount += 1): ?>                      
+                    <?php for ($inCount = $exCount; $inCount < $exCount + 4 && $inCount < count($categories); $inCount += 1): ?> 
+
+                        <?php $date = null;?>
 
                         <?php if ($categories[$inCount]['model']->isPurchase()): ?>
                             <?php $productsQuery = $categories[$inCount]['model']->getAllProductsQuery()
@@ -82,10 +84,12 @@ foreach ($panels as $panel) {
                             ?>
                         <?php endif; ?>
 
+                        <?php // $date = '00:00:00 01-01-02';  // пример даты ?>
+                        
                         <div class="col-md-3">
                             
                                 <div class="purchase-date-hdr">
-                                    <h5 class="text-center" style="font-size: 20px;"><strong><?= isset($date) ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
+                                    <h5 class="text-center" style="font-size: 20px;"><strong><?= isset($date)  ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
                                 </div>
                                             
                             <?= Html::a(
