@@ -39,7 +39,8 @@ $this->registerJs($script, $this::POS_END);
 
 <div class="">
     <p>
-        <?= GridView::widget([
+        <?php
+        echo GridView::widget([
             'dataProvider' => $dataProvider,
             'columns' => [
                 [
@@ -65,7 +66,11 @@ $this->registerJs($script, $this::POS_END);
                     'header' => 'Автопродление',
                     'class' => 'yii\grid\CheckboxColumn',
                     'checkboxOptions' => function($model, $key, $index, $column) {
-                        return ['checked' => $model->renewal, 'class' => 'deposit-check', 'onchange' => 'change_renewal(this)'];
+                        if ($model->renewal) {
+                            return ['checked' => true, 'class' => 'deposit-check', 'onchange' => 'change_renewal(this)'];
+                        }else {
+                            return ['class' => 'deposit-check', 'onchange' => 'change_renewal(this)'];
+                        }
                     }
                 ],
             ],
