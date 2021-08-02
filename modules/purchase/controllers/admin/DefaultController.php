@@ -22,14 +22,37 @@ class DefaultController extends BaseController
     public function actionCreate()
     {
         $dataProvider = new ActiveDataProvider([
-           'query' => PurchaseProduct::find()->where('NOW() <= purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),
-           'sort' => false,
-        ]);// 'query' => PurchaseProduct::find()->where('NOW() < stop_date')->orderBy('stop_date'),
+            'query' => PurchaseProduct::find()->where('NOW() <= purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),
+            'sort' => false,
+        ]);
         
         return $this->render('create', [
             'model' => new PurchaseProduct,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionOldData()
+    {
+        $dataProvider = new ActiveDataProvider([
+            'query' => PurchaseProduct::find()->where('NOW() > purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),            
+            'sort' => false,
+        ]);
+        
+        return $this->render('old-data', [
+            'model' => new PurchaseProduct,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionDeleteOldData()
+    {
+        $id = $_GET['id'];
+
+        $order = PurchaseProduct::findOne($id);
+        $order->delete();
+        
+        return $this->redirect('/admin/purchase/old-data');
     }
     
     public function actionGetProducts()

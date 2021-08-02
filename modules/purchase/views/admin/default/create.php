@@ -34,6 +34,8 @@ $this->registerJs($script, $this::POS_END);
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?= Html::button('Добавить товар', ['class' => 'btn btn-success', 'data-toggle' => 'modal', 'data-target' => '#purchase-accept-product-modal']); ?>
+
+    <?= Html::a('Старые закупки', "/admin/purchase/old-data", ['class' => 'btn btn-success']); ?>
     
 </div>
 
@@ -42,13 +44,13 @@ $this->registerJs($script, $this::POS_END);
         <?php
         echo GridView::widget([
             'dataProvider' => $dataProvider,
-            'columns' => [
+            'columns' => [                
                 [
-                    'attribute' => 'purchase_date',
+                    'attribute' => 'stop_date',
                     'format' => ['date', 'dd-MM-y'],
                 ],
                 [
-                    'attribute' => 'stop_date',
+                    'attribute' => 'purchase_date',
                     'format' => ['date', 'dd-MM-y'],
                 ],
                 [
@@ -77,6 +79,7 @@ $this->registerJs($script, $this::POS_END);
         ]); ?>
     </p>
 </div>
+
 
 <?php Modal::begin([
     'id' => 'purchase-accept-product-modal',
