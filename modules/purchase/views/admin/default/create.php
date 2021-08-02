@@ -17,6 +17,10 @@ $this->title = 'Оформление коллективной закупки';
 $this->params['breadcrumbs'][] = ['label' => 'Поставщики', 'url' => ['/admin/provider']];
 $this->params['breadcrumbs'][] = $this->title;
 
+$config = require(__DIR__ . '/../../../../../config/urlManager.php');
+$baseUrl = $config['baseUrl'];
+
+
 $script = <<<JS
     $(function () {
         $('#purchase-accept-product-modal').on('shown.bs.modal', function (e) {
@@ -34,8 +38,8 @@ $this->registerJs($script, $this::POS_END);
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?= Html::button('Добавить товар', ['class' => 'btn btn-success', 'data-toggle' => 'modal', 'data-target' => '#purchase-accept-product-modal']); ?>
-
-    <?= Html::a('Старые закупки', "/admin/purchase/old-data", ['class' => 'btn btn-success']); ?>
+    
+    <?= Html::a('Старые закупки', "old-data", ['class' => 'btn btn-success']); ?>
     
 </div>
 

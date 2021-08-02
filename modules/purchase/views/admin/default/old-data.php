@@ -17,6 +17,10 @@ $this->title = 'Старые коллективные закупки';
 $this->params['breadcrumbs'][] = ['label' => 'Поставщики', 'url' => ['/admin/provider']];
 $this->params['breadcrumbs'][] = $this->title;
 
+$config = require(__DIR__ . '/../../../../../config/urlManager.php');
+$baseUrl = $config['baseUrl'];
+
+
 $script = <<<JS
     $(function () {
         $('#purchase-accept-product-modal').on('shown.bs.modal', function (e) {
@@ -35,7 +39,7 @@ $this->registerJs($script, $this::POS_END);
 
     <?= Html::button('Добавить товар', ['class' => 'btn btn-success', 'data-toggle' => 'modal', 'data-target' => '#purchase-accept-product-modal']); ?>
     
-    <a href="/admin/purchase/create" class="btn btn-success">Новые закупки</a>
+    <?= Html::a('Новые закупки', "create", ['class' => 'btn btn-success']); ?>
     
 </div>
 
@@ -81,10 +85,9 @@ $this->registerJs($script, $this::POS_END);
                     'value' => function($data){
                         return Html::a(
                             'Удалить',
-                            "/admin/purchase/delete-old-data?id=".$data->id,
+                            "delete-old-data?id=".$data->id,
                             [
                                 'title' => 'Смелей вперед!',
-                                'target' => '_blank',
                                 'class' => 'btn btn-danger'
                             ]
                         );

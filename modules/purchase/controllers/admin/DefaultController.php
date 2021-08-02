@@ -52,7 +52,7 @@ class DefaultController extends BaseController
         $order = PurchaseProduct::findOne($id);
         $order->delete();
         
-        return $this->redirect('/admin/purchase/old-data');
+        return $this->redirect('old-data');
     }
     
     public function actionGetProducts()
