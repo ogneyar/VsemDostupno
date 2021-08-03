@@ -48,11 +48,12 @@ class DefaultController extends BaseController
     public function actionDeleteOldData()
     {
         $id = $_GET['id'];
+        $page = $_GET['page'];
 
         $order = PurchaseProduct::findOne($id);
         $order->delete();
         
-        return $this->redirect('old-data');
+        return $this->redirect('old-data?page='.$page);
     }
     
     public function actionGetProducts()

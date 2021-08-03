@@ -17,8 +17,8 @@ $this->title = 'Старые коллективные закупки';
 $this->params['breadcrumbs'][] = ['label' => 'Поставщики', 'url' => ['/admin/provider']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$config = require(__DIR__ . '/../../../../../config/urlManager.php');
-$baseUrl = $config['baseUrl'];
+// $config = require(__DIR__ . '/../../../../../config/urlManager.php');
+// $baseUrl = $config['baseUrl'];
 
 
 $script = <<<JS
@@ -85,7 +85,7 @@ $this->registerJs($script, $this::POS_END);
                     'value' => function($data){
                         return Html::a(
                             'Удалить',
-                            "delete-old-data?id=".$data->id,
+                            "delete-old-data?id=".$data->id."&page=".$_GET['page'],
                             [
                                 'title' => 'Смелей вперед!',
                                 'class' => 'btn btn-danger'
