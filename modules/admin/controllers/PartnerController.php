@@ -105,7 +105,7 @@ class PartnerController extends BaseController
                     throw new Exception('Ошибка создания пользователя!');
                 }
 
-                $types = [Account::TYPE_DEPOSIT, Account::TYPE_BONUS, Account::TYPE_GROUP, Account::TYPE_SUBSCRIPTION];
+                $types = [Account::TYPE_DEPOSIT, Account::TYPE_BONUS, Account::TYPE_SUBSCRIPTION, Account::TYPE_GROUP, Account::TYPE_STORAGE, Account::TYPE_GROUP_FEE, Account::TYPE_FRATERNITY]; 
                 foreach ($types as $type) {
                     $account = new Account(['user_id' => $user->id, 'type' => $type, 'total' => 0]);
                     if (!$account->save()) {
