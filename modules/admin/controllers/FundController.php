@@ -33,6 +33,11 @@ class FundController extends BaseController
         ]);
     }
     
+    public function actionDistribute()
+    {
+         return $this->render('distribute', []);
+    }
+
     public function actionAdd()
     {
         $model = new Fund();
@@ -100,4 +105,7 @@ class FundController extends BaseController
             }
         }
     }
+
+    
+    
 }

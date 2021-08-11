@@ -173,6 +173,10 @@ $this->registerJs($script, $this::POS_END);
                                             'class' => 'transfer-open'
                                         ]
                                     ],
+                                    [
+                                        'label' => 'Распределение',
+                                        'url' => 'fund/distribute'
+                                    ],
                                 ],
                             ]) .
                             Html::endTag('div');
