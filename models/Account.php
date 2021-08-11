@@ -115,7 +115,10 @@ class Account extends \yii\db\ActiveRecord
         }
 
         if (is_a(Yii::$app,'yii\web\Application')) {
-            if ($account->type != Account::TYPE_DEPOSIT /*&& Yii::$app->user->identity->role != User::ROLE_ADMIN*/) {
+            // if ($account->type != Account::TYPE_DEPOSIT) {
+            //     throw new Exception('Нет доступа к счету!');
+            // }
+            if (!(Yii::$app->user->identity->role == User::ROLE_ADMIN || Yii::$app->user->identity->role == User::ROLE_SUPERADMIN)) {
                 throw new Exception('Нет доступа к счету!');
             }
         }
