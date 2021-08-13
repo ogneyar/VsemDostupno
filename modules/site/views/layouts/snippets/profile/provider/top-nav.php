@@ -6,7 +6,8 @@ use kartik\icons\Icon;
 use app\models\Member;
 use app\models\User;
 
-$cart_vis = false;
+// $cart_vis = false;
+$cart_vis = true;
 if (Yii::$app->user->identity->role == User::ROLE_PROVIDER) {
     $member = Member::find()->where(['user_id' => Yii::$app->user->identity->id])->one();
     if ($member) {

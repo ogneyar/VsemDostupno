@@ -53,15 +53,15 @@ $enableCart = false;
 if (Yii::$app->user->isGuest) {
     $enableCart = true;
 } else {
-    if (!in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_PROVIDER, User::ROLE_SUPERADMIN])) {
+    if (!in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN,  User::ROLE_SUPERADMIN])) { // User::ROLE_PROVIDER,
         $enableCart = true;
     }
-    if (Yii::$app->user->identity->role == User::ROLE_PROVIDER) {
-        $member = Member::find()->where(['user_id' => Yii::$app->user->identity->id])->one();
-        if($member) {
-            $enableCart = true;
-        }
-    }
+    // if (Yii::$app->user->identity->role == User::ROLE_PROVIDER) {
+    //     $member = Member::find()->where(['user_id' => Yii::$app->user->identity->id])->one();
+    //     if($member) {
+    //         $enableCart = true;
+    //     }
+    // }
 }
 
 $features = [];

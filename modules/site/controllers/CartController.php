@@ -67,7 +67,7 @@ class CartController extends BaseController
                     [
                         'allow' => true,
                         'matchCallback' => function ($rule, $action) use ($enableCart) {
-                            if (!Yii::$app->user->isGuest && in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_PROVIDER, User::ROLE_SUPERADMIN]) && !$enableCart) {
+                            if (!Yii::$app->user->isGuest && in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN]) && !$enableCart) { //  User::ROLE_PROVIDER,
                                 throw new ForbiddenHttpException('Действие не разрешено.');
                             }
 
