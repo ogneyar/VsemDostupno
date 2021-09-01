@@ -305,12 +305,15 @@ class CartController extends BaseController
                 } catch (Exception $e) {
                     $transaction->rollBack();
 
+                    // echo $e;
+                    // return null;
+
                     //throw new ForbiddenHttpException($e->getMessage());
                     Yii::$app->session->setFlash('cart-checkout', [
                         'name' => 'cart-checkout-fail',
                     ]);
 
-                    return $this->redirect('/cart/checkout');
+                    return $this->redirect('checkout');
                 }
                 $orderId = $order->id;
                 $order = Order::findOne($orderId);

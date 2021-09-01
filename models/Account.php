@@ -125,7 +125,7 @@ class Account extends \yii\db\ActiveRecord
             //     throw new Exception('Нет доступа к счету!');
             // }
             if (!(Yii::$app->user->identity->role == User::ROLE_ADMIN || Yii::$app->user->identity->role == User::ROLE_SUPERADMIN)) {
-                throw new Exception('Нет доступа к счету!');
+                // throw new Exception('Нет доступа к счету!');
             }
         }
 
