@@ -99,7 +99,7 @@ class ProductController extends BaseController
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate($provider_id = '')
+    public function actionCreate($provider_id = '') 
     {
         if (!empty($provider_id)) {
             $model = new Product(['visibility' => 1, 'published' => 0, 'only_member_purchase' => 0, 'auto_send' => 1, 'provider_id' => $provider_id]);

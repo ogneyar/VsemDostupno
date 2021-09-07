@@ -96,6 +96,27 @@ class ServiceController extends BaseController
         $model = new Service(['visibility' => 1, 'published' => 1]);
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+            $files = UploadedFile::getInstances($model, 'photo');
+            if ($files) {
+                if ($model->photo) {
+                    $model->photo->updatePhoto(
+                        Service::MAX_GALLERY_IMAGE_SIZE,
+                        Service::MAX_GALLERY_THUMB_WIDTH,
+                        Service::MAX_GALLERY_THUMB_HEIGHT,
+                        $files[0]->tempName
+                    );
+                } else {
+                    $photo = Photo::createPhoto(
+                        Service::MAX_GALLERY_IMAGE_SIZE,
+                        Service::MAX_GALLERY_THUMB_WIDTH,
+                        Service::MAX_GALLERY_THUMB_HEIGHT,
+                        $files[0]->tempName
+                    );
+                    $model->manufacturer_photo_id = $photo->id;
+                }
+            }
+
             $model->save();
             $gallery = UploadedFile::getInstances($model, 'gallery');
             foreach ($gallery as $file) {
@@ -107,7 +128,7 @@ class ServiceController extends BaseController
                 );
                 $serviceHasPhoto = new ServiceHasPhoto();
                 $serviceHasPhoto->photo_id = $photo->id;
-                $model->link('serviceHasPhoto', $serviceHasPhoto);
+                $model->link('serviceHasPhoto', $serviceHasPhoto); 
             }
             return $this->redirect(['view', 'id' => $model->id]);
         } else {

@@ -146,6 +146,35 @@ $this->registerJs("CKEDITOR.plugins.addExternal('youtube', '/ckeditor/plugins/yo
         ]);
     ?>
 
+    <?php
+        $initialPreview = [];
+        $initialPreviewConfig = [];
+        if ($model->photo) {
+            $initialPreview[] = Html::img($model->thumbUrlManufacturer); 
+            $initialPreviewConfig[] = [
+                'url' => Url::to(['/api/profile/admin/photo/delete']),
+                'extra' => [
+                    'PhotoDeletion[key]' => $model->photo->id,
+                    'PhotoDeletion[id]' => $model->id,
+                    'PhotoDeletion[class]' => $model->className(),
+                    'PhotoDeletion[manufacturer]' => 1,
+                ],
+            ];
+        }
+        echo $form->field($model, 'photo')->widget(FileInput::className(), [
+            'name' => get_class($model) . '[photo]',
+            'language' => substr(Yii::$app->language, 0, 2),
+            'options' => [
+                'multiple' => false,
+            ],
+            'pluginOptions' =>[
+                'initialPreview' => $initialPreview,
+                'initialPreviewConfig' => $initialPreviewConfig,
+                'previewFileType' => 'any',
+            ]
+        ]);
+    ?>
+
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Добавить' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
