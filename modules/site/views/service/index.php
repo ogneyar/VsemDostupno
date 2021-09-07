@@ -2,6 +2,7 @@
 
 use yii\web\View;
 use yii\bootstrap\Alert;
+use yii\bootstrap\Modal;
 use yii\web\JsExpression;
 use yii\helpers\Url;
 use kartik\helpers\Html;
@@ -104,6 +105,18 @@ foreach ($model->serviceHasPhoto as $serviceHasPhoto) {
             </div>
         </div>
     <?php endif ?>
+
+    <?= Html::button(Icon::show('cogs') . ' Мастер', [
+            'class' => 'btn btn-warning',
+            'style' => 'margin-left:15px;',
+            'id' => 'master-btn',
+            'onclick' => new JsExpression('
+                $("#master-modal").modal("show");
+                $(".modal-backdrop").css({opacity: 0});
+            '),
+        ]) 
+    ?>
+
 </div>
 
 <div class="service-description">
@@ -114,6 +127,15 @@ foreach ($model->serviceHasPhoto as $serviceHasPhoto) {
         </div>
     </div>
 </div>
+
+<?php Modal::begin([
+    'id' => 'master-modal',
+    'options' => ['tabindex' => false, 'class' => 'manufacturer-modal'],
+]); ?>
+    
+    <img src="<?= $model->thumbUrlManufacturer ?>">
+<?php Modal::end(); ?>
+
 </div>
 
 <div class="product-panel">

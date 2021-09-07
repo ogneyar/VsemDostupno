@@ -431,7 +431,7 @@ foreach ($model->productFeatures as $feat) {
 ]); ?>
     
     <img src="<?= $model->thumbUrlManufacturer ?>">
-<?php Modal::end(); ?>
+<?php Modal::end(); ?> 
 </div>
 
 <div class="product-panel">
