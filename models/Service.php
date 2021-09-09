@@ -20,6 +20,7 @@ use app\models\User;
  * @property string $price
  * @property string $contacts
  * @property string $member_price
+ * @property integer $manufacturer_photo_id
  *
  * @property CategoryHasService[] $categoryHasService
  * @property Category[] $categories
@@ -60,7 +61,7 @@ class Service extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'name', 'description'], 'required'],
-            [['user_id', 'visibility', 'published'], 'integer'],
+            [['user_id', 'visibility', 'published', 'manufacturer_photo_id'], 'integer'],
             [['price', 'member_price'], 'required', 'when' => function ($model) {return !empty($model->price) || !empty($model->member_price);}, 'whenClient' => "function (attribute, value) {return $('input[name=\"Service[price]\"]').val() || $('input[name=\"Service[member_price]\"]').val();}"],
             [['description'], 'string'],
             [['price', 'member_price'], 'number'],
@@ -88,6 +89,9 @@ class Service extends \yii\db\ActiveRecord
             'categoryIds' => 'Категории',
             'gallery' => 'Фотографии',
             'thumbUrl' => 'Фотография',
+            'manufacturer_photo_id' => 'Номер фото мастера',
+            'photo' => 'Фото мастера',
+            'thumbUrlManufacturer' => 'Фото мастера',
         ];
     }
 
@@ -113,6 +117,11 @@ class Service extends \yii\db\ActiveRecord
     public function getCategoryHasService()
     {
         return $this->hasMany(CategoryHasService::className(), ['service_id' => 'id']);
+    }
+
+    public function getPhoto()
+    {
+        return $this->hasOne(Photo::className(), ['id' => 'manufacturer_photo_id']);
     }
 
     /**
@@ -162,16 +171,25 @@ class Service extends \yii\db\ActiveRecord
         }
     }
 
-    public function deletePhoto($photo)
+
+
+    public function deletePhoto($photo, $manufacturer = 0)
     {
         if ($photo) {
-            $serviceHasPhoto = ServiceHasPhoto::findOne([
-                'service_id' => $this->id,
-                'photo_id' => $photo->id,
-            ]);
+            if ($manufacturer == 0) {
+                $serviceHasPhoto = ServiceHasPhoto::findOne([
+                    'service_id' => $this->id,
+                    'photo_id' => $photo->id,
+                ]);
 
-            if ($serviceHasPhoto) {
-                $this->unlink('serviceHasPhoto', $serviceHasPhoto, true);
+                if ($serviceHasPhoto) {
+                    $this->unlink('serviceHasPhoto', $serviceHasPhoto, true);
+                    return true;
+                }
+            }else {
+                $this->manufacturer_photo_id = null;
+                $this->save();
+                $photo->delete();
                 return true;
             }
         }
@@ -179,7 +197,8 @@ class Service extends \yii\db\ActiveRecord
         return false;
     }
 
-    public function getThumbUrl()
+
+    public function getThumbUrl() 
     {
         return $this->serviceHasPhoto ? $this->serviceHasPhoto[0]->getThumbUrl() : self::DEFAULT_THUMB;
     }
@@ -188,6 +207,20 @@ class Service extends \yii\db\ActiveRecord
     {
         return $this->serviceHasPhoto ? $this->serviceHasPhoto[0]->getImageUrl() : self::DEFAULT_IMAGE;
     }
+
+
+
+    public function getThumbUrlManufacturer()
+    {
+        return $this->photo ? $this->photo->getThumbUrl() : self::DEFAULT_THUMB;
+    }
+        
+    public function getImageUrlManufacturer()
+    {
+        return $this->photo ? $this->photo->getImageUrl() : self::DEFAULT_IMAGE; 
+    }
+
+
 
     public function getUrl()
     {

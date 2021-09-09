@@ -77,6 +77,27 @@ class ServiceController extends BaseController
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+            $files = UploadedFile::getInstances($model, 'photo');
+            if ($files) {
+                if ($model->photo) {
+                    $model->photo->updatePhoto(
+                        Service::MAX_GALLERY_IMAGE_SIZE,
+                        Service::MAX_GALLERY_THUMB_WIDTH,
+                        Service::MAX_GALLERY_THUMB_HEIGHT,
+                        $files[0]->tempName
+                    );
+                } else {
+                    $photo = Photo::createPhoto(
+                        Service::MAX_GALLERY_IMAGE_SIZE,
+                        Service::MAX_GALLERY_THUMB_WIDTH,
+                        Service::MAX_GALLERY_THUMB_HEIGHT,
+                        $files[0]->tempName
+                    );
+                    $model->manufacturer_photo_id = $photo->id;
+                }
+            }
+            
             $model->save();
 
             $gallery = UploadedFile::getInstances($model, 'gallery');

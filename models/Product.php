@@ -295,7 +295,7 @@ class Product extends \yii\db\ActiveRecord
     
     public function getImageUrlManufacturer()
     {
-        return $this->photo ? $this->photo->getImageUrl() : self::DEFAULT_IMAGE;
+        return $this->photo ? $this->photo->getImageUrl() : self::DEFAULT_IMAGE; 
     }
 
     public function isPurchase()

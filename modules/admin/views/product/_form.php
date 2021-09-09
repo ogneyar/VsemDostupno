@@ -361,7 +361,7 @@ $this->registerJs("CKEDITOR.plugins.addExternal('youtube', '/ckeditor/plugins/yo
         $initialPreview = [];
         $initialPreviewConfig = [];
         if ($model->photo) {
-            $initialPreview[] = Html::img($model->thumbUrlManufacturer);
+            $initialPreview[] = Html::img($model->thumbUrlManufacturer); 
             $initialPreviewConfig[] = [
                 'url' => Url::to(['/api/profile/admin/photo/delete']),
                 'extra' => [
