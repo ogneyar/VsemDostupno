@@ -190,7 +190,7 @@ class CartController extends BaseController
                         }
 
                         if (!$product->save()) {
-                            throw new Exception('Ошибка обновления количества товара в магазине!');
+                            throw new Exception('Ошибка сохранения количества товара в магазине!');
                         }
                         
                         $orderHasProduct = new OrderHasProduct();
@@ -281,6 +281,9 @@ class CartController extends BaseController
                         if (!$orderHasProduct->save()) {
                             throw new Exception('Ошибка сохранения товара в заказе!');
                         }
+
+                        Fund::setDeductionForOrder($product->id, $product->purchase_price, $product->cart_quantity);
+
                     }
 
                     if ($order->paid_total > 0) {
@@ -299,7 +302,7 @@ class CartController extends BaseController
                         }
                     }
                     
-                    Fund::setDeductionForOrder($product->id, $product->purchase_price, $product->cart_quantity);
+                    // Fund::setDeductionForOrder($product->id, $product->purchase_price, $product->cart_quantity);
 
                     $transaction->commit();
                 } catch (Exception $e) {
@@ -448,6 +451,9 @@ class CartController extends BaseController
                         if (!Account::swap($deposit, $provider_account, $provider_balance->total, 'Перевод пая на счёт', false)) {
                             throw new Exception('Ошибка модификации счета пользователя!');
                         }
+
+                        Fund::setDeductionForOrder($product->id, $product->purchase_price, $product->cart_quantity);
+
                     }
 
                     if ($order->paid_total > 0) {

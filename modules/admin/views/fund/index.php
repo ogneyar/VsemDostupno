@@ -24,6 +24,8 @@ foreach ($dataProvider->getModels() as $fund) {
 <?php
 $script = <<<JS
     $(function () {
+        // web = "/web";
+        web = "";
         $("#fund-name-tbl tbody tr").click(function() {
             if ($(this).css('background-color') == 'rgb(157, 157, 157)') {
                 $("#fund-name-tbl tr").css({'background-color' : '#fff'});
@@ -49,7 +51,7 @@ $script = <<<JS
                     $("#save-fund-btn").data('id', $(this).data('key')).attr('data-id', $(this).data('key'));
                     $("#del-fund-btn").data('id', $(this).data('key')).attr('data-id', $(this).data('key'));
                     $.ajax({
-                        url: "/web/admin/fund/get-fund",
+                        url: web + "/admin/fund/get-fund",
                         type: "POST",
                         data: {id: $(this).data('key')},
                         success: function(response) {
