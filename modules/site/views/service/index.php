@@ -46,17 +46,27 @@ foreach ($model->serviceHasPhoto as $serviceHasPhoto) {
 <div class="row">
     <div class="col-md-6">
         <?= Gallery::widget(['id' => 'service-images', 'items' => $serviceImages]) ?>
-        <?= Html::a(
+        <a 
+            href="#" 
+            class="thumbnail"
+            title="Посмотреть все фотографии работ мастера"
+            onclick="<?= new JsExpression('$(`#service-images a`).first().trigger(`click`);return false;') ?>"
+        >
+            <img src="<?=$model->thumbUrl?>" />
+            <div style="background:white;color:black;font-size:20px;position:absolute;bottom:40px;left:30px;padding:0 5px;">Посмотреть все фотографии работ мастера</div>
+        </a>
+        <!-- <?/*= Html::a(
                 Html::img($model->thumbUrl),
                 '#',
                 [
                     'class' => 'thumbnail',
+                    'title' => 'Посмотреть все фотографии работ мастера',
                     'onclick' => new JsExpression('
                         $("#service-images a").first().trigger("click");
                         return false;
                     '),
                 ]
-        ) ?>
+        ) */?> -->
     </div>
     <?php if ($model->calculatedPrice > 0): ?>
         <div class="col-md-6">
