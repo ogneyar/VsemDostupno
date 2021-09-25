@@ -42,7 +42,7 @@ class MemberForm extends Model
     public function rules()
     {
         return [
-            [['partner', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
+            [['recommender_id', 'partner', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
             [['partner', 'disabled', 'recommender_id'], 'integer'],
             [['phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
@@ -58,6 +58,7 @@ class MemberForm extends Model
     public function attributeLabels()
     {
         return [
+            'recommender_id' => 'Номер рекомендателя',
             'disabled' => 'Отключен',
             'partner' => 'Партнер',
             'email' => 'Емайл',

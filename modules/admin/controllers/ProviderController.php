@@ -19,6 +19,7 @@ use app\models\Product;
 use app\models\Provider;
 use app\models\Template;
 use app\models\User;
+use app\models\Member;
 use app\models\StockHead;
 use app\models\StockBody;
 use app\models\ProviderStock;
@@ -90,6 +91,7 @@ class ProviderController extends BaseController
 
             try {
                 $user = new User();
+                $user->recommender_id = $model->recommender_id;
                 $user->role = User::ROLE_PROVIDER;
                 $user->disabled = $model->disabled;
                 $user->email = $model->email;
@@ -110,7 +112,6 @@ class ProviderController extends BaseController
                 $user->itn = $model->itn ? $model->itn : null;
                 $user->skills = $model->skills ? $model->skills : null;
                 $user->number = $model->number ? $model->number : (int) User::find()->max('number') + 1;
-                $user->recommender_id = $model->recommender_id ? $model->recommender_id : null;
                 $user->scenario = 'admin_creation';
 
                 if (!$user->save()) {
@@ -141,6 +142,14 @@ class ProviderController extends BaseController
                     throw new Exception('Ошибка создания партнера!');
                 }
                 $model->id = $provider->id;
+
+                $member = new Member();
+                $member->user_id = $user->id;
+                $member->partner_id = $model->partner;
+                $member->become_provider = 1;
+                if (!$member->save()) {
+                    throw new Exception('Ошибка создания участника!');
+                }
 
                 $forgot = new Forgot();
                 $forgot->user_id = $user->id;

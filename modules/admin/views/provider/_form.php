@@ -11,6 +11,8 @@ use kartik\editable\Editable;
 use wbraganca\fancytree\FancytreeWidget;
 use app\models\Category;
 use app\models\City;
+use app\models\Partner;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Provider */
@@ -20,7 +22,7 @@ use app\models\City;
 <div class="provider-form">
 
     <div class="form-group">
-        <label for="providerform-user_id" class="control-label">Рекомендатель</label>
+        <label for="providerform-user_id" class="control-label">Рекомендатель <span style="color:red;">*</span></label>
         <div>
             <?= Editable::widget([
                 'name'=>'UserSearching[search]',
@@ -43,6 +45,29 @@ use app\models\City;
     </div>
 
     <?php $form = ActiveForm::begin(); ?>
+
+    <?php
+        $data = [];
+        foreach (City::find()->each() as $city) {
+            $partners = Partner::find()
+                ->joinWith(['user'])
+                ->where('{{%partner}}.city_id = :city_id AND {{%user}}.disabled = 0', [':city_id' => $city->id])
+                ->all();
+            if ($partners) {
+                $data[$city->name] = ArrayHelper::map($partners, 'id', 'name');
+            }
+        }
+        echo $form->field($model, 'partner')->widget(Select2::className(), [
+            'data' => $data,
+            'language' => substr(Yii::$app->language, 0, 2),
+            'options' => [
+                'placeholder' => 'Выберите партнера ...',
+            ],
+            'pluginOptions' => [
+                'allowClear' => true,
+            ],
+        ]);
+    ?>
 
     <?= $form->field($model, 'disabled')->checkbox() ?>
 

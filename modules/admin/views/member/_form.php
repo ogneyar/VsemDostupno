@@ -18,7 +18,7 @@ use app\models\City;
 <div class="member-form">
 
     <div class="form-group">
-        <label for="memberform-user_id" class="control-label">Рекомендатель</label>
+        <label for="memberform-user_id" class="control-label">Рекомендатель <span style="color:red;">*</span></label>
         <div>
             <?= Editable::widget([
                 'name'=>'UserSearching[search]',

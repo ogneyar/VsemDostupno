@@ -42,7 +42,7 @@ class PartnerForm extends Model
     public function rules()
     {
         return [
-            [['name', 'city', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
+            [['recommender_id', 'name', 'city', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
             [['city', 'disabled', 'recommender_id'], 'integer'],
             [['name', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
@@ -58,6 +58,7 @@ class PartnerForm extends Model
     public function attributeLabels()
     {
         return [
+            'recommender_id' => 'Номер рекомендателя',
             'name' => 'Название',
             'disabled' => 'Отключен',
             'city' => 'Город',

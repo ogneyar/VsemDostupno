@@ -30,6 +30,7 @@ use Yii;
  * @property string $site
  * @property string $itn
  * @property string $category
+ * @property string $recommender_id
  */
 class ProviderRegData extends \yii\db\ActiveRecord
 {
@@ -47,9 +48,9 @@ class ProviderRegData extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['ip', 'step', 'phone', 'partner', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required', 'on' => 'reg_step_1'],
+            [['recommender_id', 'ip', 'step', 'phone', 'partner', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required', 'on' => 'reg_step_1'],
             [['ip', 'step', 'name', 'field_of_activity', 'itn', 'snils', 'ogrn', 'legal_address', 'category'], 'required', 'on' => 'reg_step_2'],
-            [['step'], 'integer'],
+            [['step', 'recommender_id'], 'integer'],
             [['field_of_activity', 'category'], 'string'],
             [['ip', 'phone', 'firstname', 'lastname', 'patronymic', 'registration', 'passport_department', 'ext_phones', 'name', 'legal_address'], 'string', 'max' => 255],
             [['citizen'], 'string', 'max' => 50],
@@ -122,6 +123,7 @@ class ProviderRegData extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
+            'recommender_id' => 'Номер рекомендателя',
             'id' => 'Идентификатор',
             'ip' => 'IP-адрес создания',
             'step' => 'Шаг регистрации',

@@ -15,6 +15,7 @@ class ProviderForm extends Model
     public $isNewRecord = true;
     public $id;
     public $user_id;
+    public $partner;
     public $name;
     public $disabled;
     public $email;
@@ -50,7 +51,7 @@ class ProviderForm extends Model
     public function rules()
     {
         return [
-            [['name', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department', 'field_of_activity', 'legal_address', 'snils', 'ogrn'], 'required'],
+            [['recommender_id', 'partner', 'name', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department', 'field_of_activity', 'legal_address', 'snils', 'ogrn'], 'required'],
             [['disabled', 'recommender_id'], 'integer'],
             [['name', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
@@ -71,6 +72,8 @@ class ProviderForm extends Model
     public function attributeLabels()
     {
         return [
+            'recommender_id' => 'Номер рекомендателя',
+            'partner' => 'Партнёр',
             'name' => 'Название',
             'disabled' => 'Отключен',
             'email' => 'Емайл',

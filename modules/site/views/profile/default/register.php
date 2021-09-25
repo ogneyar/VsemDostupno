@@ -12,6 +12,8 @@ use app\models\City;
 use app\models\Partner;
 use app\models\Category;
 use app\modules\purchase\models\PurchaseProduct;
+use kartik\editable\Editable;
+
 
 /* @var $this yii\web\View */
 $this->title = 'Регистрация участника';
@@ -51,6 +53,20 @@ $this->registerJs($script, $this::POS_END);
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
+            <p>Введите номер рекомендателя.</p>
+        </div>
+    </div>
+    <?= $form->field($model, 'recommender_id') ?>
+
+    <?= $form->field($model, 'recommender_info', [
+        'inputOptions' => [
+            'data-toggle' => 'tooltip',
+            'title' => 'Напишите ФИО или номер рекомендателя.',
+        ],
+    ]) ?>
+
+    <div class="row">
+        <div class="col-md-offset-2 col-md-6">
             <p>Выберите партнера у которого будете забирать свои заказы.</p>
         </div>
     </div>
@@ -77,6 +93,7 @@ $this->registerJs($script, $this::POS_END);
             ],
         ]);
     ?>
+
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
@@ -137,12 +154,6 @@ $this->registerJs($script, $this::POS_END);
 
     <?= $form->field($model, 'skills')->textArea(['rows' => '6']) ?>
 
-    <?= $form->field($model, 'recommender_info', [
-        'inputOptions' => [
-            'data-toggle' => 'tooltip',
-            'title' => 'Напишите ФИО или номер рекомендателя.',
-        ],
-    ]) ?>
 
     <?= $form->field($model, 'email') ?>
 

@@ -219,6 +219,7 @@ class DefaultController extends BaseController
                 $user->itn = $model->itn ? $model->itn : null;
                 $user->skills = $model->skills ? $model->skills : null;
                 $user->recommender_info = $model->recommender_info ? $model->recommender_info : null;
+                $user->recommender_id = $model->recommender_id ? $model->recommender_id : 3;
                 $user->re_captcha = $model->re_captcha;
                 
                 if (!$user->save()) {
@@ -453,6 +454,7 @@ class DefaultController extends BaseController
                             $model_user->passport_department = $model->passport_department;
                             $model_user->itn = $model->itn;
                             $model_user->ext_phones = $model->ext_phones;
+                            $model_user->recommender_id = $model->recommender_id ? $model->recommender_id : 3;
                             
                             if (!$model_user->save()) {
                                 throw new Exception('Ошибка создания пользователя!');

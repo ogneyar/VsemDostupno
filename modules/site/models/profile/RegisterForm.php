@@ -12,6 +12,8 @@ use himiklab\yii2\recaptcha\ReCaptchaValidator;
  */
 class RegisterForm extends Model
 {
+    public $recommender_id;
+    public $recommender_info;
     public $partner;
     public $email;
     public $phone;
@@ -28,7 +30,6 @@ class RegisterForm extends Model
     public $passport_department;
     public $itn;
     public $skills;
-    public $recommender_info;
     public $password;
     public $password_repeat;
     public $re_captcha;
@@ -39,7 +40,7 @@ class RegisterForm extends Model
     public function rules()
     {
         return [
-            [['partner', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department', 'password', 'password_repeat', 're_captcha'], 'required'],
+            [['recommender_id', 'partner', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department', 'password', 'password_repeat', 're_captcha'], 'required'],
             [['partner'], 'integer'],
             [['phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department', 'recommender_info'], 'string', 'max' => 255],
             [['password', 'password_repeat'], 'string', 'min' => 8, 'max' => 255],
@@ -67,6 +68,7 @@ class RegisterForm extends Model
     public function attributeLabels()
     {
         return [
+            'recommender_id' => 'Рекомендатель',
             'partner' => 'Партнер',
             'email' => 'Емайл',
             'phone' => 'Телефон',
@@ -94,4 +96,11 @@ class RegisterForm extends Model
     {
         parent::afterValidate();
     }
+
+    
+    public function getRecommender()
+    {
+        return User::findOne($this->recommender_id);
+    }
+
 }
