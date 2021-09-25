@@ -11,6 +11,7 @@ use Yii;
  * @property string $ip
  * @property integer $step
  * @property string $phone
+ * @property string $partner
  * @property string $firstname
  * @property string $lastname
  * @property string $patronymic
@@ -46,7 +47,7 @@ class ProviderRegData extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['ip', 'step', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required', 'on' => 'reg_step_1'],
+            [['ip', 'step', 'phone', 'partner', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required', 'on' => 'reg_step_1'],
             [['ip', 'step', 'name', 'field_of_activity', 'itn', 'snils', 'ogrn', 'legal_address', 'category'], 'required', 'on' => 'reg_step_2'],
             [['step'], 'integer'],
             [['field_of_activity', 'category'], 'string'],
@@ -125,6 +126,7 @@ class ProviderRegData extends \yii\db\ActiveRecord
             'ip' => 'IP-адрес создания',
             'step' => 'Шаг регистрации',
             'phone' => 'Телефон',
+            'partner' => 'Партнёр',
             'firstname' => 'Имя',
             'lastname' => 'Фамилия',
             'patronymic' => 'Отчество',

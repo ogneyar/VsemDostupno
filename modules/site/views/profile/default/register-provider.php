@@ -73,6 +73,36 @@ $this->registerJs($script, $this::POS_END);
     ]); ?>
 
         <input name="reg_step" value="<?= $step; ?>" type="hidden">
+
+        <div class="row">
+            <div class="col-md-offset-2 col-md-6">
+                <p>Выберите партнера у которого будете забирать заказ (в случае если решите чего либо приобрести).</p>
+            </div>
+        </div>
+
+        <?php
+            $data = [];
+            foreach (City::find()->each() as $city) {
+                $partners = Partner::find()
+                    ->joinWith(['user'])
+                    ->where('{{%partner}}.city_id = :city_id AND {{%user}}.disabled = 0', [':city_id' => $city->id])
+                    ->all();
+                if ($partners) {
+                    $data[$city->name] = ArrayHelper::map($partners, 'id', 'name');
+                }
+            }
+            echo $form->field($model, 'partner')->widget(Select2::className(), [
+                'data' => $data,
+                'language' => substr(Yii::$app->language, 0, 2),
+                'options' => [
+                    'placeholder' => 'Выберите партнера ...',
+                ],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                ],
+            ]);
+        ?>
+
         <?= $form->field($model, 'lastname') ?>
         
         <?= $form->field($model, 'firstname') ?>

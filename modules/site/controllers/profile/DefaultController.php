@@ -191,7 +191,7 @@ class DefaultController extends BaseController
         }
 
         $model = new RegisterForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) { 
         // if ($model->load(Yii::$app->request->post())) {
 
             $transaction = Yii::$app->db->beginTransaction();
@@ -471,6 +471,17 @@ class DefaultController extends BaseController
                                 throw new Exception('Ошибка создания поставщика!');
                             }
                             
+
+                            $member = new Member();
+                            $member->partner_id = $model->partner;
+                            $member->user_id = $model_user->id;
+                            $member->become_provider = 1;
+                            if (!$member->save()) {
+                                throw new Exception('Ошибка создания участника!');
+                            }
+
+
+
                             foreach (json_decode($model->category) as $cat) {
                                 $category = new ProviderHasCategory;
                                 $category->provider_id = $model_provider->id;
@@ -530,7 +541,7 @@ class DefaultController extends BaseController
                         
                         if ($emails = NoticeEmail::getEmails()) {
                             Email::send('admin-entity-request', $emails, [
-                                'fio' => $user->fullName,
+                                'fio' => $model_user->fullName,
                             ]);
                         }
                         
