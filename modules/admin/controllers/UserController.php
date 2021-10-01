@@ -267,7 +267,21 @@ class UserController extends BaseController
         $model = new AccountForm(['user_id' => $user->id]);
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            Account::swap(null, $user->getAccount($model->account_type), $model->amount, $model->message);
+            $config = require(__DIR__ . '/../../../config/urlManager.php');
+            $baseUrl = $config['baseUrl'];
+            if ( $baseUrl == '/') {            
+                $sendMessage = false;                
+            }else {
+                $sendMessage = true;
+            }
+
+            if ($model->account_type == Account::TYPE_BONUS && $model->amount < 0 && $model->message == "Перевод пая на Расчётный счет") {
+                Account::swap($user->getAccount(Account::TYPE_BONUS), $user->getAccount(Account::TYPE_DEPOSIT), -$model->amount, $model->message, $sendMessage);
+            }else {
+                Account::swap(null, $user->getAccount($model->account_type), $model->amount, $model->message, $sendMessage);
+            }
+
+
             if (isset($user->provider) && $model->amount < 0) {
                 ProviderStock::setStockSum($user->id, $model->amount);
             }

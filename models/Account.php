@@ -171,6 +171,10 @@ class Account extends \yii\db\ActiveRecord
                 throw new Exception('Ошибка сохранения счета Источника!');
             }
 
+            if ($from && $from->type == Account::TYPE_BONUS && $message == "Перевод пая на Расчётный счет") { 
+                $message = "Перевод пая с Инвестиционного счёта";
+            }
+
             if ($to && !Account::transfer($to, $from ? $from->user : null, $to->user, $amount, $message, false)) {
                 throw new Exception('Ошибка сохранения счета Приемника!');
             }
