@@ -26,9 +26,9 @@ class Account extends \yii\db\ActiveRecord
     const TYPE_DEPOSIT = 'deposit';
     const TYPE_BONUS = 'bonus'; // invest
     const TYPE_SUBSCRIPTION = 'subscription';
+    const TYPE_STORAGE = 'storage';
 
     const TYPE_GROUP = 'group';
-    const TYPE_STORAGE = 'storage';
     const TYPE_GROUP_FEE = 'group_fee';
 
     const TYPE_FRATERNITY = 'fraternity';
@@ -96,12 +96,12 @@ class Account extends \yii\db\ActiveRecord
     public function getTypeName()
     {
         $typeNames = [
-            self::TYPE_DEPOSIT => 'лицевой счёт',
+            self::TYPE_DEPOSIT => 'расчётный счёт',
             self::TYPE_BONUS => 'инвестиционный счёт', // бонус
             self::TYPE_SUBSCRIPTION => 'членский взнос',
-
-            self::TYPE_GROUP => 'лицевой счёт группы', // групповой бонус
             self::TYPE_STORAGE => 'партнёрский счёт', //'складской сбор',
+
+            self::TYPE_GROUP => 'расчётный счёт группы', // групповой бонус
             self::TYPE_GROUP_FEE => 'членские взносы группы',  // групповой взнос
 
             self::TYPE_FRATERNITY => 'фонд содружества',

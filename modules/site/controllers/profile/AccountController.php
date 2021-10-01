@@ -60,7 +60,10 @@ class AccountController extends BaseController
 
         foreach ($accountTypes as $accountType) {
             $account = $user->getAccount($accountType);
-            if ($account->type != Account::TYPE_GROUP && $account) {
+            if ($account->type != Account::TYPE_GROUP 
+                && $account->type != Account::TYPE_GROUP_FEE 
+                && $account->type != Account::TYPE_FRATERNITY 
+                && $account) {
                 $myAccounts[] = [
                     'name' => Html::makeTitle($account->typeName),
                     'account' => $account,
@@ -82,31 +85,45 @@ class AccountController extends BaseController
         $groupAccounts = [];
         if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
             $groupAccounts[] = [
-                'name' => 'Бонус группы',
+                'name' => 'Расчётный счёт группы',
                 'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP),
                 'actionEnable' => false,
             ];
 
-            $sumAccounts = [
-                Account::TYPE_DEPOSIT => 'Лицевой счёт группы',
-                Account::TYPE_SUBSCRIPTION => 'Членские взносы группы',
+            $groupAccounts[] = [
+                'name' => 'Членские взносы группы',
+                'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE),
+                'actionEnable' => false,
             ];
 
-            foreach ($sumAccounts as $type => $name) {
-                $groupAccounts[] = [
-                    'name' => $name,
-                    'account' => new Account([
-                        'total' => Account::find()
-                            ->joinWith('member')
-                            ->where('partner_id = :partner_id AND type = :type', [
-                                ':partner_id' => Yii::$app->user->identity->entity->partner->id,
-                                ':type' => $type,
-                            ])
-                            ->sum('total'),
-                    ]),
-                    'actionEnable' => false,
-                ];
-            }
+            // $sumAccounts = [
+            //     Account::TYPE_GROUP_FEE => 'Членские взносы группы',
+            // ];
+
+            // foreach ($sumAccounts as $type => $name) {
+            //     $groupAccounts[] = [
+            //         'name' => $name,
+            //         'account' => new Account([
+            //             'total' => Account::find()
+            //                 ->joinWith('member')
+            //                 ->where('partner_id = :partner_id AND type = :type', [
+            //                     ':partner_id' => Yii::$app->user->identity->entity->partner->id,
+            //                     ':type' => $type,
+            //                 ])
+            //                 ->sum('total'),
+            //         ]),
+            //         'actionEnable' => false,
+            //     ];
+            // }
+        }
+
+        $fraternityAccount = [];
+        if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
+            $fraternityAccount[] = [
+                'name' => ' Счёт содружества',
+                'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_FRATERNITY),
+                'actionEnable' => false,
+            ];
         }
 
         $accountType = Yii::$app->getRequest()->getQueryParam('type');
@@ -118,6 +135,7 @@ class AccountController extends BaseController
             'title' => 'Счета',
             'myAccounts' => $myAccounts,
             'groupAccounts' => $groupAccounts,
+            'fraternityAccount' => $fraternityAccount,
             'accountType' => $accountType,
             'user' => $user,
         ]);

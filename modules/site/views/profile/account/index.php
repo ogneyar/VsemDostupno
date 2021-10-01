@@ -84,7 +84,31 @@ $this->params['breadcrumbs'] = [$this->title];
     </div>
 <?php endif ?>
 
-<?= Html::tag('h2', 'Детализация по счетам') ?>
+<?php if (!empty($fraternityAccount)): ?>
+    <?= Html::tag('h2', 'Фонд содружества') ?>
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th class="col-md-8">Счет</th>
+                        <th class="col-md-2">Остаток</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($fraternityAccount as $account): ?>
+                    <tr>
+                        <td class="vert-align"><?= Html::encode($account['name']) ?></td>
+                        <td class="text-center vert-align"><?= $account['account']->total ?></td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php endif ?>
+
+<?= Html::tag('h2', 'Детализация по счетам') ?> 
 <?php
     $items = [];
     foreach (array_merge($myAccounts, $groupAccounts) as $account) {
