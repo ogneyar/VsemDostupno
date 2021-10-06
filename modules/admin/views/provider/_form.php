@@ -6,13 +6,13 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 // use yii\widgets\MaskedInput;
 use yii\web\JsExpression;
+use wbraganca\fancytree\FancytreeWidget;
 use kartik\date\DatePicker;
 use kartik\editable\Editable;
-use wbraganca\fancytree\FancytreeWidget;
+use kartik\select2\Select2;
+use app\models\Partner;
 use app\models\Category;
 use app\models\City;
-use app\models\Partner;
-use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Provider */
