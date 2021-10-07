@@ -67,7 +67,7 @@ $this->registerJs($script, $this::POS_END);
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
-            <p>Выберите партнера у которого будете забирать свои заказы.</p>
+            <p>Выберите удобный адрес обслуживания.</p>
         </div>
     </div>
 
@@ -79,7 +79,11 @@ $this->registerJs($script, $this::POS_END);
                 ->where('{{%partner}}.city_id = :city_id AND {{%user}}.disabled = 0', [':city_id' => $city->id])
                 ->all();
             if ($partners) {
-                $data[$city->name] = ArrayHelper::map($partners, 'id', 'name');
+                foreach ($partners as $partner) {
+                    $data[$partner->name] = [$partner->id => $city->name];
+                }
+                // $data[$city->name] = ArrayHelper::map($partners, 'id', 'name');
+
             }
         }
         echo $form->field($model, 'partner')->widget(Select2::className(), [
@@ -92,6 +96,7 @@ $this->registerJs($script, $this::POS_END);
                 'allowClear' => true,
             ],
         ]);
+        // var_dump($data);
     ?>
 
 
