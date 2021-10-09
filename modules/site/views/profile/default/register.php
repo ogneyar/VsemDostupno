@@ -53,7 +53,7 @@ $this->registerJs($script, $this::POS_END);
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
-            <p>Введите номер рекомендателя.</p>
+            <p>Введите номер рекомендателя.</p> 
         </div>
     </div>
     <?= $form->field($model, 'recommender_id') ?>

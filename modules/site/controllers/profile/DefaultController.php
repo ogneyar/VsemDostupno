@@ -220,8 +220,8 @@ class DefaultController extends BaseController
                 $user->skills = $model->skills ? $model->skills : null;
                 $user->recommender_info = $model->recommender_info ? $model->recommender_info : null;
 
-                $recommender = User::findOne(['id' => $model->recommender_id]); 
-                $user->recommender_id = $recommender->number ? $recommender->number : 40;
+                $recommender = User::findOne(['number' => $model->recommender_id]); 
+                $user->recommender_id = $recommender->id ? $recommender->id : 95;
 
                 $user->re_captcha = $model->re_captcha;
                 
