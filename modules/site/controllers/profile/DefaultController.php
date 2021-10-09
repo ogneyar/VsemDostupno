@@ -458,8 +458,8 @@ class DefaultController extends BaseController
                             $model_user->itn = $model->itn;
                             $model_user->ext_phones = $model->ext_phones;
                             
-                            $recommender = User::findOne(['id' => $model->recommender_id]); 
-                            $model_user->recommender_id = $recommender->number ? $recommender->number : 40;
+                            $recommender = User::findOne(['number' => $model->recommender_id]); 
+                            $model_user->recommender_id = $recommender->id ? $recommender->id : 95;
                             
                             if (!$model_user->save()) {
                                 throw new Exception('Ошибка создания пользователя!');

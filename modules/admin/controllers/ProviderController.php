@@ -91,7 +91,6 @@ class ProviderController extends BaseController
 
             try {
                 $user = new User();
-                $user->recommender_id = $model->recommender_id;
                 $user->role = User::ROLE_PROVIDER;
                 $user->disabled = $model->disabled;
                 $user->email = $model->email;
@@ -112,6 +111,7 @@ class ProviderController extends BaseController
                 $user->itn = $model->itn ? $model->itn : null;
                 $user->skills = $model->skills ? $model->skills : null;
                 $user->number = $model->number ? $model->number : (int) User::find()->max('number') + 1;
+                $user->recommender_id = $model->recommender_id ? $model->recommender_id : 95;
                 $user->scenario = 'admin_creation';
 
                 if (!$user->save()) {
