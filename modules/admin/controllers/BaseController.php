@@ -21,7 +21,7 @@ class BaseController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
-                        'matchCallback' => function ($rule, $action) {
+                        'matchCallback' => function ($rule, $action) { 
                             if (!in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
                                 throw new ForbiddenHttpException('Действие не разрешено.');
                             }

@@ -83,7 +83,7 @@ Icon::map($this);
                         [
                             'label' => 'Сайт',
                             'items' => [
-                                ['label' => 'Фонды', 'url' => ['/admin/fund']],
+                                ['label' => 'Фонды', 'url' => ['/admin/fund'], 'visible' => Yii::$app->user->identity->role == User::ROLE_SUPERADMIN],
                                 ['label' => 'Страницы', 'url' => ['/admin/page']],
                                 ['label' => 'Письма', 'url' => ['/admin/email']],
                                 ['label' => 'Города', 'url' => ['/admin/city']],
