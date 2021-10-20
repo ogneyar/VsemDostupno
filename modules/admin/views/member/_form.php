@@ -112,7 +112,7 @@ use app\models\City;
 
     <?= $form->field($model, 'itn') ?>
 
-    <?= $form->field($model, 'recommender_info') ?>
+    <?= $form->field($model, 'recommender_info')->hiddenInput(['value'=> ''])->label(false) ?>
 
     <?= $form->field($model, 'recommender_id', ['template' => "{label}\n<div>{input}</div>\n<div>{error}</div>"])->hiddenInput()->label(false) ?>
 

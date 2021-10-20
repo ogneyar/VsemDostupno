@@ -56,14 +56,14 @@ $this->registerJs($script, $this::POS_END);
             <p>Введите номер рекомендателя.</p> 
         </div>
     </div>
-    <?= $form->field($model, 'recommender_id') ?>
-
-    <?= $form->field($model, 'recommender_info', [
+    <?= $form->field($model, 'recommender_id', [
         'inputOptions' => [
             'data-toggle' => 'tooltip',
-            'title' => 'Напишите ФИО или номер рекомендателя.',
+            'title' => 'Напишите номер рекомендателя.',
         ],
     ]) ?>
+
+    <?= $form->field($model, 'recommender_info')->hiddenInput(['value'=> ''])->label(false) ?>
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
