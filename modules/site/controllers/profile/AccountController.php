@@ -14,6 +14,8 @@ use app\models\AccountLog;
 use app\models\Email;
 use app\models\Transfer;
 use app\models\User;
+use app\models\Member;
+use app\models\Partner;
 use app\modules\site\models\account\TransferForm;
 
 class AccountController extends BaseController
@@ -84,16 +86,34 @@ class AccountController extends BaseController
         }
 
         $groupAccounts = [];
-        if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
+        if ($user->role == User::ROLE_PARTNER) {
+
+            $partner_id = Partner::findOne(['user_id' => $user->id])->id;
+            // можно так
+            $members = Member::findAll(['partner_id' => $partner_id]);
+            // или так
+            // $members = Member::find()->where(['partner_id' => $partner_id])->all();
+            // или вот так
+            // $members = Member::find()->where('partner_id = :partner_id', [':partner_id' => $partner_id])->all();
+            
+            $total = 0;
+            if ($members) {
+                foreach ($members as $member) {
+                    $total += Account::find()->where(['user_id' => $member->user_id])->andWhere(['type' => Account::TYPE_DEPOSIT])->one()->total;
+                }
+            }
+            
             $groupAccounts[] = [
                 'name' => 'Общая сумма расчётных счётов группы',
-                'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP),
+                'total' => $total,
+                'members' => $members,
                 'actionEnable' => false,
             ];
 
             $groupAccounts[] = [
                 'name' => 'Общая сумма членских взносов группы',
-                'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE),
+                'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total,
+                'members' => null,
                 'actionEnable' => false,
             ];
 
@@ -116,18 +136,19 @@ class AccountController extends BaseController
         }
 
         $subscription = [
-            'name' => 'Сумма долга за ежемесячные членские взносы',
+            'name' => 'Ежемесячные членские взносы',
             'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_SUBSCRIPTION),
             'actionEnable' => false,
         ];
 
+        // Рекомендательский сбор идёт на Инвестиционный счёт (TYPE_BONUS)
         $account_id = $user->getAccount(Account::TYPE_BONUS)->id;
         $info[] = [
-            'name' => "Рекомендательский сбор",
+            'name' => "Рекомендательские взносы",
             'actionEnable' => false,
             'dataProvider' => new ActiveDataProvider([
                 'id' => Account::TYPE_RECOMENDER,
-                'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account->id])->andWhere('message = "Рекомендательский сбор"'), 
+                'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account->id])->andWhere('message = "Рекомендательские взносы"'), 
                 'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
                 'pagination' => [
                     'params' => array_merge($_GET, [
@@ -136,6 +157,7 @@ class AccountController extends BaseController
                 ],
             ]),
         ];
+        // Членские взносы идут с Расчётного счёта (TYPE_DEPOSIT)
         $account_id = $user->getAccount(Account::TYPE_DEPOSIT)->id;
         $info[] = [
             'name' => "Членские взносы",

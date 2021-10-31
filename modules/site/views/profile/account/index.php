@@ -93,7 +93,7 @@ $this->params['breadcrumbs'] = [$this->title];
                 <?php foreach ($groupAccounts as $account): ?>
                     <tr>
                         <td class="vert-align"><?= Html::encode($account['name']) ?></td>
-                        <td class="text-center vert-align"><?= $account['account']->total ?></td>
+                        <td class="text-center vert-align"><?= $account['total'] ?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>
