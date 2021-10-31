@@ -63,6 +63,7 @@ class AccountController extends BaseController
             if ($account->type != Account::TYPE_GROUP 
                 && $account->type != Account::TYPE_GROUP_FEE 
                 && $account->type != Account::TYPE_FRATERNITY 
+                && $account->type != Account::TYPE_SUBSCRIPTION 
                 && $account) {
                 $myAccounts[] = [
                     'name' => Html::makeTitle($account->typeName),
@@ -85,57 +86,79 @@ class AccountController extends BaseController
         $groupAccounts = [];
         if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
             $groupAccounts[] = [
-                'name' => 'Расчётный счёт группы',
+                'name' => 'Общая сумма расчётных счётов группы',
                 'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP),
                 'actionEnable' => false,
             ];
 
             $groupAccounts[] = [
-                'name' => 'Членские взносы группы',
+                'name' => 'Общая сумма членских взносов группы',
                 'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE),
                 'actionEnable' => false,
             ];
 
-            // $sumAccounts = [
-            //     Account::TYPE_GROUP_FEE => 'Членские взносы группы',
-            // ];
-
-            // foreach ($sumAccounts as $type => $name) {
-            //     $groupAccounts[] = [
-            //         'name' => $name,
-            //         'account' => new Account([
-            //             'total' => Account::find()
-            //                 ->joinWith('member')
-            //                 ->where('partner_id = :partner_id AND type = :type', [
-            //                     ':partner_id' => Yii::$app->user->identity->entity->partner->id,
-            //                     ':type' => $type,
-            //                 ])
-            //                 ->sum('total'),
-            //         ]),
-            //         'actionEnable' => false,
-            //     ];
-            // }
         }
 
         $fraternityAccount = [];
         if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
             $fraternityAccount[] = [
-                'name' => ' Счёт содружества',
+                'name' => 'Отчисленно в фонд содружества',
                 'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_FRATERNITY),
                 'actionEnable' => false,
             ];
         }
 
         $accountType = Yii::$app->getRequest()->getQueryParam('type');
-        if (!$user->getAccount($accountType)) {
+        if ($accountType == Account::TYPE_RECOMENDER) {
+
+        }else if (!$user->getAccount($accountType)) {
             $accountType = Account::TYPE_DEPOSIT;
         }
+
+        $subscription = [
+            'name' => 'Сумма долга за ежемесячные членские взносы',
+            'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_SUBSCRIPTION),
+            'actionEnable' => false,
+        ];
+
+        $account_id = $user->getAccount(Account::TYPE_BONUS)->id;
+        $info[] = [
+            'name' => "Рекомендательский сбор",
+            'actionEnable' => false,
+            'dataProvider' => new ActiveDataProvider([
+                'id' => Account::TYPE_RECOMENDER,
+                'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account->id])->andWhere('message = "Рекомендательский сбор"'), 
+                'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
+                'pagination' => [
+                    'params' => array_merge($_GET, [
+                        'type' => Account::TYPE_RECOMENDER,
+                    ]),
+                ],
+            ]),
+        ];
+        $account_id = $user->getAccount(Account::TYPE_DEPOSIT)->id;
+        $info[] = [
+            'name' => "Членские взносы",
+            'actionEnable' => false,
+            'dataProvider' => new ActiveDataProvider([
+                'id' => Account::TYPE_SUBSCRIPTION,
+                'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account_id])->andWhere('message = "Членский взнос"'),
+                'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
+                'pagination' => [
+                    'params' => array_merge($_GET, [
+                        'type' => Account::TYPE_SUBSCRIPTION,
+                    ]),
+                ],
+            ]),
+        ];
 
         return $this->render('index', [
             'title' => 'Счета',
             'myAccounts' => $myAccounts,
             'groupAccounts' => $groupAccounts,
             'fraternityAccount' => $fraternityAccount,
+            'subscription' => $subscription,
+            'info' => $info,
             'accountType' => $accountType,
             'user' => $user,
         ]);

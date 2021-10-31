@@ -23,15 +23,17 @@ use app\models\ProviderStock;
  */
 class Account extends \yii\db\ActiveRecord
 {
-    const TYPE_DEPOSIT = 'deposit';
-    const TYPE_BONUS = 'bonus'; // invest
-    const TYPE_SUBSCRIPTION = 'subscription';
-    const TYPE_STORAGE = 'storage';
+    const TYPE_DEPOSIT = 'deposit'; // расчётный счёт
+    const TYPE_BONUS = 'bonus'; // инвестиционный счёт
+    const TYPE_STORAGE = 'storage'; // партнёрский счёт
 
-    const TYPE_GROUP = 'group';
-    const TYPE_GROUP_FEE = 'group_fee';
+    const TYPE_SUBSCRIPTION = 'subscription'; // членский взнос
+    const TYPE_RECOMENDER = 'recomender'; // рекомендательский взнос
 
-    const TYPE_FRATERNITY = 'fraternity';
+    const TYPE_GROUP = 'group'; // расчётный счёт группы
+    const TYPE_GROUP_FEE = 'group_fee'; // членские взносы группы
+
+    const TYPE_FRATERNITY = 'fraternity'; // фонд содружества
 
     /**
      * @inheritdoc
@@ -98,8 +100,10 @@ class Account extends \yii\db\ActiveRecord
         $typeNames = [
             self::TYPE_DEPOSIT => 'расчётный счёт',
             self::TYPE_BONUS => 'инвестиционный счёт', // бонус
-            self::TYPE_SUBSCRIPTION => 'членский взнос',
             self::TYPE_STORAGE => 'партнёрский счёт', //'складской сбор',
+            
+            self::TYPE_SUBSCRIPTION => 'членский взнос',
+            self::TYPE_RECOMENDER => 'рекомендательский сбор',
 
             self::TYPE_GROUP => 'расчётный счёт группы', // групповой бонус
             self::TYPE_GROUP_FEE => 'членские взносы группы',  // групповой взнос
