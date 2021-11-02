@@ -19,9 +19,9 @@ class PurchaseNotificationController extends Controller
     public function actionIndex()
     {
         $date = date('Y-m-d');
-        //$date = '2021-05-19';
+        // $date = '2021-11-01';
         $products = PurchaseProduct::find()->where(['stop_date' => $date, 'status' => 'advance'])->all();
-// $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
+        // $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
         if ($products) {
             foreach ($products as $product) {
                 $orders_to_send = [];
@@ -125,20 +125,29 @@ class PurchaseNotificationController extends Controller
                         if (!in_array($order_product->purchase_order_id, $orders_to_send)) {
                             $orders_to_send[] = $order_product->purchase_order_id;
                         }
+
+                        try {
+                            Email::send('account-log', $provider_account->user->email, [
+                                'typeName' => $provider_account->typeName,
+                                'message' => 'Списан возврат от закупки',
+                                'amount' => -$provider_balance->total,
+                                'total' => $provider_account->total,
+                            ]);
+                        } catch (Exception $e) {
+                            // unset($e);
+                        }
                         
-                        Email::send('account-log', $provider_account->user->email, [
-                            'typeName' => $provider_account->typeName,
-                            'message' => 'Списан возврат от закупки',
-                            'amount' => -$provider_balance->total,
-                            'total' => $provider_account->total,
-                        ]);
+                        try {
+                            Email::send('account-log', $deposit->user->email, [
+                                'typeName' => $deposit->typeName,
+                                'message' => 'Зачислен возврат от закупки',
+                                'amount' => $provider_balance->total + $fund_balance->total,
+                                'total' => $deposit->total,
+                            ]); 
+                        } catch (Exception $e) {
+                            // unset($e);
+                        }
                         
-                        Email::send('account-log', $deposit->user->email, [
-                            'typeName' => $deposit->typeName,
-                            'message' => 'Зачислен возврат от закупки',
-                            'amount' => $provider_balance->total + $fund_balance->total,
-                            'total' => $deposit->total,
-                        ]); 
                     }
                     
                     if ($product->renewal) {
@@ -172,26 +181,34 @@ class PurchaseNotificationController extends Controller
                     
                     foreach ($orders_to_send as $val) {
                         $order = PurchaseOrder::findOne($val);
-                        Email::send('abortive_order_member', $order->email, [
-                            'fio' => $order->firstname . ' ' . $order->patronymic,
-                            'created_at' => date('d.m.Y', strtotime($order->created_at)),
-                            'order_number' => $order->order_number,
-                            'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
-                            'new_purchase_date' => $product->renewal ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
-                        ]);
+                        try {
+                            Email::send('abortive_order_member', $order->email, [
+                                'fio' => $order->firstname . ' ' . $order->patronymic,
+                                'created_at' => date('d.m.Y', strtotime($order->created_at)),
+                                'order_number' => $order->order_number,
+                                'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
+                                'new_purchase_date' => $product->renewal ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
+                            ]);
+                        } catch (Exception $e) {
+                            // unset($e);
+                        }
                     }
                     
                     foreach ($order_products as $order_product) {
                         PurchaseOrder::setOrderStatus($order_product->purchase_order_id);
                     }
+                    try {
+                        Email::send('abortive_order_provider', $product->provider->user->email, [
+                            'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
+                            'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
+                            'new_purchase_date' => $product->renewal ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
+                            'new_stop_date' => $product->renewal ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
+                            'purchase_total' => $product->purchase_total . ' рублей',
+                        ]);
+                    } catch (Exception $e) {
+                        // unset($e);
+                    }
                     
-                    Email::send('abortive_order_provider', $product->provider->user->email, [
-                        'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
-                        'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
-                        'new_purchase_date' => $product->renewal ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
-                        'new_stop_date' => $product->renewal ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
-                        'purchase_total' => $product->purchase_total . ' рублей',
-                    ]);
                 }
             }
         }
