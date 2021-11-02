@@ -50,6 +50,12 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endforeach ?>
     </datalist>
 
+    <div>
+        <p>“Перевод пая на Расчётный счёт” автоматизирован : с Инвестиционного и Партнёрского счетов.</p>
+    </div>
+    <hr />
+    <br />
+
     <div class="form-group">
         <?= Html::submitButton('Выполнить', ['class' => 'btn btn-success']) ?>
     </div>

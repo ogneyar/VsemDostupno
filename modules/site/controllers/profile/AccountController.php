@@ -14,6 +14,8 @@ use app\models\AccountLog;
 use app\models\Email;
 use app\models\Transfer;
 use app\models\User;
+use app\models\Member;
+use app\models\Partner;
 use app\modules\site\models\account\TransferForm;
 
 class AccountController extends BaseController
@@ -63,6 +65,7 @@ class AccountController extends BaseController
             if ($account->type != Account::TYPE_GROUP 
                 && $account->type != Account::TYPE_GROUP_FEE 
                 && $account->type != Account::TYPE_FRATERNITY 
+                && $account->type != Account::TYPE_SUBSCRIPTION 
                 && $account) {
                 $myAccounts[] = [
                     'name' => Html::makeTitle($account->typeName),
@@ -83,59 +86,101 @@ class AccountController extends BaseController
         }
 
         $groupAccounts = [];
-        if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
+        if ($user->role == User::ROLE_PARTNER) {
+
+            $partner_id = Partner::findOne(['user_id' => $user->id])->id;
+            // можно так
+            $members = Member::findAll(['partner_id' => $partner_id]);
+            // или так
+            // $members = Member::find()->where(['partner_id' => $partner_id])->all();
+            // или вот так
+            // $members = Member::find()->where('partner_id = :partner_id', [':partner_id' => $partner_id])->all();
+            
+            $total = 0;
+            if ($members) {
+                foreach ($members as $member) {
+                    $total += Account::find()->where(['user_id' => $member->user_id])->andWhere(['type' => Account::TYPE_DEPOSIT])->one()->total;
+                }
+            }
+            
             $groupAccounts[] = [
-                'name' => 'Расчётный счёт группы',
-                'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP),
+                'name' => 'Общая сумма расчётных счётов группы',
+                'total' => $total,
+                'members' => $members,
                 'actionEnable' => false,
             ];
 
             $groupAccounts[] = [
-                'name' => 'Членские взносы группы',
-                'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE),
+                'name' => 'Общая сумма членских взносов группы',
+                'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total,
+                'members' => null,
                 'actionEnable' => false,
             ];
 
-            // $sumAccounts = [
-            //     Account::TYPE_GROUP_FEE => 'Членские взносы группы',
-            // ];
-
-            // foreach ($sumAccounts as $type => $name) {
-            //     $groupAccounts[] = [
-            //         'name' => $name,
-            //         'account' => new Account([
-            //             'total' => Account::find()
-            //                 ->joinWith('member')
-            //                 ->where('partner_id = :partner_id AND type = :type', [
-            //                     ':partner_id' => Yii::$app->user->identity->entity->partner->id,
-            //                     ':type' => $type,
-            //                 ])
-            //                 ->sum('total'),
-            //         ]),
-            //         'actionEnable' => false,
-            //     ];
-            // }
         }
 
         $fraternityAccount = [];
         if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
             $fraternityAccount[] = [
-                'name' => ' Счёт содружества',
+                'name' => 'Отчисленно в фонд содружества',
                 'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_FRATERNITY),
                 'actionEnable' => false,
             ];
         }
 
         $accountType = Yii::$app->getRequest()->getQueryParam('type');
-        if (!$user->getAccount($accountType)) {
+        if ($accountType == Account::TYPE_RECOMENDER) {
+
+        }else if (!$user->getAccount($accountType)) {
             $accountType = Account::TYPE_DEPOSIT;
         }
+
+        $subscription = [
+            'name' => 'Ежемесячные членские взносы',
+            'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_SUBSCRIPTION),
+            'actionEnable' => false,
+        ];
+
+        // Рекомендательский сбор идёт на Инвестиционный счёт (TYPE_BONUS)
+        $account_id = $user->getAccount(Account::TYPE_BONUS)->id;
+        $info[] = [
+            'name' => "Рекомендательские взносы",
+            'actionEnable' => false,
+            'dataProvider' => new ActiveDataProvider([
+                'id' => Account::TYPE_RECOMENDER,
+                'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account->id])->andWhere('message = "Рекомендательские взносы"'), 
+                'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
+                'pagination' => [
+                    'params' => array_merge($_GET, [
+                        'type' => Account::TYPE_RECOMENDER,
+                    ]),
+                ],
+            ]),
+        ];
+        // Членские взносы идут с Расчётного счёта (TYPE_DEPOSIT)
+        $account_id = $user->getAccount(Account::TYPE_DEPOSIT)->id;
+        $info[] = [
+            'name' => "Членские взносы",
+            'actionEnable' => false,
+            'dataProvider' => new ActiveDataProvider([
+                'id' => Account::TYPE_SUBSCRIPTION,
+                'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account_id])->andWhere('message = "Членский взнос"'),
+                'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
+                'pagination' => [
+                    'params' => array_merge($_GET, [
+                        'type' => Account::TYPE_SUBSCRIPTION,
+                    ]),
+                ],
+            ]),
+        ];
 
         return $this->render('index', [
             'title' => 'Счета',
             'myAccounts' => $myAccounts,
             'groupAccounts' => $groupAccounts,
             'fraternityAccount' => $fraternityAccount,
+            'subscription' => $subscription,
+            'info' => $info,
             'accountType' => $accountType,
             'user' => $user,
         ]);

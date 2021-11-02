@@ -28,7 +28,7 @@ $this->params['breadcrumbs'] = [$this->title];
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($myAccounts as $account): ?>
+                <?php foreach ($myAccounts as $account): ?> 
                     <tr>
                         <td class="vert-align"><?= Html::encode($account['name']) ?></td>
                         <td class="text-center vert-align"><?= $account['account']->total ?></td>
@@ -60,6 +60,24 @@ $this->params['breadcrumbs'] = [$this->title];
     </div>
 <?php endif ?>
 
+<!-- Членские взносы -->
+<?php if (!empty($subscription)): ?>
+    <?= Html::tag('h2', 'Членские взносы') ?>
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td class="vert-align"><?= Html::encode($subscription['name']) ?></td>
+                        <td class="text-center vert-align"><?= $subscription['account']->total ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php endif ?>
+
+
 <?php if (!empty($groupAccounts)): ?>
     <?= Html::tag('h2', 'Счета группы') ?>
     <div class="row">
@@ -75,7 +93,7 @@ $this->params['breadcrumbs'] = [$this->title];
                 <?php foreach ($groupAccounts as $account): ?>
                     <tr>
                         <td class="vert-align"><?= Html::encode($account['name']) ?></td>
-                        <td class="text-center vert-align"><?= $account['account']->total ?></td>
+                        <td class="text-center vert-align"><?= $account['total'] ?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>
@@ -89,12 +107,6 @@ $this->params['breadcrumbs'] = [$this->title];
     <div class="row">
         <div class="col-md-8">
             <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th class="col-md-8">Счет</th>
-                        <th class="col-md-2">Остаток</th>
-                    </tr>
-                </thead>
                 <tbody>
                 <?php foreach ($fraternityAccount as $account): ?>
                     <tr>
@@ -111,7 +123,7 @@ $this->params['breadcrumbs'] = [$this->title];
 <?= Html::tag('h2', 'Детализация по счетам') ?> 
 <?php
     $items = [];
-    foreach (array_merge($myAccounts, $groupAccounts) as $account) {
+    foreach (array_merge($myAccounts, $info) as $account) {
         if (!isset($account['dataProvider'])) {
             continue;
         }
@@ -130,7 +142,7 @@ $this->params['breadcrumbs'] = [$this->title];
                     'message',
                 ],
             ]),
-            'active' => $accountType == $account['account']->type,
+            'active' => $accountType == $account['dataProvider']->id,
         ];
     }
     echo TabsX::widget(['items' => $items]);
