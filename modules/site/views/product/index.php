@@ -363,7 +363,7 @@ foreach ($model->productFeatures as $feat) {
                         }
                         echo Alert::widget([
                             'body' => sprintf(
-                                'Закупка состоится %s, заказы принимаются до %s включительно.',
+                                'Доставка состоится %s, заказы принимаются до %s включительно.',
                                 Html::a($purchase_date_1, Url::to([$model->category->url])),
                                 Html::a($stop_date_1, Url::to([$model->category->url]))
                             ),
