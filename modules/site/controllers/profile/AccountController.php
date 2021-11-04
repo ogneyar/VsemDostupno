@@ -146,6 +146,7 @@ class AccountController extends BaseController
         $info[] = [
             'name' => "Рекомендательские взносы",
             'actionEnable' => false,
+            'recomender' => true,
             'dataProvider' => new ActiveDataProvider([
                 'id' => Account::TYPE_RECOMENDER,
                 'query' => AccountLog::find()->where('account_id = :account_id', [':account_id' => $account->id])->andWhere('message = "Рекомендательские взносы"'), 

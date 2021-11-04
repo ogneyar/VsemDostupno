@@ -127,23 +127,41 @@ $this->params['breadcrumbs'] = [$this->title];
         if (!isset($account['dataProvider'])) {
             continue;
         }
+        if (!isset($account['recomender'])) {
+            $items[] = [
+                'label' => $account['name'],
+                'content' => GridView::widget([
+                    'dataProvider' => $account['dataProvider'],
+                    'columns' => [
+                        ['class' => 'yii\grid\SerialColumn'],
 
-        $items[] = [
-            'label' => $account['name'],
-            'content' => GridView::widget([
-                'dataProvider' => $account['dataProvider'],
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
+                        'created_at',
+                        'amount',
+                        'fromUserFullName',
+                        'toUserFullName',
+                        'message',
+                    ],
+                ]),
+                'active' => $accountType == $account['dataProvider']->id,
+            ];
+        }else {
+            $items[] = [
+                'label' => $account['name'],
+                'content' => GridView::widget([
+                    'dataProvider' => $account['dataProvider'],
+                    'columns' => [
+                        ['class' => 'yii\grid\SerialColumn'],
 
-                    'created_at',
-                    'amount',
-                    'fromUserFullName',
-                    'toUserFullName',
-                    'message',
-                ],
-            ]),
-            'active' => $accountType == $account['dataProvider']->id,
-        ];
+                        'created_at' => "Дата / время",
+                        'fromUserFullName' => "Зачисленно с благодарностью от:",
+                        'amount' => "Сумма зачисления 3%",
+                        'toUserFullName' => "Адрес зачисления",
+                        // '' => 'кнопка'
+                    ],
+                ]),
+                'active' => $accountType == $account['dataProvider']->id,
+            ];
+        }
     }
     echo TabsX::widget(['items' => $items]);
 ?>
