@@ -20,7 +20,7 @@ class BaseController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            if (!in_array(Yii::$app->user->identity->role, [User::ROLE_MEMBER, User::ROLE_PROVIDER])) {
+                            if (!in_array(Yii::$app->user->identity->role, [User::ROLE_MEMBER, User::ROLE_PROVIDER, User::ROLE_PARTNER])) {
                                 throw new ForbiddenHttpException('Действие не разрешено.');
                             }
 

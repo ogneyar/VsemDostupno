@@ -45,6 +45,11 @@ echo Nav::widget([
             'url' => Url::to(['/profile']),
             'items' => [
                 [
+                    'label' => Icon::show('list-alt') . ' История закупок',
+                    'url' => Url::to(['/purchase/history']),
+                    'visible' => Yii::$app->hasModule('purchase'),
+                ],
+                [
                     'label' => Icon::show('list-alt') . ' История заказов',
                     'url' => Url::to(['/profile/partner/order']),
                 ],
