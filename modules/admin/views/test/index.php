@@ -17,8 +17,17 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php
-        // $controller = new PurchaseNotificationController(Yii::$app->controller->id, Yii::$app);
-        // $controller->actionIndex();
+        foreach($accounts as $account)
+        {
+            // var_dump($account);
+            foreach($account as $acc)
+            {
+                echo($acc->id);
+                echo(" - ");
+                echo($acc->total);
+            }
+            echo("<br/>");
+        }
     ?>
 
 </div>
