@@ -13,7 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        purchase notificatiion запустился
+        Перенос закупок выполнен!
     </p>
 
     <?php

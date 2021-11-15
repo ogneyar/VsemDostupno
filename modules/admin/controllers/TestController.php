@@ -22,7 +22,9 @@ class TestController extends BaseController
         foreach($users as $user)
         {
             // $user->id;
-            $accounts[] = Account::find()->where(['user_id' => $user->id,'type' => 'deposit'])->all();
+            $accounts[] = Account::find()->where(['user_id' => $user->id,'type' => ['deposit', 'subscription']])->all();
+            // $accounts[] = Account::find()->where(['user_id' => $user->id,'type' => 'deposit'])->all();
+            // $accounts[] = Account::find()->where(['user_id' => $user->id])->all();
         }
 
         return $this->render('index', [
