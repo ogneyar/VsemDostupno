@@ -14,8 +14,17 @@ $this->title = 'Членские взносы';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="subscriber-payment-index">
-
+    
+    
     <h1><?= Html::encode($this->title) ?></h1>
+    
+    <hr/>
+    <label>
+        <input class="btn btn-default" type="number" placeholder="Введите сумму" value="20" disabled style="width:80px;"/> 
+        <button class="btn btn-default">Сохранить</button>
+        <label>Сумма "Членских взносов" взымаемая ежемесячно</label>
+    </label>
+    <hr/>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
