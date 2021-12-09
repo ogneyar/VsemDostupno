@@ -22,6 +22,10 @@ $this->params['breadcrumbs'][] = $this->title;
             // var_dump($account);
             foreach($account as $acc)
             {
+                echo("<br />");
+                echo date("h");
+                echo("<br />");
+
                 echo("user_id: ");
                 echo($acc->user_id);
                 echo(" - ");
