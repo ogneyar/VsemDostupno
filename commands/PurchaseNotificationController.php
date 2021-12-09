@@ -20,8 +20,9 @@ class PurchaseNotificationController extends Controller
     {
         $date = date('Y-m-d');
         // $date = '2021-11-01';
-        $products = PurchaseProduct::find()->where(['stop_date' => $date, 'status' => 'advance'])->all();
-        // $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
+         $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();
+        // $products = PurchaseProduct::find()->where(['stop_date' => $date, 'status' => 'advance'])->all();
+        // $products = PurchaseProduct::find()->where(['stop_date' => $date])->andWhere(['status' => 'advance'])->all();
         if ($products) {
             foreach ($products as $product) {
                 $orders_to_send = [];
