@@ -65,7 +65,7 @@ class DefaultController extends BaseController
                 $data['subject'] = htmlspecialchars($_POST['subject_vote']);
                 // MailingVote::sendMailing($data); 
 
-                EmailLetters::sendMailingVote($data);
+                EmailLetters::sendMailingVote($data); 
             }
         }
         

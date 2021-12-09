@@ -17,8 +17,32 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php
-        // $controller = new PurchaseNotificationController(Yii::$app->controller->id, Yii::$app);
-        // $controller->actionIndex();
+        foreach($accounts as $account)
+        {
+            // var_dump($account);
+            foreach($account as $acc)
+            {
+                echo("user_id: ");
+                echo($acc->user_id);
+                echo(" - ");
+                echo("type: ");
+                echo($acc->type);
+                echo(" - ");
+                echo("total: ");
+                echo($acc->total);
+                echo(" - ");
+
+                // if ($acc->type == "deposit")
+
+                // email - Списание членсого взноса
+
+                
+                foreach($users as $user) {
+                    if ($user->id == $acc->user_id) var_dump($user->email);
+                }
+            }
+            echo("<br/>");
+        }
     ?>
 
 </div>

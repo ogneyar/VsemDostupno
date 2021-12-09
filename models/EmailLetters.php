@@ -88,8 +88,11 @@ class EmailLetters extends \yii\db\ActiveRecord
             foreach($letters as $letter) {
                 if (!$letter->is_read) echo "<b>";
                 
-                echo '<a href="#" onclick="getLetter('.$letter->id.', `'.$letter->subject.'`,`'.$letter->body.'`);">'.$letter->date.'</a>';
+                // echo '<a href="#" onclick="getLetter('.$letter->id.', `'.$letter->subject.'`,`'.$letter->body.'`);">'.$letter->date.'</a>';
                 
+                echo Html::a($letter->date, 'javascript:void(0)', [
+                    'onclick' => 'getLetter('.$letter->id.', `'.$letter->subject.'`,`'.$letter->body.'`);'
+                ]);
 
                 echo Html::a('Удалить', 'javascript:void(0)', [
                     'onclick' => 'delLetter('.$letter->id.');',

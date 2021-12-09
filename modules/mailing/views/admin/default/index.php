@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
     
     <?php $form = ActiveForm::begin(['id' => 'mailing_info_frm', 'options' => ['enctype'=>'multipart/form-data']]); ?>
         
-        <input type="hidden" name="candidates-all" id="candidates-all-hdn" value="0">
+        <input type="hidden" name="candidates-all" id="candidates-all-hdn" value="0"> 
         <div class="form-group">
             <?= Html::checkbox('members', false, ['id' => 'members']); ?>
             <label for="members">Для Участников</label>

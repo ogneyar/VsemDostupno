@@ -89,7 +89,7 @@ foreach ($panels as $panel) {
                         <div class="col-md-3">
                             
                                 <div class="purchase-date-hdr">
-                                    <h5 class="text-center" style="font-size: 20px;"><strong><?= isset($date)  ? 'Закупка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
+                                    <h5 class="text-center" style="font-size: 20px;"><strong><?= isset($date)  ? 'Доставка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
                                 </div>
                                             
                             <?= Html::a(

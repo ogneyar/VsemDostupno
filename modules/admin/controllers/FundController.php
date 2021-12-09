@@ -3,7 +3,9 @@
 namespace app\modules\admin\controllers;
 
 use Yii;
+use app\models\Account;
 use app\models\Fund;
+use app\models\User;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
@@ -27,9 +29,43 @@ class FundController extends BaseController
         $dataProvider = new ActiveDataProvider([
             'query' => Fund::find(),
         ]);
+
+        $balance = 0;
+        $accounts = Account::find()->where(['type' => [Account::TYPE_DEPOSIT, Account::TYPE_BONUS, Account::TYPE_STORAGE]])->all();
+        foreach($accounts as $acc) {
+            $balance += $acc->total;
+        }
+
+        $minus = 0;
+        $accounts = Account::find()->where(['type' => Account::TYPE_SUBSCRIPTION])->all();
+        foreach($accounts as $acc) {
+            if ($acc->type < 0) $minus += $acc->total;
+        }
+
+        $po = 0;
+        $friend = 0;
+        $penis = 0;
+        $user = User::find()->where(['role' => User::ROLE_SUPERADMIN,'disabled' => '0'])->all();
+        if ($user) {
+            $user_id = $user[0]->id;
+            // $account = Account::find()->where(['user_id' => $user_id,'type' => Account::TYPE_DEPOSIT])->all();
+            $account = Account::find()->where(['user_id' => $user_id])->all();
+            if ($account) {
+                foreach($account as $acc) {
+                    if ($acc->type == Account::TYPE_DEPOSIT) $po = $acc->total; // счёт ПО
+                    if ($acc->type == Account::TYPE_BONUS) $friend = $acc->total; // счёт содружества
+                    if ($acc->type == Account::TYPE_SUBSCRIPTION) $penis = $acc->total; // Членские взносы
+                }
+            }
+        }
         
         return $this->render('index', [
             'dataProvider' => $dataProvider,
+            'balance' => $balance,
+            'po' => $po,
+            'friend' => $friend,
+            'minus' => $minus,
+            'penis' => $penis,
         ]);
     }
     
