@@ -76,7 +76,7 @@ class ProductController extends BaseController
         ];
     }
 
-    public function actionSearch($q = null, $id = null, $c = null)
+    public function actionSearch($q = null, $id = null, $c = null) 
     {
         $out = [
             'results' => [
@@ -115,14 +115,23 @@ class ProductController extends BaseController
                     $out['results'] = $data;
                 }
             } elseif (!is_null($c) && $c == 'true') {
-                $productQuery = PurchaseProduct::find()
-                    ->joinWith('productFeature')
-                    ->joinWith('productFeature.product')
-                    ->orWhere('name like :q', [':q' => '%' . $q . '%'])
-                    ->andWhere('visibility != 0')
-                    ->andWhere('stop_date > NOW()')
-                    ->orderBy(['purchase_date' => SORT_ASC]);
-                
+                if (date("H") > 20) {
+                    $productQuery = PurchaseProduct::find()
+                        ->joinWith('productFeature')
+                        ->joinWith('productFeature.product')
+                        ->orWhere('name like :q', [':q' => '%' . $q . '%'])
+                        ->andWhere('visibility != 0')
+                        ->andWhere('stop_date > NOW()')
+                        ->orderBy(['purchase_date' => SORT_ASC]);
+                }else {
+                    $productQuery = PurchaseProduct::find()
+                        ->joinWith('productFeature')
+                        ->joinWith('productFeature.product')
+                        ->orWhere('name like :q', [':q' => '%' . $q . '%'])
+                        ->andWhere('visibility != 0')
+                        ->andWhere('stop_date >= NOW()')
+                        ->orderBy(['purchase_date' => SORT_ASC]);
+                }
                 $data = [];
                 foreach ($productQuery->each() as $product) {
                     $text = sprintf('%s (%s)', $product->productFeature->product->name . ', ' . $product->productFeature->featureName, (new \DateTime($product->purchase_date))->format('d.m.Y'));
