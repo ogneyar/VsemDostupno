@@ -62,7 +62,7 @@ class SearchController extends BaseController
             $query->select('user.id')
                 ->from('user', ['INNER JOIN', 'member', 'user.id=member.user_id'], ['INNER JOIN', 'partner', 'user.id=partner.user_id'])
                 ->Where('user.lastname=:p1', [':p1' => $fio[0]])
-                ->andWhere('user.firstname=:p2', [':p2' => isset($fio[1]) ? $fio[1] : ""])
+                // ->andWhere('user.firstname=:p2', [':p2' => isset($fio[1]) ? $fio[1] : ""])
                 ->andWhere('role != "admin"')
                 ->andWhere('role != "superadmin"');
             $command = $query->createCommand();
@@ -73,7 +73,12 @@ class SearchController extends BaseController
                 $sub_array[]=$item['id'];
                  }
             $res_sql=implode(',',$sub_array);
-            $count = Yii::$app->db->createCommand('SELECT COUNT(*) FROM user WHERE user.id IN ('.$res_sql.')')->queryScalar();
+            if ($res_sql) $count = Yii::$app->db->createCommand('SELECT COUNT(*) FROM user WHERE user.id IN ('.$res_sql.')')->queryScalar();
+            else {
+                $res_sql = 0;
+                $count = 0;
+            }
+            // var_dump($res_sql);
             $dataProvider = new SqlDataProvider([
                 'sql' => 'SELECT u.id as user_id, u.role, u.email, u.phone, u.firstname, u.lastname, u.patronymic, u.number, m.id as member_id, p.id as partner_id, p.name from user u left join member m on u.id = m.user_id left join partner p on (u.id = p.user_id OR m.partner_id = p.id) where u.id in ('.$res_sql.') AND u.role="member" AND p.name LIKE "%'.$pieces[0].'%"',
                 
@@ -92,7 +97,7 @@ class SearchController extends BaseController
                 ->createCommand('SELECT COUNT(*) from user WHERE user.number='.$discount_number.'')
                 ->queryScalar();
             $dataProvider= new SqlDataProvider ([
-                'sql'=>'SELECT u.id as user_id, u.role, u.email, u.phone, u.firstname, u.lastname, u.number, m.id as member_id, p.id as partner_id, p.name from user u left join member m on u.id = m.user_id left join partner p on (u.id = p.user_id OR m.partner_id = p.id) where u.number = ('.$discount_number.') AND u.role="member" AND p.name LIKE "%'.$pieces[0].'%"',
+                'sql'=>'SELECT u.id as user_id, u.role, u.email, u.phone, u.firstname, u.lastname, u.patronymic, u.number, m.id as member_id, p.id as partner_id, p.name from user u left join member m on u.id = m.user_id left join partner p on (u.id = p.user_id OR m.partner_id = p.id) where u.number = ('.$discount_number.') AND u.role="member" AND p.name LIKE "%'.$pieces[0].'%"',
                 'totalCount'=>$count,
                 'pagination'=> [
                     'pageSize'=>10,
@@ -167,7 +172,7 @@ class SearchController extends BaseController
             foreach ($data as $d) {
                 $out[] = ['value' => $d['lastname']. ' ' .$d['firstname']. ' ' .$d['patronymic']];
             }
-            echo Json::encode($out);
+            echo Json::encode($out); 
         }
 
         if ($disc_number != null) {
