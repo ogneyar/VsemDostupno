@@ -16,6 +16,7 @@ use app\models\Email;
 use app\models\Forgot;
 use app\models\Partner;
 use app\models\User;
+use app\models\Member;
 use app\modules\admin\models\AccountForm;
 use app\modules\admin\models\PartnerForm;
 
@@ -121,6 +122,14 @@ class PartnerController extends BaseController
                     throw new Exception('Ошибка создания партнера!');
                 }
                 $model->id = $partner->id;
+
+                $member = new Member();
+                $member->user_id = $user->id;
+                $member->partner_id = $partner->id;
+                $member->become_provider = 0;
+                if (!$member->save()) {
+                    throw new Exception('Ошибка создания партнера как участника!');
+                }
 
                 $forgot = new Forgot();
                 $forgot->user_id = $user->id;
