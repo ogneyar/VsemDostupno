@@ -49,7 +49,8 @@ class MemberController extends BaseController
     public function actionIndex()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => Member::find()->joinWith('user')->where('user.request = 0'),
+            // 'query' => Member::find()->joinWith('user')->where('user.request = 0'),
+            'query' => Member::find()->joinWith('user')->where('user.request = 0')->andWhere("user.role = 'member'"),
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
 
