@@ -9,14 +9,14 @@ use app\models\Account;
 
 class TestController extends BaseController
 {
-    const PERCENT_FOR_ALL = 30;
     /**
      * Tests.
      * @return mixed
      */
     public function actionIndex()
-
     {       
+        $constants = require(__DIR__ . '/../../../config/constants.php');
+
         $users = User::find()->where(['role' => [User::ROLE_MEMBER,User::ROLE_PARTNER,User::ROLE_PROVIDER]])->all();
         $accounts = [];
         foreach($users as $user)
@@ -30,7 +30,7 @@ class TestController extends BaseController
         return $this->render('index', [
             'users' => $users,
             'accounts' => $accounts,
-            'percent_for_all' => $this::PERCENT_FOR_ALL
+            'percent_for_all' => $constants["PERCENT_FOR_ALL"]
             ]);
     }
 

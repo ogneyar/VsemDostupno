@@ -19,6 +19,9 @@ use kartik\select2\Select2;
 use app\modules\mailing\models\MailingProduct;
 
 
+// const PERCENT_FOR_ALL = 25;
+$constants = require(__DIR__ . '/../../../../config/constants.php');
+
 /* @var $this yii\web\View */
 /* @var $model app\models\Product */
 /* @var $form yii\widgets\ActiveForm */
@@ -416,7 +419,7 @@ $this->registerJs("CKEDITOR.plugins.addExternal('youtube', '/ckeditor/plugins/yo
         <hr>
         <h4>Цена "Для всех"</h4>
         <hr>
-        <input type="checkbox" id="fund_common_price_check">&nbsp;&nbsp;Использовать 40% наценку
+        <input type="checkbox" id="fund_common_price_check">&nbsp;&nbsp;Использовать <?php echo($constants["PERCENT_FOR_ALL"])?>% наценку
         <br />
         <br />
         <div class="has-feedback">

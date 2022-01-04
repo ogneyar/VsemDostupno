@@ -7,8 +7,6 @@ use app\models\ProductPrice;
 use app\models\FundProduct;
 use app\models\FundCommonPrice;
 
-// const PERCENT_FOR_ALL = 25;
-// define("PERCENT_FOR_ALL", 25);
 
 /**
  * This is the model class for table "fund".
@@ -20,9 +18,6 @@ use app\models\FundCommonPrice;
  */
 class Fund extends \yii\db\ActiveRecord
 {
-
-    // const PERCENT_FOR_ALL = 25;
-    // static PERCENT_FOR_ALL = 25;
 
     /**
      * @inheritdoc
@@ -78,6 +73,8 @@ class Fund extends \yii\db\ActiveRecord
     
     public function recalculatePrice()
     {
+        $constants = require(__DIR__ . '/../config/constants.php');
+
         $products = ProductPrice::find()->all();
         if ($products) {
             foreach ($products as $product) {
@@ -92,8 +89,8 @@ class Fund extends \yii\db\ActiveRecord
                 }
                 $percent_member = $product->purchase_price / 100 * $total_percent;
                 $product->member_price = round($product->purchase_price + $percent_member, 2);                
-                // $percent_all = $product->member_price / 100 * $this::PERCENT_FOR_ALL;
-                $percent_all = $product->member_price / 100 * 25;
+                // $percent_all = $product->member_price / 100 * 25;
+                $percent_all = $product->member_price / 100 * $constants["PERCENT_FOR_ALL"];
                 $common_price = FundCommonPrice::find()->where(['product_feature_id' => $product->product_feature_id])->one();
                 $product->price = $common_price ? $common_price->price : round($product->member_price + $percent_all, 2);
                 $product->save();
@@ -118,8 +115,10 @@ class Fund extends \yii\db\ActiveRecord
     
     public static function calculateAllPrice($price, $feature_id)
     {
-        // $percent_all = $price / 100 * $this::PERCENT_FOR_ALL;
-        $percent_all = $price / 100 * 25;
+        $constants = require(__DIR__ . '/../config/constants.php');
+
+        // $percent_all = $price / 100 * 25;
+        $percent_all = $price / 100 * $constants["PERCENT_FOR_ALL"];
         $common_price = FundCommonPrice::find()->where(['product_feature_id' => $feature_id])->one();
         return $common_price ? $common_price->price : round($price + $percent_all, 2);
     }

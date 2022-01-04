@@ -4,6 +4,8 @@ use yii\helpers\Html;
 
 use app\commands\PurchaseNotificationController;
 
+$constants = require(__DIR__ . '/../../../../config/constants.php');
+
 // const PERCENT_FOR_ALL = 40; // или так 
 // define("PERCENT_FOR_ALL", 40); // или так
 
@@ -26,6 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
         // echo(PERCENT_FOR_ALL);
         
         echo($percent_for_all);
+        
+        echo("<br/>");
+        
+        echo($constants["PERCENT_FOR_ALL"]);
 
         echo("<br/>");
 

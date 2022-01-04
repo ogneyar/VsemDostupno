@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $model->isNewRecord ? 'Добавить' : 'И�
 
     <?= $this->render('_form', [
         'model' => $model,
-        'model_fund' => $model_fund,
+        'model_fund' => $model_fund, 
     ]) ?>
 
 </div>
