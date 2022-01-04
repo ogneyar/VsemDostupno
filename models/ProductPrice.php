@@ -57,7 +57,7 @@ class ProductPrice extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
+    /** 
      * @return \yii\db\ActiveQuery
      */
     public function getProduct()

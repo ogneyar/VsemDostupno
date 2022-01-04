@@ -324,7 +324,7 @@ foreach ($model->productFeatures as $feat) {
                         [
                             'content' => 'Стоимость для всех желающих',
                             'badge' => $model->productFeatures[0]->is_weights == 1 ? Yii::$app->formatter->asCurrency($model->formattedPrice * $model->productFeatures[0]->volume, 'RUB') : $model->formattedPrice,
-                            'options' => ['class' => !Yii::$app->user->isGuest ? 'disabled' : ''],
+                            'options' => ['class' => !Yii::$app->user->isGuest ? 'disabled' : ''], 
                         ],
                         [
                             'content' => 'Стоимость для участников ПО',

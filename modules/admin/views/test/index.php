@@ -4,6 +4,9 @@ use yii\helpers\Html;
 
 use app\commands\PurchaseNotificationController;
 
+// const PERCENT_FOR_ALL = 40; // или так 
+define("PERCENT_FOR_ALL", 40); // или так
+
 $this->title = 'Тест';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -17,6 +20,13 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php
+
+        echo("<br/>");
+
+        echo(PERCENT_FOR_ALL);
+
+        echo("<br/>");
+
         foreach($accounts as $account)
         {
             // var_dump($account);
@@ -46,6 +56,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             }
             echo("<br/>");
+
+            // echo("<br/>");
         }
     ?>
 

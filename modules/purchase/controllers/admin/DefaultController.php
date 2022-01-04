@@ -134,7 +134,7 @@ class DefaultController extends BaseController
             $product_price = new ProductPrice();
             $product_price->product_id = $product->id;
             $product_price->product_feature_id = $product_feature->id;
-            $product_price->purchase_price = $price;
+            $product_price->purchase_price = $price; 
             $product_price->save();
         }
         

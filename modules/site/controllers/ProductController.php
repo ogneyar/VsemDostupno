@@ -36,7 +36,7 @@ class ProductController extends BaseController
                 ->andWhere('product.visibility != 0')
                 ->andWhere('published != 0')
                 ->andWhere('product_feature.quantity > 0')
-                ->one();
+                ->one(); 
         } else {
             $model = Product::find()
                 ->joinWith('productFeatures')

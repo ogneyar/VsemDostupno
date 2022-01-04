@@ -33,7 +33,7 @@ class Account extends \yii\db\ActiveRecord
     const TYPE_GROUP = 'group'; // расчётный счёт группы
     const TYPE_GROUP_FEE = 'group_fee'; // членские взносы группы
 
-    const TYPE_FRATERNITY = 'fraternity'; // фонд содружества
+    const TYPE_FRATERNITY = 'fraternity'; // фонд содружества // походу можно удалять
 
     /**
      * @inheritdoc
@@ -99,14 +99,14 @@ class Account extends \yii\db\ActiveRecord
     {
         $typeNames = [
             self::TYPE_DEPOSIT => 'расчётный счёт',
-            self::TYPE_BONUS => 'инвестиционный счёт', // бонус
-            self::TYPE_STORAGE => 'партнёрский счёт', //'складской сбор',
+            self::TYPE_BONUS => 'инвестиционный счёт', // старое название - 'бонус'
+            self::TYPE_STORAGE => 'партнёрский счёт', // старое название - 'складской сбор',
             
             self::TYPE_SUBSCRIPTION => 'членский взнос',
             self::TYPE_RECOMENDER => 'рекомендательский сбор',
 
-            self::TYPE_GROUP => 'расчётный счёт группы', // групповой бонус
-            self::TYPE_GROUP_FEE => 'членские взносы группы',  // групповой взнос
+            self::TYPE_GROUP => 'расчётный счёт группы', // старое название - 'групповой бонус'
+            self::TYPE_GROUP_FEE => 'членские взносы группы',  // старое название - 'групповой взнос'
 
             self::TYPE_FRATERNITY => 'фонд содружества',
         ];
