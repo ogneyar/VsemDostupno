@@ -184,4 +184,4 @@ $this->registerJs($script, $this::POS_END);
             <div class="form-group field-purchase-product" id="purchase-product-form"></div>    
         </div>
     <?php ActiveForm::end(); ?>
-<?php Modal::end(); ?>
+<?php Modal::end(); ?> 

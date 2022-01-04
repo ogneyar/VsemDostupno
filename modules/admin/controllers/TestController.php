@@ -9,7 +9,7 @@ use app\models\Account;
 
 class TestController extends BaseController
 {
-   
+    const PERCENT_FOR_ALL = 30;
     /**
      * Tests.
      * @return mixed
@@ -29,7 +29,8 @@ class TestController extends BaseController
 
         return $this->render('index', [
             'users' => $users,
-            'accounts' => $accounts
+            'accounts' => $accounts,
+            'percent_for_all' => $this::PERCENT_FOR_ALL
             ]);
     }
 

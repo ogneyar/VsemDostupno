@@ -104,6 +104,7 @@ class DefaultController extends BaseController
     
     public function actionAddProduct() 
     {
+        
         $volume = ($_POST['product_exists'] == '0') ? $_POST['volume'] : $_POST['volume_ex'];
         $tare = ($_POST['product_exists']) == '0' ? $_POST['tare'] : $_POST['tare_ex'];
         $measurement = ($_POST['product_exists'] == '0') ? $_POST['measurement'] : $_POST['measurement_ex'];
@@ -156,7 +157,7 @@ class DefaultController extends BaseController
         $purchase->status = 'advance';
         $purchase->save();
         //print_r($purchase);
-        
+
         return true;
     }
     
