@@ -112,7 +112,7 @@ class AccountController extends BaseController
 
             $groupAccounts[] = [
                 'name' => 'Общая сумма членских взносов группы',
-                'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total,
+                'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total, 
                 'members' => null,
                 'actionEnable' => false,
             ];

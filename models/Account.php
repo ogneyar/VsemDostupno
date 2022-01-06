@@ -25,14 +25,12 @@ class Account extends \yii\db\ActiveRecord
 {
     const TYPE_DEPOSIT = 'deposit'; // расчётный счёт // у суперадмина это СЧЁТ ПО
     const TYPE_BONUS = 'bonus'; // инвестиционный счёт // у суперадмина это ФОНД СОДРУЖЕСТВА
+    const TYPE_SUBSCRIPTION = 'subscription'; // членский взнос // у суперадмина это ЧЛЕНСКИЕ ВЗНОСЫ
     const TYPE_STORAGE = 'storage'; // партнёрский счёт
 
-    const TYPE_SUBSCRIPTION = 'subscription'; // членский взнос // у суперадмина это ЧЛЕНСКИЕ ВЗНОСЫ
-    const TYPE_RECOMENDER = 'recomender'; // рекомендательский взнос
-
-    const TYPE_GROUP = 'group'; // расчётный счёт группы
-    const TYPE_GROUP_FEE = 'group_fee'; // членские взносы группы
-
+    const TYPE_RECOMENDER = 'recomender'; // рекомендательский взнос // походу можно удалять
+    const TYPE_GROUP = 'group'; // расчётный счёт группы // походу можно удалять
+    const TYPE_GROUP_FEE = 'group_fee'; // членские взносы группы // походу можно удалять
     const TYPE_FRATERNITY = 'fraternity'; // фонд содружества // походу можно удалять
 
     /**
