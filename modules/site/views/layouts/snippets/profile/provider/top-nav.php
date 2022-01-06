@@ -68,6 +68,10 @@ echo Nav::widget([
                     'url' => Url::to(['/profile/member/order']),
                     'visible' => $cart_vis
                 ],
+                // [
+                //     'label' => Icon::show('bars') . ' Быстрый заказ',
+                //     'url' => Url::to(['profile/account/order-create']),
+                // ],
                 [
                     'label' => Icon::show('briefcase') . ' Мои услуги',
                     'url' => Url::to(['/profile/service']),
