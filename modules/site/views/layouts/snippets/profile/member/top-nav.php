@@ -51,10 +51,10 @@ echo Nav::widget([
                     'label' => Icon::show('list-alt') . ' История заказов',
                     'url' => Url::to(['/profile/member/order']),
                 ],
-                // [
-                //     'label' => Icon::show('bars') . ' Быстрый заказ',
-                //     'url' => Url::to(['profile/account/order-create']),
-                // ],
+                [
+                    'label' => Icon::show('bars') . ' Быстрый заказ',
+                    'url' => Url::to(['profile/account/order-create']),
+                ],
                 [
                     'label' => Icon::show('briefcase') . ' Мои услуги',
                     'url' => Url::to(['/profile/service']),
