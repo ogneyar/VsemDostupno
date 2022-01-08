@@ -1,5 +1,6 @@
 <?php
 
+// use Yii;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\web\JsExpression;
@@ -163,16 +164,6 @@ $this->registerJs($script, $this::POS_END);
 
 
 
-
-
-
-
-
-
-
-
-
-
 <?= Html::pageHeader(Html::encode($this->title)) ?>
 
 <div class="order-create">
@@ -192,40 +183,20 @@ $this->registerJs($script, $this::POS_END);
     <div class="form-group field-orderform-product">
         <?php
             // echo(Yii::$app->user->id);
+            // var_dump(Yii::$app->user);
+            // echo(Yii::$app->user->identity->entity->role);
         ?>
-    </div>
-
-    <?= $form->field($model, 'user_id')->hiddenInput()->label(false) ?>
-
-
-    <!-- <h3>Информация о покупателе</h3>
-
-    <div class="form-group field-orderform-product">
-        <label class="control-label" for="orderform-product">Покупатель</label>
-        <?= Select2::widget([
+        <?= Html::hiddenInput('user_id', Yii::$app->user->id, [
             'id' => 'user_id',
             'name' => 'user_id',
-            'options' => ['placeholder' => 'Введите покупателя ...'],
-            'pluginOptions' => [
-                'allowClear' => true,
-                'minimumInputLength' => 1,
-                'language' => substr(Yii::$app->language, 0, 2),
-                'ajax' => [
-                    'url' => Url::to(['/api/profile/partner/member/search']),
-                    'dataType' => 'json',
-                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                ],
-                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                'templateResult' => new JsExpression('function(user) { return user.text; }'),
-                'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-            ],
-            'pluginEvents' => [
-                'select2:select' => new JsExpression('function() { $("#edit-account").prop("disabled", false); }'),
-                'select2:unselect' => new JsExpression('function() { $("#edit-account").prop("disabled", true); }'),
-            ],
+            // 'placeholder' => 'Введите количество ...',
+            'class' => 'form-control',
         ]) ?>
     </div>
- -->
+
+    <?= $form->field($model, 'user_id')->hiddenInput(['value' => Yii::$app->user->id])->label(false) ?>
+
+
 
     <h3>Товары</h3>
 
