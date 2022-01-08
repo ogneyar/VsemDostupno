@@ -22,7 +22,7 @@ class BaseController extends Controller
                         'matchCallback' => function ($rule, $action) {
                             if (Yii::$app->user->identity->entity->disabled ||
                             !in_array(Yii::$app->user->identity->role, [User::ROLE_PARTNER])) {
-                                throw new ForbiddenHttpException('Действие не разрешено.');
+                                // throw new ForbiddenHttpException('Действие не разрешено.');
                             }
 
                             return true;
