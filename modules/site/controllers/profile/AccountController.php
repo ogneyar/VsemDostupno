@@ -591,7 +591,7 @@ class AccountController extends BaseController
     public function actionSuccess()
     {
         return $this->render('success', [
-            'title' => 'Успех',
+            'title' => 'Ваша заявка отправлена!',
         ]);
     }
 
