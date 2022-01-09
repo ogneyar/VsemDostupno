@@ -22,52 +22,43 @@ $this->params['breadcrumbs'] = [$this->title];
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                        <th class="col-md-1">№ п/п</th>
                         <th class="col-md-8">Счет</th>
                         <th class="col-md-2">Остаток</th>
-                        <th class="col-md-2"></th>
+                        <!-- <th class="col-md-2"></th> -->
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($myAccounts as $account): ?> 
+                <?php foreach ($myAccounts as $i => $account): ?> 
                     <tr>
+                        <td class="vert-align"><?= $i+1 ?></td>
                         <td class="vert-align"><?= Html::encode($account['name']) ?></td>
                         <td class="text-center vert-align"><?= $account['account']->total ?></td>
-                        <td class="text-center vert-align">
-                            <?php if ($account['actionEnable']): ?>
-                                <?= Html::beginTag('div', ['class'=>'dropdown']) .
-                                Html::button('Действия <span class="caret"></span>', [
-                                    'type'=>'button',
-                                    'class'=>'btn btn-default',
-                                    'data-toggle'=>'dropdown'
-                                ]) .
-                                DropdownX::widget([
-                                    'items' => [
-                                        [
-                                            'label' => Icon::show('user') . ' Перевести пользователю сайта',
-                                            'url' => Url::to(['/profile/account/transfer']),
-                                        ],
-                                    ],
-                                    'encodeLabels' => false,
-                                ]) .
-                                Html::endTag('div') ?>
-                            <?php endif ?>
-                        </td>
+                        <!-- <td class="text-center vert-align">
+                            <?php 
+                            // if ($account['actionEnable']): ?>
+                                <?//= Html::beginTag('div', ['class'=>'dropdown']) .
+                                // Html::button('Действия <span class="caret"></span>', [
+                                //     'type'=>'button',
+                                //     'class'=>'btn btn-default',
+                                //     'data-toggle'=>'dropdown'
+                                // ]) .
+                                // DropdownX::widget([
+                                //     'items' => [
+                                //         [
+                                //             'label' => Icon::show('user') . ' Перевести пользователю сайта',
+                                //             'url' => Url::to(['/profile/account/transfer']),
+                                //         ],
+                                //     ],
+                                //     'encodeLabels' => false,
+                                // ]) .
+                                // Html::endTag('div') ?>
+                            <?php //endif ?>
+                        </td> -->
                     </tr>
                 <?php endforeach ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-<?php endif ?>
-
-<!-- Членские взносы -->
-<?php if (!empty($subscription)): ?>
-    <?= Html::tag('h2', 'Членские взносы') ?>
-    <div class="row">
-        <div class="col-md-8">
-            <table class="table table-bordered">
-                <tbody>
                     <tr>
+                        <td class="vert-align"><?= $i+2 ?></td>
                         <td class="vert-align"><?= Html::encode($subscription['name']) ?></td>
                         <td class="text-center vert-align"><?= $subscription['account']->total ?></td>
                     </tr>
@@ -77,6 +68,23 @@ $this->params['breadcrumbs'] = [$this->title];
     </div>
 <?php endif ?>
 
+<!-- Членские взносы -->
+<!-- <?php //if (!empty($subscription)): ?>
+    <?//= Html::tag('h2', 'Членские взносы') ?>
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td class="vert-align"><?//= Html::encode($subscription['name']) ?></td>
+                        <td class="text-center vert-align"><?//= $subscription['account']->total ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php //endif ?> -->
+
 
 <?php if (!empty($groupAccounts)): ?>
     <?= Html::tag('h2', 'Счета группы') ?>
@@ -85,13 +93,15 @@ $this->params['breadcrumbs'] = [$this->title];
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th class="col-md-8">Счет</th>
+                        <th class="col-md-1">№ п/п</th>
+                        <th class="col-md-8">Наименование</th>
                         <th class="col-md-2">Остаток</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($groupAccounts as $account): ?>
+                <?php foreach ($groupAccounts as $i => $account): ?>
                     <tr>
+                        <td class="vert-align"><?= $i+1 ?></td>
                         <td class="vert-align"><?= Html::encode($account['name']) ?></td>
                         <td class="text-center vert-align"><?= $account['total'] ?></td>
                     </tr>
@@ -103,13 +113,21 @@ $this->params['breadcrumbs'] = [$this->title];
 <?php endif ?>
 
 <?php if (!empty($fraternityAccount)): ?>
-    <?= Html::tag('h2', 'Фонд содружества') ?>
+    <!-- <?= Html::tag('h2', 'Фонд содружества') ?> -->
     <div class="row">
         <div class="col-md-8">
             <table class="table table-bordered">
-                <tbody>
-                <?php foreach ($fraternityAccount as $account): ?>
+                <thead>
                     <tr>
+                        <th class="col-md-1">№ п/п</th>
+                        <th class="col-md-8">Наименование</th>
+                        <th class="col-md-2">Остаток</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($fraternityAccount as $i => $account): ?>
+                    <tr>
+                        <td class="vert-align"><?= $i+1 ?></td>
                         <td class="vert-align"><?= Html::encode($account['name']) ?></td>
                         <td class="text-center vert-align"><?= $account['account']->total ?></td>
                     </tr>

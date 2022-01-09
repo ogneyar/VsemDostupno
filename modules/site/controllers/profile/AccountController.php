@@ -132,9 +132,17 @@ class AccountController extends BaseController
                 'actionEnable' => false,
             ];
 
+            $total = 0;
+            if ($members) {
+                foreach ($members as $member) {
+                    $total += Account::find()->where(['user_id' => $member->user_id])->andWhere(['type' => Account::TYPE_SUBSCRIPTION])->one()->total;
+                }
+            }
+
             $groupAccounts[] = [
                 'name' => 'Общая сумма членских взносов группы',
-                'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total, 
+                // 'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total, 
+                'total' => $total,
                 'members' => null,
                 'actionEnable' => false,
             ];
@@ -144,7 +152,8 @@ class AccountController extends BaseController
         $fraternityAccount = [];
         if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
             $fraternityAccount[] = [
-                'name' => 'Отчисленно в фонд содружества',
+                // 'name' => 'Отчисленно в фонд содружества',
+                'name' => 'Счёт содружества',
                 'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_FRATERNITY),
                 'actionEnable' => false,
             ];
@@ -158,7 +167,8 @@ class AccountController extends BaseController
         }
 
         $subscription = [
-            'name' => 'Ежемесячные членские взносы',
+            // 'name' => 'Ежемесячные членские взносы',
+            'name' => 'Членский взнос',
             'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_SUBSCRIPTION),
             'actionEnable' => false,
         ];
