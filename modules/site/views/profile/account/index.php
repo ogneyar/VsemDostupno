@@ -169,11 +169,30 @@ $this->params['breadcrumbs'] = [$this->title];
                     'dataProvider' => $account['dataProvider'],
                     'columns' => [
                         ['class' => 'yii\grid\SerialColumn'],
-
-                        'created_at' => "Дата / время",
-                        'fromUserFullName' => "Зачисленно с благодарностью от:",
-                        'amount' => "Сумма зачисления 3%",
-                        'toUserFullName' => "Адрес зачисления",
+                        [
+                            'header' => 'Дата / время',
+                            'attribute' => 'created_at',
+                            'format' => ['decimal', 2],
+                        ],
+                        // 'created_at' => 'Дата / время',
+                        [
+                            'header' => 'Зачисленно с благодарностью от',
+                            'attribute' => 'fromUserFullName',
+                            'format' => ['decimal', 2],
+                        ],
+                        // 'fromUserFullName' => 'Зачисленно с благодарностью от:',
+                        [
+                            'header' => 'Сумма зачисления 3%',
+                            'attribute' => 'amount',
+                            'format' => ['decimal', 2],
+                        ],
+                        // 'amount' => 'Сумма зачисления 3%',
+                        [
+                            'header' => 'Адрес зачисления',
+                            'attribute' => 'toUserFullName',
+                            'format' => ['decimal', 2],
+                        ],
+                        // 'toUserFullName' => 'Адрес зачисления',
                         // '' => 'кнопка'
                     ],
                 ]),
