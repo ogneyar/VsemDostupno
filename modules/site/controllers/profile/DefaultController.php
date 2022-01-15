@@ -126,7 +126,7 @@ class DefaultController extends BaseController
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->login()) { 
             if (Yii::$app->getUser()->getReturnUrl() == '/') {
                 Yii::$app->getUser()->setReturnUrl(Url::to([$this->defaultRoute]));
             }
