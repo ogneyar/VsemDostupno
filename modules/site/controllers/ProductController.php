@@ -12,12 +12,32 @@ use app\models\ProductPrice;
 use app\models\Cart;
 use app\models\Category;
 
+use yii\web\Response;
+use app\models\Account;
+
+
 use app\modules\purchase\models\PurchaseProduct;
 
 class ProductController extends BaseController
 {
     public function actionIndex($id)
     {
+        // if (Yii::$app->request->post()) {
+        if ($id == -12) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            // return true;
+            $value = $_GET["value"];
+            if ($value) {
+                $acc = Account::find()->where(['user_id' => Yii::$app->user->id,'type' => 'subscription'])->one();
+                $acc->total = $value;
+                $acc->save();
+            }
+            return  [
+                'ok' => true,
+                'message' => 'Значение заменено на ' . $value . '.',
+                'value' => $value,
+            ];
+        }
         $model = Product::find()
             ->joinWith('productFeatures')
             ->joinWith('productFeatures.productPrices')

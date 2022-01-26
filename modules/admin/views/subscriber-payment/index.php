@@ -6,6 +6,7 @@ use yii\grid\GridView;
 use kartik\dropdown\DropdownX;
 use app\models\User;
 use app\models\Parameter;
+use app\models\Account;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -17,58 +18,83 @@ $this->params['breadcrumbs'][] = $this->title;
     
     
     <h1><?= Html::encode($this->title) ?></h1>
-    
+
     <hr/>
     <label>
-        <input class="btn btn-default" type="number" placeholder="Введите сумму" value="20" disabled style="width:80px;"/> 
-        <button class="btn btn-default">Сохранить</button>
+        <input <?php if (!$superadmin) echo("disabled"); ?> id="input_changed_subscriber_payment_total" class="btn btn-default" type="number" placeholder="Введите сумму" value="<?=$account?>" style="width:80px;"/> 
+        <?php if ($superadmin) echo '<button id="button_changed_subscriber_payment_total" class="btn btn-default">Сохранить</button>'; ?>
         <label>Сумма "Членских взносов" взымаемая ежемесячно</label>
     </label>
     <hr/>
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+    <script>
+        document.getElementById("button_changed_subscriber_payment_total")
+            ?.addEventListener("click", async function() {
+                console.log("Кнопка нажата.")
+                <?php 
+                    // $acc = Account::find()->where(['user_id' => Yii::$app->user->id,'type' => 'subscription'])->one();
+                    // $acc->total = 17;
+                    // $acc->save();
+                ?>
+                let value = document.getElementById("input_changed_subscriber_payment_total").value
+                let url = '<?=$web?>/product/-12?value=' + value;
+                let response = await fetch(url, {method:"get"});
 
-            'created_at',
-            'amount',
-            'fullName',
+                // let commits = await response.json(); // читаем ответ в формате JSON
 
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{actions}',
-                'buttons' => [
-                    'actions' => function ($url, $model) {
-                        if ($model->amount < User::SUBSCRIBER_MONTHS_INTERVAL * (int) Parameter::getValueByName('subscriber-payment')) {
-                            $items = [
-                                [
-                                    'label' => 'Членский взнос (мес.)',
-                                    'url' => Url::to(['user/download-user-payment-by-quarter', 'id' => $model->user->id, 'months' => (int) ($model->amount / (int) Parameter::getValueByName('subscriber-payment'))]),
-                                ],
-                            ];
-                        } else {
-                            $items = [
-                                [
-                                    'label' => 'Членский взнос (кв-л)',
-                                    'url' => Url::to(['user/download-user-payment-by-quarter', 'id' => $model->user->id]),
-                                ],
-                            ];
-                        }
-                        return Html::beginTag('div', ['class'=>'dropdown']) .
-                            Html::button('Действия <span class="caret"></span>', [
-                                'type'=>'button',
-                                'class'=>'btn btn-default',
-                                'data-toggle'=>'dropdown'
-                            ]) .
-                            DropdownX::widget([
-                            'items' => $items,
-                        ]) .
-                        Html::endTag('div');
-                    }
-                ],
-            ],
-        ],
-    ]); ?>
+                // alert(commits[0].author.login);
+                let com = await response.json()
+                console.log(com);
+                alert(com.message);
+
+            })
+    </script>
+
+    <?php
+    // echo GridView::widget([ 
+    //     'dataProvider' => $dataProvider,
+    //     'columns' => [
+    //         ['class' => 'yii\grid\SerialColumn'],
+
+    //         'created_at',
+    //         'amount',
+    //         'fullName',
+
+    //         [
+    //             'class' => 'yii\grid\ActionColumn',
+    //             'template' => '{actions}',
+    //             'buttons' => [
+    //                 'actions' => function ($url, $model) {
+    //                     if ($model->amount < User::SUBSCRIBER_MONTHS_INTERVAL * (int) Parameter::getValueByName('subscriber-payment')) {
+    //                         $items = [
+    //                             [
+    //                                 'label' => 'Членский взнос (мес.)',
+    //                                 'url' => Url::to(['user/download-user-payment-by-quarter', 'id' => $model->user->id, 'months' => (int) ($model->amount / (int) Parameter::getValueByName('subscriber-payment'))]),
+    //                             ],
+    //                         ];
+    //                     } else {
+    //                         $items = [
+    //                             [
+    //                                 'label' => 'Членский взнос (кв-л)',
+    //                                 'url' => Url::to(['user/download-user-payment-by-quarter', 'id' => $model->user->id]),
+    //                             ],
+    //                         ];
+    //                     }
+    //                     return Html::beginTag('div', ['class'=>'dropdown']) .
+    //                         Html::button('Действия <span class="caret"></span>', [
+    //                             'type'=>'button',
+    //                             'class'=>'btn btn-default',
+    //                             'data-toggle'=>'dropdown'
+    //                         ]) .
+    //                         DropdownX::widget([
+    //                         'items' => $items,
+    //                     ]) .
+    //                     Html::endTag('div');
+    //                 }
+    //             ],
+    //         ],
+    //     ],
+    // ]); 
+    ?>
 
 </div>
