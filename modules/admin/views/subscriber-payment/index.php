@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <hr/>
     <label>
-        <input <?php if (!$superadmin) echo("disabled"); ?> id="input_changed_subscriber_payment_total" class="btn btn-default" type="number" placeholder="Введите сумму" value="<?=$account?>" style="width:80px;"/> 
+        <input <?php if (!$superadmin) echo("disabled"); ?> id="input_changed_subscriber_payment_total" class="btn btn-default" type="number" placeholder="Введите сумму" value="<?=$account?>" style="width:150px;"/> 
         <?php if ($superadmin) echo '<button id="button_changed_subscriber_payment_total" class="btn btn-default">Сохранить</button>'; ?>
         <label>Сумма "Членских взносов" взымаемая ежемесячно</label>
     </label>
@@ -30,23 +30,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <script>
         document.getElementById("button_changed_subscriber_payment_total")
             ?.addEventListener("click", async function() {
-                console.log("Кнопка нажата.")
-                <?php 
-                    // $acc = Account::find()->where(['user_id' => Yii::$app->user->id,'type' => 'subscription'])->one();
-                    // $acc->total = 17;
-                    // $acc->save();
-                ?>
                 let value = document.getElementById("input_changed_subscriber_payment_total").value
-                let url = '<?=$web?>/product/-12?value=' + value;
+                let url = '<?=$web?>/site/run/update-subscription?value=' + value;
                 let response = await fetch(url, {method:"get"});
 
-                // let commits = await response.json(); // читаем ответ в формате JSON
-
-                // alert(commits[0].author.login);
                 let com = await response.json()
-                console.log(com);
+                // console.log(com);
                 alert(com.message);
-
             })
     </script>
 

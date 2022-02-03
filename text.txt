@@ -1,0 +1,1 @@
+INSERT INTO `account` (`id`, `user_id`, `type`, `total`) VALUES (NULL, '347', 'storage', '0.00');

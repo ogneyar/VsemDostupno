@@ -44,7 +44,8 @@ class FundController extends BaseController
 
         $po = 0;
         $friend = 0;
-        $penis = 0;
+        $subscrib = 0;
+        $storage = 0;
         $user = User::find()->where(['role' => User::ROLE_SUPERADMIN,'disabled' => '0'])->all();
         if ($user) {
             $user_id = $user[0]->id;
@@ -54,7 +55,8 @@ class FundController extends BaseController
                 foreach($account as $acc) {
                     if ($acc->type == Account::TYPE_DEPOSIT) $po = $acc->total; // счёт ПО
                     if ($acc->type == Account::TYPE_BONUS) $friend = $acc->total; // счёт содружества
-                    if ($acc->type == Account::TYPE_SUBSCRIPTION) $penis = $acc->total; // Членские взносы
+                    if ($acc->type == Account::TYPE_SUBSCRIPTION) $subscrib = $acc->total; // сумма взымаемых членских взносов
+                    if ($acc->type == Account::TYPE_STORAGE) $storage = $acc->total; // Членские взносы
                 }
             }
         }
@@ -65,7 +67,8 @@ class FundController extends BaseController
             'po' => $po,
             'friend' => $friend,
             'minus' => $minus,
-            'penis' => $penis,
+            'subscrib' => $subscrib,
+            'storage' => $storage,
         ]);
     }
     
