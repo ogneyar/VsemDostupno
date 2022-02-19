@@ -40,9 +40,9 @@ class RunController extends BaseController
         Yii::$app->response->format = Response::FORMAT_JSON;
         // return true;
         $value = "";
-        if($_GET && $_GET["value"]) $value = $_GET["value"];
-        // $value = $_GET["value"];
-        if ($value) {
+        if($_GET && ($_GET["value"] || $_GET["value"] == 0)) $value = $_GET["value"];
+        
+        if ($value || $value == 0) {
             $acc = Account::find()->where(['user_id' => Yii::$app->user->id,'type' => 'subscription'])->one();
             $acc->total = $value;
             $acc->save();

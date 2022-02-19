@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <label>
         <input <?php if (!$superadmin) echo("disabled"); ?> id="input_changed_subscriber_payment_total" class="btn btn-default" type="number" placeholder="Введите сумму" value="<?=$account?>" style="width:150px;"/> 
         <?php if ($superadmin) echo '<button id="button_changed_subscriber_payment_total" class="btn btn-default">Сохранить</button>'; ?>
-        <label>Сумма "Членских взносов" взымаемая ежемесячно</label>
+        <label>Сумма "Членских взносов" взымаемая ежемесячно (0 - для отключения)</label>
     </label>
     <hr/>
 

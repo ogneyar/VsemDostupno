@@ -55,8 +55,30 @@ class SubscriberMonthPaymentController extends Controller
                 
                 // заглушка не время теста (тест над счётом Алексея - user_id = 367)
                 // if ($user->id != 367) continue;
-                if ($user->id != 345) continue;
-                
+                // if ($user->id != 345) continue; // или над моим
+
+                // долги по членским взносам копятся здесь (в положительном значении)
+                $user_subscription = $user->getAccount(Account::TYPE_SUBSCRIPTION);
+                // итоговая сумма долга
+                $user_subscription_total = $user_subscription->total;
+                if ($user_subscription_total > 0) { // значит есть не оплаченный взнос
+                    // основной кошелёк пользователя
+                    $user_deposit = $user->getAccount(Account::TYPE_DEPOSIT);
+                    // итоговая сумма кошелька
+                    $user_deposit_total = $user_deposit->total;
+                    if ($user_deposit_total > $user_subscription_total) { // если достаточно средств на счету
+                        Account::swap($user_deposit, $admin_storage, $user_subscription_total, $message . " (ранее не оплаченого)", $sendMessage);
+                        Account::swap($user_subscription, null, $user_subscription_total, $message . " (ранее не оплаченого)", false);
+                        $amount = $amount + $user_subscription_total;
+                    }else { // если недостаточно...
+                        if ($user_deposit_total > 0) {                            
+                            Account::swap($user_deposit, $admin_storage, $user_deposit_total, $message . " (ранее не оплаченого)", $sendMessage);
+                            Account::swap($user_subscription, null, $user_deposit_total, $message . " (ранее не оплаченого)", false);
+                            $amount = $amount + $user_deposit_total;
+                        }
+                    }
+                }
+
                 $d = new DateTime();
                 $date = $d->format('Y-m-d H:i:s');
 
@@ -83,29 +105,7 @@ class SubscriberMonthPaymentController extends Controller
                 }else {
                     $subPay = new SubscriberPayment();
                     $subPay->user_id = $user->id;
-                }
-
-                            
-                // долги по членским взносам копятся здесь (в положительном значении)
-                $user_subscription = $user->getAccount(Account::TYPE_SUBSCRIPTION);
-
-                if ($user_subscription->total > 0) { // значит есть не оплаченный взнос
-                    // основной кошелёк пользователя
-                    $user_deposit = $user->getAccount(Account::TYPE_DEPOSIT);
-                    if ($user_deposit->total > $user_subscription->total) { // если достаточно средств на счету
-                        $user_subscription_total = $user_subscription->total;
-                        Account::swap($user_deposit, $admin_storage, $user_subscription_total, $message . " (ранее не оплаченого)", $sendMessage);
-                        Account::swap($user_subscription, null, $user_subscription_total, $message . " (ранее не оплаченого)", false);
-                        $amount = $amount + $user_subscription_total;
-                    }else { // если недостаточно...
-                        if ($user_deposit->total > 0) {
-                            $user_deposit_total = $user_deposit->total;
-                            Account::swap($user_deposit, $admin_storage, $user_deposit_total, $message . " (ранее не оплаченого)", $sendMessage);
-                            Account::swap($user_subscription, null, $user_deposit_total, $message . " (ранее не оплаченого)", $sendMessage);
-                            $amount = $amount + $user_deposit_total;
-                        }
-                    }
-                }
+                }                
 
                 // основной кошелёк пользователя (после уплаты долгов)
                 $user_deposit = $user->getAccount(Account::TYPE_DEPOSIT);
