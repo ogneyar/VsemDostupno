@@ -71,7 +71,7 @@ class RunController extends BaseController
 
         $controller = new SubscriberMonthPaymentController(Yii::$app->controller->id, Yii::$app);
         
-        return $controller->actionIndex();
+        return $controller->actionIndex(); 
 
     }
 
