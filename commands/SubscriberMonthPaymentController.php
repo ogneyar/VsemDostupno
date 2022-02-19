@@ -36,6 +36,8 @@ class SubscriberMonthPaymentController extends Controller
         // сумма членского взноса
         $paySumm = $admin_subscription->total;
 
+        if ($paySumm == 0) return "Функция отключена администратором!";
+
         // кошелёк, где хранятся членские взносы
         $admin_storage = $admin->getAccount(Account::TYPE_STORAGE);
 
@@ -52,7 +54,8 @@ class SubscriberMonthPaymentController extends Controller
                 $amount = 0;
                 
                 // заглушка не время теста (тест над счётом Алексея - user_id = 367)
-                if ($user->id != 367) continue;
+                // if ($user->id != 367) continue;
+                if ($user->id != 345) continue;
                 
                 $d = new DateTime();
                 $date = $d->format('Y-m-d H:i:s');
