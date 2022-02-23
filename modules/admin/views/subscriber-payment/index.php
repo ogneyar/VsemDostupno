@@ -40,6 +40,65 @@ $this->params['breadcrumbs'][] = $this->title;
             })
     </script>
 
+    <style>
+    .SP_table {
+        /* border: 1px solid lightgrey; */
+        margin-bottom: 20px;
+    }
+    .SP_table td {
+        border: 1px solid lightgrey;
+        padding: 5px 10px;
+    }
+    .SP_table thead {
+        font-weight: 700;
+    }
+    .SP_table button {
+        border: 1px solid lightgrey;
+        padding: 5px 10px;
+        margin: 10px;
+    }
+    </style>
+
+    <table class="SP_table">
+        <thead>
+            <tr>
+                <td>&nbsp;№&nbsp;<br />п/п</td>
+                <td>Ф.И.О</td>
+                <td>Название группы</td>
+                <td>Статус контрагента</td>
+                <td>Сумма к оплате</td>
+                <td>Распечатать<br />Приходно кассовый ордер</td>
+                <td>Исключить из текущего списка на месяц</td>
+                <td>Отметка к исключению</td>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+            $echo = "";
+            foreach (array_reverse($subscriber_messages) as $key => $value) {
+                $role = "Участник";
+                if ($value->role === "partner") $role = "Партнёр";
+                if ($value->role === "provider") $role = "Поставщик";
+                $echo .= "<tr>";
+                $echo .= "<td>" . $key + 1 . "</td>";
+                $echo .= "<td>" . $value->fullName . "</td>";
+                $echo .= "<td>" . $value->partner->name . "</td>";
+                $echo .= "<td>" . $role . "</td>";
+                // $echo .= "<td>" . $value->subscriber->number_of_times . "</td>";
+                $echo .= "<td>" . $value->amount . "</td>";
+                $echo .= "<td><button>Действия</button></td>";
+                if ($value->subscriber->number_of_times) $echo .= "<td>Долг</td>";
+                else $echo .= "<td>Нет долга</td>";
+                if ($value->subscriber->number_of_times >= 3) $echo .= "<td>Исключить<br />контрагента</td>";
+                else $echo .= "<td>&nbsp;</td>";
+                $echo .= "</tr>";
+            }
+            echo $echo;
+        ?>
+        </tbody>
+    </table>
+
+    
     <?php
     // echo GridView::widget([ 
     //     'dataProvider' => $dataProvider,
@@ -49,6 +108,8 @@ $this->params['breadcrumbs'][] = $this->title;
     //         'created_at',
     //         'amount',
     //         'fullName',
+    //         'visible',
+    //         'number_of_times',
 
     //         [
     //             'class' => 'yii\grid\ActionColumn',

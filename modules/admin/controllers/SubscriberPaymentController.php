@@ -4,7 +4,7 @@ namespace app\modules\admin\controllers;
 
 use Yii;
 use yii\data\ActiveDataProvider;
-use app\models\SubscriberPayment;
+use app\models\SubscriberMessages;
 
 use app\models\User;
 use app\models\Account;
@@ -41,10 +41,13 @@ class SubscriberPaymentController extends BaseController
             // $accounts[] = Account::find()->where(['user_id' => $user->id])->all();
         }
 
+        
         // $dataProvider = new ActiveDataProvider([
-        //     'query' => SubscriberPayment::find(),
+        //     'query' => SubscriberMessages::find(),
         //     'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
-        // ]);
+        //     ]);
+            
+        $subscriber_messages = SubscriberMessages::find()->all();
 
         return $this->render('index', [
             // 'dataProvider' => $dataProvider,
@@ -52,6 +55,7 @@ class SubscriberPaymentController extends BaseController
             'superadmin' => $superadmin,
             'web' => $web,
             'request' => Yii::$app->request,
+            'subscriber_messages' => $subscriber_messages,
         ]);
     }
 }

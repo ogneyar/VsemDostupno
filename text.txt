@@ -1,1 +1,8 @@
 INSERT INTO `account` (`id`, `user_id`, `type`, `total`) VALUES (NULL, '347', 'storage', '0.00');
+
+
+ALTER TABLE `subscriber_payment` ADD `visible` TINYINT NOT NULL DEFAULT '1' COMMENT 'Показать админу?' AFTER `amount`;
+ALTER TABLE `subscriber_payment` ADD `number_of_times` INT NOT NULL DEFAULT '0' COMMENT 'Который раз не оплатил' AFTER `visible`;
+
+
+CREATE TABLE `subscriber_messages` (`id` INT PRIMARY KEY AUTO_INCREMENT,`user_id` INT NOT NULL,`created_at` DATETIME NOT NULL,`amount` DOUBLE NOT NULL);

@@ -5,25 +5,22 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "subscriber_payment".
+ * This is the model class for table "subscriber_messages".
  *
  * @property integer $id
  * @property integer $user_id
  * @property string $created_at
- * @property integer $number_of_times
- *
- * @property User $user
- * @property string $fullName
+ * @property integer $amount
  * 
  */
-class SubscriberPayment extends \yii\db\ActiveRecord
+class SubscriberMessages extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'subscriber_payment';
+        return 'subscriber_messages';
     }
 
     /**
@@ -32,9 +29,9 @@ class SubscriberPayment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id'], 'required'],
-            [['user_id', 'number_of_times'], 'integer'],
-            [['created_at'], 'safe'],
+            [['user_id', 'amount'], 'required'],
+            [['user_id'], 'integer'],
+            [['amount'], 'number'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
@@ -48,7 +45,7 @@ class SubscriberPayment extends \yii\db\ActiveRecord
             'id' => 'Идентификатор',
             'user_id' => 'Идентификатор пользователя',
             'created_at' => 'Дата и время платежа',
-            'number_of_times' => 'Который раз не оплатил?',
+            'amount' => 'Сумма',
             'fullName' => 'ФИО',
         ];
     }
@@ -58,27 +55,32 @@ class SubscriberPayment extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        // return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return User::find()->where(['id' => $this->user_id])->one();
     }
 
     public function getFullName()
     {
-        return $this->user->fullName;
+        return $this->user ? $this->user->fullName : null;
     }
 
     public function getRole()
     {
-        return $this->user->role;
+        return $this->user ? $this->user->role : null;
     }
 
     public function getMember()
     {
-        return Member::find()->where(['user_id' => $this->user->id])->one();
+        return $this->user ? Member::find()->where(['user_id' => $this->user->id])->one() : null;
     }
 
     public function getPartner()
     {
-        return Partner::find()->where(['id' => $this->member->partner_id])->one();
+        return $this->member ? Partner::find()->where(['id' => $this->member->partner_id])->one() : null;
     }
 
+    public function getSubscriber()
+    {
+        return $this->user ? SubscriberPayment::find()->where(['user_id' => $this->user->id])->one() : null;
+    }
 }
