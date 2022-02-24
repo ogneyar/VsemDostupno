@@ -75,12 +75,14 @@ $this->params['breadcrumbs'][] = $this->title;
         <tbody>
         <?php
             $echo = "";
-            foreach (array_reverse($subscriber_messages) as $key => $value) {
+            $key = 1;
+            // foreach (array_reverse($subscriber_messages) as $value) {
+            foreach ($subscriber_messages as $value) {
                 $role = "Участник";
                 if ($value->role === "partner") $role = "Партнёр";
                 if ($value->role === "provider") $role = "Поставщик";
                 $echo .= "<tr>";
-                $echo .= "<td>" . $key + 1 . "</td>";
+                $echo .= "<td>" . $key++ . "</td>";
                 $echo .= "<td>" . $value->fullName . "</td>";
                 $echo .= "<td>" . $value->partner->name . "</td>";
                 $echo .= "<td>" . $role . "</td>";

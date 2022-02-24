@@ -22,7 +22,7 @@ class SubscriberPaymentController extends BaseController
     public function actionIndex()
     {
         // if (Yii::$app->request->get()) { 
-        //     Yii::$app->response->format = Response::FORMAT_JSON;
+        //     Yii::$app->response->format = Response::FORMAT_JSON; 
         //     return  [ 'ok' => true, 'message' => 'Товар найден.', ];
         // }
 
