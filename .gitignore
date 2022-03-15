@@ -3,41 +3,15 @@ u1366210_bless.sql
 bless.sql
 /dumps
 
-# phpstorm project files
-.idea
-
-# netbeans project files
-nbproject
-
-# zend studio for eclipse project files
-.buildpath
-.project
-.settings
-
-# windows thumbnail cache
-Thumbs.db
-
 # composer vendor dir
 /vendor
-vendor
 
-# composer itself is not needed
-composer.phar
+/web
 
-# Mac DS_Store Files
-.DS_Store
+/config
 
-# phpunit itself is not needed
-phpunit.phar
-# local phpunit config
-/phpunit.xml
-
-
-
-web
-
-config
-
-runtime
+/runtime
 
 .env
+
+/tests
