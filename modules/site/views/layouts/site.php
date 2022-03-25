@@ -387,15 +387,17 @@ $this->registerJs($script, $this::POS_END);
                 ]) ?>
                 <div class="container">
                     <div class="row site-page">
-                        <?//= Yii::$app->controller->route ?>
+                        <!-- <?//= Yii::$app->controller->route ?> -->
                         <?php if (!in_array(Yii::$app->controller->route, $account_routes)): ?>
                             <?php if ($menu_first_level): ?>
                                 <div class="col-md-2">
                                     <?php foreach ($menu_first_level as $menu_f_l) {
                                         $items = Category::getMenuItems($menu_f_l);
+                                        // var_dump($items);
                                         $show = true;
                                         if ($menu_f_l->isPurchase()) {
-                                            $heading = Icon::show('calendar') . ' Закупки';
+                                            // $heading = Icon::show('calendar') . ' Закупки';
+                                            $heading = Icon::show('calendar') . ' ' . $menu_f_l->name;
                                             if (!Yii::$app->hasModule('purchase')) {
                                                 $show = false;
                                             }
