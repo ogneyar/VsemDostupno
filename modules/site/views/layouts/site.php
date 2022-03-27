@@ -497,7 +497,8 @@ $this->registerJs($script, $this::POS_END);
         menuPanel507.addEventListener("click", (e) => {
             e.preventDefault()
             e.stopPropagation()
-            window.location.href = web + "/page/punkty-vydachi"
+            // window.location.href = web + "/page/punkty-vydachi"
+            window.location.href = web + "/category/507"
         })
     })
 
