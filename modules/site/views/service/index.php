@@ -41,7 +41,14 @@ foreach ($model->serviceHasPhoto as $serviceHasPhoto) {
 
 ?>
 <div id="inner-cat">
-<?= Html::pageHeader(Html::encode($model->name)) ?>
+
+<?php 
+    if ($model->name == "Скидки") {
+        echo Html::pageHeader(Html::encode("Скидки наших Партнёров"));
+    }else {
+        echo Html::pageHeader(Html::encode($model->name)); 
+    }
+?>
 
 <div class="row">
     <div class="col-md-6">
@@ -150,7 +157,7 @@ foreach ($model->serviceHasPhoto as $serviceHasPhoto) {
 
 <div class="product-panel">
     <div id="main-cat-level-1" style="display: none;">
-        <?= Html::pageHeader('Исходная') ?>
+        <!-- <?//= Html::pageHeader('Исходная') ?> -->
         <?php foreach ($menu_first_level as $item): ?>
             <div class="col-md-4">
                 <?= Html::a(
@@ -158,14 +165,20 @@ foreach ($model->serviceHasPhoto as $serviceHasPhoto) {
                         $item->url,
                         ['class' => 'thumbnail']
                 ) ?>
-                <h5 class="text-center" style="font-size: 20px;"><strong><?= $item->name ?></strong></h5>
+                <!-- <h5 class="text-center" style="font-size: 20px;"><strong><?//= $item->name ?></strong></h5> -->
             </div>
         <?php endforeach; ?>
     </div>
 
     <?php foreach ($menu_first_level as $f_level): ?>
         <div id="main-cat-level-2-<?= $f_level->id ?>" class="main-cat-level-2" style="display: none;">
-            <?= Html::pageHeader(Html::encode($f_level->fullName)) ?>
+            <?php 
+                if ($f_level->fullName == "Скидки") {
+                    echo Html::pageHeader(Html::encode("Скидки наших Партнёров"));
+                }else {
+                    echo Html::pageHeader(Html::encode($f_level->fullName)); 
+                }
+            ?>
             <?php $categories = Category::getMenuItems($f_level); ?>
             <?php if ($categories): ?>
                 <?php $categories = PurchaseProduct::getSortedViewItems($categories) ?>

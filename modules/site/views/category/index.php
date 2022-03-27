@@ -49,7 +49,13 @@ $services = $servicesQuery->offset($servicePages->offset)
     
 ?>
 
-<?= Html::pageHeader(Html::encode($model->fullName), '', ['id' => 'page-header-category']) ?>
+<?php 
+if ($model->fullName == "Скидки") {
+    echo Html::pageHeader(Html::encode("Скидки наших Партнёров"), '', ['id' => 'page-header-category']);
+}else {
+    echo Html::pageHeader(Html::encode($model->fullName), '', ['id' => 'page-header-category']); 
+}
+?>
 
 <?php if ($model->description): ?>
     <div class="row category-description" id="inner-cate-descr">
