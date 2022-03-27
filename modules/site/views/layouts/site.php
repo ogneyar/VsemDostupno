@@ -393,20 +393,28 @@ $this->registerJs($script, $this::POS_END);
                                 <div class="col-md-2">
                                     <?php foreach ($menu_first_level as $menu_f_l) {
                                         $items = Category::getMenuItems($menu_f_l);
-                                        // var_dump($items);
+                                        
+                                        if ( ! $items && $menu_f_l->id == 507) {
+                                            // var_dump($menu_f_l->id);
+                                        }
+                                        
                                         $show = true;
                                         if ($menu_f_l->isPurchase()) {
                                             // $heading = Icon::show('calendar') . ' Закупки';
-                                            $heading = Icon::show('calendar') . ' ' . $menu_f_l->name;
+                                            // $heading = Icon::show('calendar') . ' ' . $menu_f_l->name;
+                                            $heading = $menu_f_l->name;
                                             if (!Yii::$app->hasModule('purchase')) {
                                                 $show = false;
                                             }
                                         } else if ($menu_f_l->isRecomended()) {
-                                            $heading = Icon::show('thumbs-o-up') . ' Рекомендуем';
+                                            // $heading = Icon::show('thumbs-o-up') . ' Рекомендуем';
+                                            $heading = 'Рекомендуем';
                                         } else if ($menu_f_l->isStock()) {
-                                            $heading = Icon::show('list') . ' В наличии';
+                                            // $heading = Icon::show('list') . ' В наличии';
+                                            $heading = 'В наличии';
                                         } else {
-                                            $heading = Icon::show('list') . ' ' . $menu_f_l->name;
+                                            // $heading = Icon::show('list') . ' ' . $menu_f_l->name;
+                                            $heading = $menu_f_l->name;
                                         }
                                         if ($show) {
                                             echo $this->renderFile('@app/modules/site/views/layouts/snippets/menu-panel.php', [
@@ -471,3 +479,26 @@ $this->registerJs($script, $this::POS_END);
     </body>
 </html>
 <?php $this->endPage() ?>
+
+
+<script type="text/javascript">
+
+    // этот скрипт сцуко кастыль для панели меню категорий
+    // клиенту захотелось в категории запихнуть страницу
+    // при нажатии на панель с id = 507 открывается страница
+    // "/page/punkty-vydachi", вместо поиска подкатегорий
+
+    // import web from "../../../../config/constants.js"
+    
+    let web = ""
+    // let web = "/web"
+    document.addEventListener("DOMContentLoaded", () => {
+        let menuPanel507 = document.getElementById('menu-panel-507')
+        menuPanel507.addEventListener("click", (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            window.location.href = web + "/page/punkty-vydachi"
+        })
+    })
+
+</script>
