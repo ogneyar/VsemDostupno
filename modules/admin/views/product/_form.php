@@ -18,7 +18,6 @@ use kartik\select2\Select2;
 
 use app\modules\mailing\models\MailingProduct;
 
-
 // const PERCENT_FOR_ALL = 25;
 $constants = require(__DIR__ . '/../../../../config/constants.php');
 
@@ -364,7 +363,7 @@ $this->registerJs("CKEDITOR.plugins.addExternal('youtube', '/ckeditor/plugins/yo
         $initialPreview = [];
         $initialPreviewConfig = [];
         if ($model->photo) {
-            $initialPreview[] = Html::img($model->thumbUrlManufacturer); 
+            $initialPreview[] = Html::img($model->thumbUrlManufacturer);
             $initialPreviewConfig[] = [
                 'url' => Url::to(['/api/profile/admin/photo/delete']),
                 'extra' => [
