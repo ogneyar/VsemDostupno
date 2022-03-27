@@ -16,6 +16,6 @@ class DefaultController extends BaseController
         $config = require(__DIR__ . '/../../../config/urlManager.php');
         $baseUrl = $config['baseUrl'];
         
-        return $this->redirect($baseUrl . 'admin/product');
+        return $this->redirect($baseUrl . 'admin/service');
     }
 }

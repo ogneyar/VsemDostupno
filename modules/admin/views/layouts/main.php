@@ -61,7 +61,7 @@ Icon::map($this);
                             ],
                         ],
                         
-                        ['label' => 'Товары', 'url' => ['/admin/product']],
+                        // ['label' => 'Товары', 'url' => ['/admin/product']],
                         ['label' => 'Услуги', 'url' => ['/admin/service']],
                         ['label' => 'Категории', 'url' => ['/admin/category']],
                         [

@@ -3,7 +3,7 @@
 use yii\helpers\Url;
 use kartik\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use yii\widgets\MaskedInput;
+// use yii\widgets\MaskedInput;
 use kartik\date\DatePicker;
 
 /* @var $this yii\web\View */
@@ -90,10 +90,10 @@ $this->registerJs($script, $this::POS_END);
         ],
     ]) ?>
 
-    <?= $form->field($model, 'phone')->widget(
+    <?= $form->field($model, 'phone')/*->widget(
         MaskedInput::className(), [
         'mask' => '+7 (999)-999-9999',
-    ]) ?>
+    ])*/ ?>
 
     <?= $form->field($model, 'ext_phones') ?>
 
