@@ -9,6 +9,14 @@ echo Nav::widget([
     'options' => ['class' => 'navbar-nav navbar-right'],
     'items' => [
         [
+            'label' => 'Контакты',
+            'url' => Url::to(['/page/kontakty']),
+        ],
+        [
+            'label' => 'О нас',
+            'url' => Url::to(['/page/o-nas']),
+        ],
+        [
             'label' => Icon::show('shopping-cart') . ' Корзина ' . Html::badge($cart->information, ['class' => 'cart-information']),
             'url' => Url::to(['/cart']),
         ],
