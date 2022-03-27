@@ -5,7 +5,7 @@ use kartik\helpers\Html;
 use app\models\User;
 
 NavBar::begin([
-    'brandLabel' => Html::tag('div', Html::encode(Yii::$app->params['name']), ['class' => 'pull-left']),
+    'brandLabel' => Html::tag('div', Html::encode(Yii::$app->params['name']), ['class' => 'headerMain pull-left']),
     'brandUrl' => Url::to(['/']),
     'options' => [
         'class' => 'navbar-default navbar-fixed-top',
