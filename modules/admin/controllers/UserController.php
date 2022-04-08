@@ -278,12 +278,34 @@ class UserController extends BaseController
             if (
                 ($model->account_type == Account::TYPE_BONUS || $model->account_type == Account::TYPE_STORAGE) && 
                 $model->amount < 0 && 
-                $model->message == "Перевод пая на Расчётный счет"
+                $model->message == "Перевод пая на Расчётный счет" 
             ) {
                 Account::swap($user->getAccount($model->account_type), $user->getAccount(Account::TYPE_DEPOSIT), -$model->amount, $model->message, $sendMessage);
             }else {
                 if ($model->message != "Перевод пая на Расчётный счет") {
-                    Account::swap(null, $user->getAccount($model->account_type), $model->amount, $model->message, $sendMessage);
+
+                    $amount = $model->amount;
+                    if ($model->account_type == Account::TYPE_DEPOSIT) {
+
+                        $subscription = $user->getAccount(Account::TYPE_SUBSCRIPTION); 
+                        // положительная сумма означает наличие долга по Членским Взносам                        
+                        if ($subscription->total > 0 && $amount >= $subscription->total) {
+                            
+                            $amount = $amount - $subscription->total;
+
+                            // супер админ
+                            $admin = User::find()->where(['role' => User::ROLE_SUPERADMIN, 'disabled' => false])->one();
+                            // кошелёк, где хранятся членские взносы
+                            $admin_storage = $admin->getAccount(Account::TYPE_STORAGE);
+                            $message = "Списание долга по членским взносам";
+
+                            Account::swap($subscription, $admin_storage, $subscription->total, $message, $sendMessage);
+                        }
+
+                    }
+
+                    if ($amount > 0) Account::swap(null, $user->getAccount($model->account_type), $amount, $model->message, $sendMessage);
+
                 }
             }
 
