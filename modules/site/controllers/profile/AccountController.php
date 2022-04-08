@@ -166,10 +166,17 @@ class AccountController extends BaseController
             $accountType = Account::TYPE_DEPOSIT;
         }
 
+        $долг = Yii::$app->user->identity->entity->getAccount(Account::TYPE_SUBSCRIPTION)->total;
+        if ( $долг == 0 ) {
+            $user = User::find()->where(['disabled' => 0, 'role' => [User::ROLE_SUPERADMIN]])->one();
+            $account = Account::find()->where(['user_id' => $user->id,'type' => 'subscription'])->one();
+            $долг = floor($account->total);
+        }
+
         $subscription = [
             // 'name' => 'Ежемесячные членские взносы',
             'name' => 'Членский взнос',
-            'account' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_SUBSCRIPTION),
+            'account' => $долг, 
             'actionEnable' => false,
         ];
 

@@ -40,7 +40,7 @@ $this->params['breadcrumbs'] = [$this->title];
                                 <?//= Html::beginTag('div', ['class'=>'dropdown']) .
                                 // Html::button('Действия <span class="caret"></span>', [
                                 //     'type'=>'button',
-                                //     'class'=>'btn btn-default',
+                                //     'class'=>'btn btn-default', 
                                 //     'data-toggle'=>'dropdown'
                                 // ]) .
                                 // DropdownX::widget([
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'] = [$this->title];
                     <tr>
                         <td class="vert-align"><?= $i+2 ?></td>
                         <td class="vert-align"><?= Html::encode($subscription['name']) ?></td>
-                        <td class="text-center vert-align"><?= $subscription['account']->total ?></td>
+                        <td class="text-center vert-align"><?= $subscription['account'] ?></td>
                     </tr>
                 </tbody>
             </table>
