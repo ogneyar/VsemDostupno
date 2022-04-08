@@ -93,12 +93,19 @@ class CartController extends BaseController
     public function actionOrder()
     {
         if (!Yii::$app->user->isGuest) {
+            
+            $account = Account::find()->where(['user_id' => Yii::$app->user->id,'type' => 'subscription'])->one();            
+            if ($account->total > 0) {
+                Yii::$app->session->setFlash('message', 'Необходимо внести членский взнос!');
+                return $this->redirect('/cart');
+            }
+            
             $cart = new Cart();
             $deposit = Yii::$app->user->identity->entity->deposit;
 
+
             if ($cart->total > $deposit->total) {
                 Yii::$app->session->setFlash('message', 'Недостаточно средств на счете для совершения заказа!');
-
                 return $this->redirect('/cart');
             }
         } else {
