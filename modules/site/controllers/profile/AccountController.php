@@ -300,6 +300,15 @@ class AccountController extends BaseController
         $model = new OrderForm();
         $total_paid_for_provider = 0;
 
+        $account = Account::find()->where(['user_id' => Yii::$app->user->id,'type' => 'subscription'])->one();            
+        if ($account->total > 0) {
+            Yii::$app->session->setFlash('message', 'Необходимо внести членский взнос!');
+            return $this->render('order-create', [
+                'title' => 'Быстрый заказ',
+                'model' => $model,
+            ]);
+        }
+
         // if ($model->load(Yii::$app->request->post()) && $model->validate()) {
         if ($model->load(Yii::$app->request->post())) {
 
