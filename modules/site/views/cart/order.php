@@ -5,7 +5,7 @@ use yii\bootstrap\ActiveForm;
 use yii\web\JsExpression;
 use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
-use yii\widgets\MaskedInput;
+// use yii\widgets\MaskedInput;
 use kartik\helpers\Html;
 use kartik\icons\Icon;
 use kartik\select2\Select2;
@@ -71,10 +71,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif ?>
 
     <?php if ($model->canFilled('phone')): ?>
-        <?= $form->field($model, 'phone')->widget(
-            MaskedInput::className(), [
-            'mask' => '+7 (999)-999-9999',
-        ]) ?>
+        <?= $form->field($model, 'phone')
+        // ->widget(
+        //     MaskedInput::className(), [
+        //     'mask' => '+7 (999)-999-9999',
+        // ]) 
+        ?>
     <?php endif ?>
 
     <?php if ($model->canFilled('email')): ?>

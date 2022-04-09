@@ -381,7 +381,15 @@ class OrderController extends BaseController
         $model = new OrderForm();
         $total_paid_for_provider = 0;
 
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            
+            $account = Account::find()->where(['user_id' => $model->user_id,'type' => 'subscription'])->one();            
+            if ($account->total > 0) {
+                Yii::$app->session->setFlash('message', 'Необходимо внести членский взнос!');
+                throw new Exception('Необходимо внести членский взнос!');
+            }
+
             $is_purchase = isset($_POST['is_purchase']);
             $user = User::findOne($model->user_id);
             $productList = Json::decode($model->product_list);

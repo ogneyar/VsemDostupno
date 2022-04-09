@@ -31,27 +31,14 @@ class SubscriberPaymentController extends BaseController
 
         $superadmin = false;
         if (Yii::$app->user->identity->role == User::ROLE_SUPERADMIN) $superadmin = true;
-        // $users = User::find()->where(['role' => [User::ROLE_MEMBER,User::ROLE_PARTNER,User::ROLE_PROVIDER]])->all();
-        $users = User::find()->where(['disabled' => 0, 'role' => [User::ROLE_SUPERADMIN]])->all();
-        $accounts = [];
-        foreach($users as $user)
-        {
-            // $accounts[] = Account::find()->where(['user_id' => $user->id,'type' => ['deposit', 'subscription']])->all();
-            $accounts[] = Account::find()->where(['user_id' => $user->id,'type' => 'subscription'])->all();
-            // $accounts[] = Account::find()->where(['user_id' => $user->id])->all();
-        }
-
         
-        // $dataProvider = new ActiveDataProvider([
-        //     'query' => SubscriberMessages::find(),
-        //     'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
-        //     ]);
-            
+        $user = User::find()->where(['disabled' => 0, 'role' => [User::ROLE_SUPERADMIN]])->one();
+        $account = Account::find()->where(['user_id' => $user->id,'type' => 'subscription'])->one();
+        
         $subscriber_messages = SubscriberMessages::find()->all();
 
         return $this->render('index', [
-            // 'dataProvider' => $dataProvider,
-            'account' => floor($accounts[0][0]->total),
+            'account' => floor($account->total),
             'superadmin' => $superadmin,
             'web' => $web,
             'request' => Yii::$app->request,
