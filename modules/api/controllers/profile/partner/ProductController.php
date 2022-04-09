@@ -83,7 +83,7 @@ class ProductController extends BaseController
                         ->joinWith('productFeature.product')
                         ->orWhere('name like :q', [':q' => '%' . $q . '%'])
                         ->andWhere('visibility != 0')
-                        ->andWhere('stop_date >= NOW()')
+                        ->andWhere('stop_date >= current_date()')
                         ->orderBy(['purchase_date' => SORT_ASC]);
                 }
                 
