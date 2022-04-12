@@ -66,7 +66,7 @@ class SubscriberMonthPaymentController extends Controller
                 // итоговая сумма долга
                 $user_subscription_total = $user_subscription->total;
 
-                $flag = true; // погашены ли долги?
+                $flag = false; // есть ли долг?
 
                 if ($user_subscription_total > 0) { // значит есть не оплаченный взнос
                     // основной кошелёк пользователя
@@ -83,7 +83,7 @@ class SubscriberMonthPaymentController extends Controller
                         //     Account::swap($user_subscription, null, $user_deposit_total, $message . " (ранее не оплаченого)", false);
                         //     $amount = $amount + $user_deposit_total;
                         // }
-                        $flag = false; // есть долги
+                        $flag = true; // есть долги
                     }
                 }
                 
@@ -95,6 +95,16 @@ class SubscriberMonthPaymentController extends Controller
 
                 $d = new DateTime();
                 $date = $d->format('Y-m-d H:i:s');
+                $newDateComps = date_parse($date);
+                $newYear = $newDateComps['year'];
+                $newMonth = $newDateComps['month'];
+
+                
+                $dateComps = date_parse($user->created_at);                
+                $year = $dateComps['year'];
+                $month = $dateComps['month'];
+                // проверка, если пользователь зарегестрирован в этом месяце, то пропускаем
+                if ($newYear == $year && $newMonth == $month) continue;
                 
                 // сообщения для админа на стр Членские Взносы
                 $subMess = new SubscriberMessages(); 
@@ -111,14 +121,14 @@ class SubscriberMonthPaymentController extends Controller
                     $year = $dateComps['year'];
                     $month = $dateComps['month'];
 
-                    $newDateComps = date_parse($date);
-                    $newYear = $newDateComps['year'];
-                    $newMonth = $newDateComps['month'];
+                    // $newDateComps = date_parse($date);
+                    // $newYear = $newDateComps['year'];
+                    // $newMonth = $newDateComps['month'];
 
                     if ($newYear == $year) {
                         if ($newMonth == $month) { // если в этом месяце уже был платёж
-                            // если погашены долги, а в базе записано что он есть, то обнуляем
-                            if ($flag && $subPay->number_of_times > 0) {
+                            // если нет долга, а в базе записано что он есть, то обнуляем
+                            if ( ! $flag && $subPay->number_of_times > 0) {
                                 $subPay->number_of_times = 0;
                                 $subPay->save();
                             }
@@ -126,13 +136,13 @@ class SubscriberMonthPaymentController extends Controller
                         }
                     }
 
-                    if ($subPay->number_of_times >= 3 && ! $flag) { // если долг более 3х месяцев
+                    if ($subPay->number_of_times >= 3 && $flag) { // если долг более 3х месяцев
                         // сообщения для автоматики
                         $subPay->created_at = $date;
                         $subPay->save();
                         
                         // сообщения для админа на стр Членские Взносы
-                        $subMess->amount = $user_subscription->total;
+                        $subMess->amount = $user_subscription->total * (-1);
                         $subMess->save();
                         
                         continue; // пропускаем если долг более 3х месяцев
@@ -146,6 +156,7 @@ class SubscriberMonthPaymentController extends Controller
 
                 $number_of_times = 0; // количество неоплаченных раз (месяцев)
 
+                $newFlag = false; // есть ли долг (ещё один флаг нужен потому что ниже используется первый флаг)
                 if ($user_deposit->total >= $paySumm && ! $flag) { // если денег хватает и нет не погашенных долгов
                     Account::swap($user_deposit, $admin_storage, $paySumm, $message, $sendMessage);
                 }else { // иначе если не хватает
@@ -156,21 +167,38 @@ class SubscriberMonthPaymentController extends Controller
                     // }else { 
                         // иначе всю сумму записываем в долг
                         Account::swap(null, $user_subscription, $paySumm, $message . " (не хватает средств на основном счету)", $sendMessage);
-                        $number_of_times = $subPay->number_of_times + 1;
+                        if ($subPay->number_of_times > 0) $number_of_times = $subPay->number_of_times + 1;
+                        else $number_of_times = 1;
+                        $newFlag = true;
                     // }
                 }
-                $amount += $paySumm;
-
                 // сообщения для автоматики
                 $subPay->created_at = $date;
                 $subPay->number_of_times = $number_of_times;
                 $subPay->save();
 
-               // сообщения для админа на стр Членские Взносы
-                $subMess->amount = $amount;
+                // сообщения для админа на стр Членские Взносы
+                if ($amount) { // если произвелась оплата долгов
+                    if ( ! $newFlag) { // если не появилось долгов
+                        $subMess->amount = $amount + $paySumm;
+                    }else {
+                        $subMess->amount = $amount;
+
+                        // ещё одно сообщение для админа на стр Членские Взносы (о долге)
+                        $subMess2 = new SubscriberMessages(); 
+                        $subMess2->user_id = $user->id;
+                        $subMess2->created_at = $date;
+                        $subMess2->amount = $paySumm * (-1);                    
+                        $subMess2->save();
+                    }
+                }else {
+                    if ( ! $newFlag) $subMess->amount = $paySumm;
+                    else $subMess->amount = $paySumm * (-1);                    
+                }
+
                 $subMess->save();
 
-                $response = $response . "User_id=" . $user->id . " - членские взносы - " . $amount . "<br /><br />"; //\r\n\r\n";
+                $response = $response . "User_id=" . $user->id . " - членские взносы - " . $paySumm . "<br /><br />"; //\r\n\r\n";
                                 
                 // throw new Exception('Деление на ноль.');
 
