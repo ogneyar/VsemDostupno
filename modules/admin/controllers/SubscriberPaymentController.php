@@ -3,7 +3,6 @@
 namespace app\modules\admin\controllers;
 
 use Yii;
-use yii\data\ActiveDataProvider;
 use app\models\SubscriberMessages;
 
 use app\models\User;

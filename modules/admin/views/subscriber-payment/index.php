@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
+use yii\web\JsExpression;
 use kartik\dropdown\DropdownX;
 use app\models\User;
 use app\models\Parameter;
@@ -39,24 +40,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 alert(com.message);
             })
     </script>
-
+    
     <style>
-    .SP_table {
-        /* border: 1px solid lightgrey; */
-        margin-bottom: 20px;
-    }
-    .SP_table td {
-        border: 1px solid lightgrey;
-        padding: 5px 10px;
-    }
-    .SP_table thead {
-        font-weight: 700;
-    }
-    .SP_table button {
-        border: 1px solid lightgrey;
-        padding: 5px 10px;
-        margin: 10px;
-    }
+        .SP_table {
+            /* border: 1px solid lightgrey; */
+            margin-bottom: 20px;
+        }
+        .SP_table td {
+            border: 1px solid lightgrey;
+            padding: 5px 10px;
+        }
+        .SP_table thead {
+            font-weight: 700;
+        }
+        .SP_table button {
+            border: 1px solid lightgrey;
+            padding: 5px 10px;
+            margin: 10px;
+            width: 120px;
+        }
     </style>
 
     <table class="SP_table">
@@ -86,11 +88,37 @@ $this->params['breadcrumbs'][] = $this->title;
                 $echo .= "<td>" . $value->fullName . "</td>";
                 $echo .= "<td>" . $value->partner->name . "</td>";
                 $echo .= "<td>" . $role . "</td>";
-                // $echo .= "<td>" . $value->subscriber->number_of_times . "</td>";
                 $echo .= "<td>" . $value->amount . "</td>";
-                $echo .= "<td><button>Действия</button></td>";
+                $echo .= Html::beginTag('td', ['class'=>'dropdown']) .
+                    Html::button('Действия <span class="caret"></span>', [
+                        'type'=>'button',
+                        'class'=>'btn btn-default',
+                        'data-toggle'=>'dropdown'
+                    ]) .
+                    DropdownX::widget([
+                        'items' => [
+                            [
+                                'label' => 'Членский взнос (мес.)',
+                                'url' => Url::to(['user/download-user-payment-by-months', 'id' => $value->user->id]),
+                                'linkOptions' => [
+                                    'onclick' => new JsExpression("
+                                        var months = prompt('Введите количество месяцев оплаты членского взноса:');
+                                        if (months) {
+                                            if (!months.match(/^\d+$/)) {
+                                                alert('Ошибка при вводе количества месяцев!');
+                                                return false; 
+                                            }
+                                            window.location.href = $(this).attr('href') + '&months=' + months;
+                                        }
+                                        return false; 
+                                    "),
+                                ]
+                            ],
+                        ],
+                    ]) .
+                Html::endTag('td');
                 if ($value->subscriber->number_of_times) $echo .= "<td>Долг</td>";
-                else $echo .= "<td>Нет долга</td>";
+                else $echo .= "<td><button id='button_delete_subscriber_message'>Нет долга</button></td>";
                 if ($value->subscriber->number_of_times >= 3) $echo .= "<td>Исключить<br />контрагента</td>";
                 else $echo .= "<td>&nbsp;</td>";
                 $echo .= "</tr>";
@@ -100,54 +128,11 @@ $this->params['breadcrumbs'][] = $this->title;
         </tbody>
     </table>
 
-    
-    <?php
-    // echo GridView::widget([ 
-    //     'dataProvider' => $dataProvider,
-    //     'columns' => [
-    //         ['class' => 'yii\grid\SerialColumn'],
-
-    //         'created_at',
-    //         'amount',
-    //         'fullName',
-    //         'visible',
-    //         'number_of_times',
-
-    //         [
-    //             'class' => 'yii\grid\ActionColumn',
-    //             'template' => '{actions}',
-    //             'buttons' => [
-    //                 'actions' => function ($url, $model) {
-    //                     if ($model->amount < User::SUBSCRIBER_MONTHS_INTERVAL * (int) Parameter::getValueByName('subscriber-payment')) {
-    //                         $items = [
-    //                             [
-    //                                 'label' => 'Членский взнос (мес.)',
-    //                                 'url' => Url::to(['user/download-user-payment-by-quarter', 'id' => $model->user->id, 'months' => (int) ($model->amount / (int) Parameter::getValueByName('subscriber-payment'))]),
-    //                             ],
-    //                         ];
-    //                     } else {
-    //                         $items = [
-    //                             [
-    //                                 'label' => 'Членский взнос (кв-л)',
-    //                                 'url' => Url::to(['user/download-user-payment-by-quarter', 'id' => $model->user->id]),
-    //                             ],
-    //                         ];
-    //                     }
-    //                     return Html::beginTag('div', ['class'=>'dropdown']) .
-    //                         Html::button('Действия <span class="caret"></span>', [
-    //                             'type'=>'button',
-    //                             'class'=>'btn btn-default',
-    //                             'data-toggle'=>'dropdown'
-    //                         ]) .
-    //                         DropdownX::widget([
-    //                         'items' => $items,
-    //                     ]) .
-    //                     Html::endTag('div');
-    //                 }
-    //             ],
-    //         ],
-    //     ],
-    // ]); 
-    ?>
+    <script>
+        document.getElementById("button_delete_subscriber_message")
+            ?.addEventListener("click", async function() {
+                alert("message");
+            })
+    </script>
 
 </div>
