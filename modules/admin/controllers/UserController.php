@@ -106,16 +106,12 @@ class UserController extends BaseController
             throw new NotFoundHttpException('Участник не найден.');
         }
 
-
         $d = new DateTime();
         $date = $d->format('Y-m-d H:i:s');
         $dateComps = date_parse($date);
         $year = $dateComps['year'];
         $month = $dateComps['month'];
         $day = $dateComps['day'];
-        // $hour = $dateComps['hour'];
-        // $minute = $dateComps['minute'];
-        // $second = $dateComps['second'];
 
         $mon = $month - $months + 1;
         if ($mon <= 0) {
@@ -125,35 +121,25 @@ class UserController extends BaseController
 
         $newDate = $year. "-" . $mon . "-01 00:00:00";
 
+        $superadmin = User::find()->where(['role'=>'superadmin'])->one();
+
         $message = "Списание членского взноса";
         $user_deposit = $user->getAccount(Account::TYPE_DEPOSIT);
         $accountLog = AccountLog::find()
             ->where([
                 'account_id' => $user_deposit->id, 
-                // 'message' => $message, 
-                'to_user_id' => 347
+                'to_user_id' => $superadmin->id
             ])
             ->andWhere(['like', 'message', $message])
-            // ->andWhere(['created_at >= ' . $newDate])
             ->andWhere(['>=', 'created_at', $newDate])
             ->all();
-
-        // var_dump($accountLog[0]);
-        // var_dump($user_deposit->id);
 
         $amount = 0;
         foreach($accountLog as $acc) {
             $amount += $acc->amount;
-            // echo("created_at = " . $acc->created_at);
-            // echo("<br />");    
         };
 
         $paymentTotal = $amount * (-1);
-
-        // echo("amount = " . $amount);
-        // echo("<br />");
-        // echo("newDate = " . $newDate);
-        // return null;
 
         $templateName = preg_replace('/^download-\w+-(\w+)-by-\w+$/', '$1', $this->action->id);
         $templateFile = Template::getFileByName('user', $templateName);
