@@ -6,6 +6,7 @@ use Yii;
 
 use yii\web\Response;
 use app\models\Account;
+use app\models\SubscriberMessages;
 
 use app\commands\SubscriberMonthPaymentController;
 
@@ -72,6 +73,21 @@ class RunController extends BaseController
         $controller = new SubscriberMonthPaymentController(Yii::$app->controller->id, Yii::$app);
         
         return $controller->actionIndex(); 
+
+    }
+
+    /**
+     * удаление сообщений
+     * @return redirect
+     */
+    public function actionDeleteRecordSubscriberMessages($id, $return)
+    {       
+
+        $subscriberMessages = SubscriberMessages::findOne($id);
+
+        $subscriberMessages->delete();
+
+        return $this->redirect($return); 
 
     }
 

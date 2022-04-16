@@ -95,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class'=>'btn btn-default',
                         'data-toggle'=>'dropdown'
                     ]) .
-                    DropdownX::widget([
+                    DropdownX::widget([ 
                         'items' => [
                             [
                                 'label' => 'Членский взнос (мес.)',
@@ -118,7 +118,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]) .
                 Html::endTag('td');
                 if ($value->subscriber->number_of_times) $echo .= "<td>Долг</td>";
-                else $echo .= "<td><button id='button_delete_subscriber_message'>Нет долга</button></td>";
+                else $echo .= "<td>
+                    <button 
+                        data-deletename='$value->fullName' 
+                        data-deleteid='$value->id' 
+                        class='button_delete_subscriber_message'
+                    >
+                        Нет долга
+                    </button>
+                </td>";
                 if ($value->subscriber->number_of_times >= 3) $echo .= "<td>Исключить<br />контрагента</td>";
                 else $echo .= "<td>&nbsp;</td>";
                 $echo .= "</tr>";
@@ -129,10 +137,13 @@ $this->params['breadcrumbs'][] = $this->title;
     </table>
 
     <script>
-        document.getElementById("button_delete_subscriber_message")
-            ?.addEventListener("click", async function() {
-                alert("message");
+        let elements = document.getElementsByClassName("button_delete_subscriber_message")
+        for (let i = 0; i < elements.length; i++) {
+            elements[i]?.addEventListener("click", async function() {
+                var yes = confirm(`Вы уверенны, что хотите исключить ${this.dataset.deletename} из таблицы до нового периода?`);
+                if (yes) window.location.href = `<?=$web?>/site/run/delete-record-subscriber-messages?id=${this.dataset.deleteid}&return=<?=$web?>/admin/subscriber-payment`;
             })
+        }
     </script>
 
 </div>

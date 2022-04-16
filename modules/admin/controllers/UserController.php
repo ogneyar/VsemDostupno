@@ -3,6 +3,7 @@
 namespace app\modules\admin\controllers;
 
 use Yii;
+use DateTime;
 use yii\helpers\Url;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
@@ -97,13 +98,62 @@ class UserController extends BaseController
         exit();
     }
 
-    public function actionDownloadUserPaymentByMonths($id, $months)
+    public function actionDownloadUserPaymentByMonths($id, $months) 
     {
         $user = User::findOne($id);
 
         if (!$user) {
             throw new NotFoundHttpException('Участник не найден.');
         }
+
+
+        $d = new DateTime();
+        $date = $d->format('Y-m-d H:i:s');
+        $dateComps = date_parse($date);
+        $year = $dateComps['year'];
+        $month = $dateComps['month'];
+        $day = $dateComps['day'];
+        // $hour = $dateComps['hour'];
+        // $minute = $dateComps['minute'];
+        // $second = $dateComps['second'];
+
+        $mon = $month - $months + 1;
+        if ($mon <= 0) {
+            $mon += 12;
+            $year -= 1;
+        }
+
+        $newDate = $year. "-" . $mon . "-01 00:00:00";
+
+        $message = "Списание членского взноса";
+        $user_deposit = $user->getAccount(Account::TYPE_DEPOSIT);
+        $accountLog = AccountLog::find()
+            ->where([
+                'account_id' => $user_deposit->id, 
+                // 'message' => $message, 
+                'to_user_id' => 347
+            ])
+            ->andWhere(['like', 'message', $message])
+            // ->andWhere(['created_at >= ' . $newDate])
+            ->andWhere(['>=', 'created_at', $newDate])
+            ->all();
+
+        // var_dump($accountLog[0]);
+        // var_dump($user_deposit->id);
+
+        $amount = 0;
+        foreach($accountLog as $acc) {
+            $amount += $acc->amount;
+            // echo("created_at = " . $acc->created_at);
+            // echo("<br />");    
+        };
+
+        $paymentTotal = $amount * (-1);
+
+        // echo("amount = " . $amount);
+        // echo("<br />");
+        // echo("newDate = " . $newDate);
+        // return null;
 
         $templateName = preg_replace('/^download-\w+-(\w+)-by-\w+$/', '$1', $this->action->id);
         $templateFile = Template::getFileByName('user', $templateName);
@@ -116,8 +166,8 @@ class UserController extends BaseController
         $objectReader = \PHPExcel_IOFactory::createReader('Excel5');
         $objectExcel = $objectReader->load($templateFile);
 
-        $subscriberPaymentAmount = (int) Parameter::getValueByName('subscriber-payment');
-        $paymentTotal = $months * $subscriberPaymentAmount;
+        // $subscriberPaymentAmount = (int) Parameter::getValueByName('subscriber-payment');
+        // $paymentTotal = $months * $subscriberPaymentAmount;
 
         $spelloutTotal = sprintf(
             '%s %02d копеек',
@@ -128,15 +178,21 @@ class UserController extends BaseController
         $parameters = Template::getUserParameters($user);
         $parameters['paymentTotal'] = sprintf('%.2f', $paymentTotal);
         $parameters['message'] = sprintf('Основание: Членский взнос за %d мес. - %.2f руб.', $months, $parameters['paymentTotal']);
+        $parameters['id'] = "        ";
         $objectExcel->setActiveSheetIndex(0)
             ->setCellValue('A25', $parameters['message'])
+            ->setCellValue('AR15', $parameters['id'])
             ->setCellValue('AM21', $parameters['paymentTotal'])
-            ->setCellValue('BB15', $parameters['createdDate'])
-            ->setCellValue('BQ12', 'от ' . $parameters['createdDate'] . ' г.')
+            // ->setCellValue('BB15', $parameters['createdDate'])
+            ->setCellValue('BB15', $parameters['currentDate'])
+            ->setCellValue('BQ10', 'к приходному кассовому ордеру № ' . $parameters['id'])
+            // ->setCellValue('BQ12', 'от ' . $parameters['createdDate'] . ' г.')
+            ->setCellValue('BQ12', 'от ' . $parameters['currentDate'] . ' г.')
             ->setCellValue('BQ14', $parameters['fullName'])
             ->setCellValue('BQ16', $parameters['message'])
             ->setCellValue('BQ23', $spelloutTotal)
-            ->setCellValue('BQ29', $parameters['createdDate'] . ' г.')
+            // ->setCellValue('BQ29', $parameters['createdDate'] . ' г.')
+            ->setCellValue('BQ29', $parameters['currentDate'] . ' г.')
             ->setCellValue('BV21', floor($paymentTotal))
             ->setCellValue('CM21', sprintf('%02d', round(100 * ($paymentTotal - floor($paymentTotal)))))
             ->setCellValue('F27', $spelloutTotal)
