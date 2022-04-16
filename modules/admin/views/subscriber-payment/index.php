@@ -6,6 +6,9 @@ use yii\grid\GridView;
 use yii\web\JsExpression;
 use kartik\dropdown\DropdownX;
 use app\models\User;
+use app\models\Member;
+use app\models\Partner;
+use app\models\Provider;
 use app\models\Parameter;
 use app\models\Account;
 
@@ -78,12 +81,18 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php
             $echo = "";
             $key = 1;
-            // foreach (array_reverse($subscriber_messages) as $value) {
-            foreach ($subscriber_messages as $value) {
+            foreach (array_reverse($subscriber_messages) as $value) {
+            // foreach ($subscriber_messages as $value) {
+                $grey = false;
+                if ($value->subscriber->number_of_times >= 3) $grey = true;
+
                 $role = "Участник";
                 if ($value->role === "partner") $role = "Партнёр";
                 if ($value->role === "provider") $role = "Поставщик";
-                $echo .= "<tr>";
+
+                if ($grey) $echo .= "<tr style='background: grey; color: white;'>";
+                else $echo .= "<tr>";
+
                 $echo .= "<td>" . $key++ . "</td>";
                 $echo .= "<td>" . $value->fullName . "</td>";
                 $echo .= "<td>" . $value->partner->name . "</td>";
@@ -120,18 +129,41 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($value->subscriber->number_of_times) $echo .= "<td>Долг</td>";
                 else $echo .= "<td>
                     <button 
-                        data-deletename='$value->fullName' 
-                        data-deleteid='$value->id' 
+                        data-delete_name='$value->fullName' 
+                        data-delete_id='$value->id' 
                         class='button_delete_subscriber_message'
                     >
                         Нет долга
                     </button>
                 </td>";
-                if ($value->subscriber->number_of_times >= 3) $echo .= "<td>Исключить<br />контрагента</td>";
-                else $echo .= "<td>&nbsp;</td>";
+
+                if ($grey) {
+                    $user_id = $value->user->id;
+                    if ($value->role == "member") {
+                        $contragent = Member::find()->where(['user_id' => $user_id])->one();
+                    }else if ($value->role == "partner") {
+                        $contragent = Partner::find()->where(['user_id' => $user_id])->one();
+                    }else if ($value->role == "provider") {
+                        $contragent = Provider::find()->where(['user_id' => $user_id])->one();
+                    }
+                    $echo .= "<td>
+                        <button 
+                            data-redirect_id='$contragent->id' 
+                            data-redirect_role='$value->role' 
+                            class='button_redirect_subscriber_message'
+                            style='background: lightgrey; color: black;'
+                        >
+                            Исключить<br />контрагента
+                        </button>
+                    </td>";
+                }else $echo .= "<td>&nbsp;</td>";
+
                 $echo .= "</tr>";
             }
+
+            // ВЫВОД НА ЭКРАН ВСЕЙ ТАБЛИЦЫ
             echo $echo;
+
         ?>
         </tbody>
     </table>
@@ -140,8 +172,17 @@ $this->params['breadcrumbs'][] = $this->title;
         let elements = document.getElementsByClassName("button_delete_subscriber_message")
         for (let i = 0; i < elements.length; i++) {
             elements[i]?.addEventListener("click", async function() {
-                var yes = confirm(`Вы уверенны, что хотите исключить ${this.dataset.deletename} из таблицы до нового периода?`);
-                if (yes) window.location.href = `<?=$web?>/site/run/delete-record-subscriber-messages?id=${this.dataset.deleteid}&return=<?=$web?>/admin/subscriber-payment`;
+                var yes = confirm(`Вы уверенны, что хотите исключить ${this.dataset.delete_name} из таблицы до нового периода?`);
+                if (yes) window.location.href = `<?=$web?>/site/run/delete-record-subscriber-messages?id=${this.dataset.delete_id}&return=<?=$web?>/admin/subscriber-payment`;
+            })
+        }
+    </script>
+
+    <script>
+        let redirects = document.getElementsByClassName("button_redirect_subscriber_message")
+        for (let i = 0; i < redirects.length; i++) {
+            redirects[i]?.addEventListener("click", async function() {
+                window.location.href = `<?=$web?>/admin/${this.dataset.redirect_role}/view?id=${this.dataset.redirect_id}`;
             })
         }
     </script>
