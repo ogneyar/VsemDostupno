@@ -311,8 +311,8 @@ class UserController extends BaseController
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $config = require(__DIR__ . '/../../../config/urlManager.php');
             $baseUrl = $config['baseUrl'];
-            if ( $baseUrl == '/') {            
-                $sendMessage = false;                
+            if ( $baseUrl == '/') {
+                $sendMessage = false;
             }else {
                 $sendMessage = true;
             }
@@ -327,10 +327,10 @@ class UserController extends BaseController
                 if ($model->message != "Перевод пая на Расчётный счет") {
 
                     $amount = $model->amount;
-                    if ($model->account_type == Account::TYPE_DEPOSIT) {
+                    if ($model->account_type == Account::TYPE_DEPOSIT && $amount > 0) {
 
                         $subscription = $user->getAccount(Account::TYPE_SUBSCRIPTION); 
-                        // положительная сумма означает наличие долга по Членским Взносам                        
+                        // положительная сумма означает наличие долга по Членским Взносам
                         if ($subscription->total > 0 && $amount >= $subscription->total) {
                             
                             $amount = $amount - $subscription->total;
@@ -346,7 +346,7 @@ class UserController extends BaseController
 
                     }
 
-                    if ($amount > 0) Account::swap(null, $user->getAccount($model->account_type), $amount, $model->message, $sendMessage);
+                    Account::swap(null, $user->getAccount($model->account_type), $amount, $model->message, $sendMessage);
 
                 }
             }
