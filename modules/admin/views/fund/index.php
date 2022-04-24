@@ -255,8 +255,11 @@ $this->registerJs($script, $this::POS_END);
                 style="display: flex; flex-direction: row; align-items: center;"
             >
                 <label>Членские взносы</label>
-                <input disabled placeholder="<?=$minus?>" />
-                <input disabled placeholder="<?=$storage?>" />
+                <input disabled placeholder="<?php 
+                    if ($minus > 0) echo("-" . $minus); 
+                    else echo($minus);
+                ?>" style="width:100px;" />
+                <input disabled placeholder="<?=$storage?>" style="width:120px;" />
                 <div class='dropdown'>
                     <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
                     <?php echo DropdownX::widget([

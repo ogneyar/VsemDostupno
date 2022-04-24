@@ -39,7 +39,7 @@ class FundController extends BaseController
         $minus = 0;
         $accounts = Account::find()->where(['type' => Account::TYPE_SUBSCRIPTION])->all();
         foreach($accounts as $acc) {
-            if ($acc->type < 0) $minus += $acc->total;
+            if ($acc->total > 0) $minus += $acc->total;
         }
 
         $po = 0;
