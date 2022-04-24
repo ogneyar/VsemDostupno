@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <hr/>
     <label>
-        <input <?php if (!$superadmin) echo("disabled"); ?> id="input_changed_subscriber_payment_total" class="btn btn-default" type="number" placeholder="Введите сумму" value="<?=$account?>" style="width:150px;"/> 
+        <input <?php if (!$superadmin) echo("disabled"); ?> id="input_changed_subscriber_payment_total" class="btn btn-default" type="number" placeholder="Введите сумму" value="<?=$account?>" style="width:100px;"/> 
         <?php if ($superadmin) echo '<button id="button_changed_subscriber_payment_total" class="btn btn-default">Сохранить</button>'; ?>
         <label>Сумма "Членских взносов" взымаемая ежемесячно (0 - для отключения)</label>
     </label>
@@ -84,14 +84,19 @@ $this->params['breadcrumbs'][] = $this->title;
             foreach (array_reverse($subscriber_messages) as $value) {
             // foreach ($subscriber_messages as $value) {
                 $grey = false;
+                $red = false;
                 if ($value->subscriber->number_of_times >= 3) $grey = true;
+                if ($value->subscriber->number_of_times > 0) $red = true;
 
                 $role = "Участник";
                 if ($value->role === "partner") $role = "Партнёр";
                 if ($value->role === "provider") $role = "Поставщик";
 
-                if ($grey) $echo .= "<tr style='background: grey; color: white;'>";
-                else $echo .= "<tr>";
+                if ($grey) {
+                    $echo .= "<tr style='background: grey; color: red;'>";
+                }else if ($red) {
+                    $echo .= "<tr style='color: red;'>";
+                }else $echo .= "<tr>";
 
                 $echo .= "<td>" . $key++ . "</td>";
                 $echo .= "<td>" . $value->fullName . "</td>";
@@ -102,7 +107,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     Html::button('Действия <span class="caret"></span>', [
                         'type'=>'button',
                         'class'=>'btn btn-default',
-                        'data-toggle'=>'dropdown'
+                        'data-toggle'=>'dropdown',
+                        // 'style'=>'background: lightgreen;'
                     ]) .
                     DropdownX::widget([ 
                         'items' => [
@@ -132,6 +138,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         data-delete_name='$value->fullName' 
                         data-delete_id='$value->id' 
                         class='button_delete_subscriber_message'
+                        style='background: lightgreen;'
                     >
                         Нет долга
                     </button>
