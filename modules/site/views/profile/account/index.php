@@ -102,8 +102,15 @@ $this->params['breadcrumbs'] = [$this->title];
                 <?php foreach ($groupAccounts as $i => $account): ?>
                     <tr>
                         <td class="vert-align"><?= $i+1 ?></td>
-                        <td class="vert-align"><?= Html::encode($account['name']) ?></td>
-                        <td class="text-center vert-align"><?= $account['total'] ?></td>
+                        <td class="vert-align"><?php
+                            if ($account['name'] === 'Членские взносы группы') {
+                                echo Html::a($account['name'],'account/subscriber'); 
+                            }else echo Html::encode($account['name']); 
+                        ?></td>
+                        <td class="text-center vert-align"><?php 
+                            if ($account['name'] === 'Членские взносы группы' && $account['total'] > 0) echo "-" . $account['total']; 
+                            else echo $account['total']; 
+                        ?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>

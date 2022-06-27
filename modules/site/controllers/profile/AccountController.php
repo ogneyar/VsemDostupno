@@ -30,6 +30,7 @@ use app\models\ProviderStock;
 use app\models\Fund;
 use app\models\StockBody;
 use app\models\NoticeEmail;
+use app\models\SubscriberMessages;
 
 use app\modules\purchase\models\PurchaseOrder;
 use app\modules\purchase\models\PurchaseOrderProduct;
@@ -54,6 +55,7 @@ class AccountController extends BaseController
                             'transfer',
                             'order-create',
                             'success',
+                            'subscriber',
                         ],
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
@@ -140,7 +142,7 @@ class AccountController extends BaseController
             }
 
             $groupAccounts[] = [
-                'name' => 'Общая сумма членских взносов группы',
+                'name' => 'Членские взносы группы',
                 // 'total' => Yii::$app->user->identity->entity->getAccount(Account::TYPE_GROUP_FEE)->total, 
                 'total' => $total,
                 'members' => null,
@@ -308,7 +310,7 @@ class AccountController extends BaseController
                 'model' => $model,
             ]);
         }
-
+		
         // if ($model->load(Yii::$app->request->post()) && $model->validate()) {
         if ($model->load(Yii::$app->request->post())) {
 
@@ -618,6 +620,45 @@ class AccountController extends BaseController
     {
         return $this->render('success', [
             'title' => 'Ваша заявка отправлена!',
+        ]);
+    }
+    
+    public function actionSubscriber()
+    {
+
+        $constants = require(__DIR__ . '/../../../../config/constants.php');
+        $web = $constants["WEB"];
+
+        // $superadmin = false;
+        // if (Yii::$app->user->identity->role == User::ROLE_SUPERADMIN) $superadmin = true;
+        
+        $user = User::find()->where(['disabled' => 0, 'role' => [User::ROLE_SUPERADMIN]])->one();
+        $account = Account::find()->where(['user_id' => $user->id,'type' => 'subscription'])->one();
+        
+        $subscriber_messages = [];
+        $subscriber = SubscriberMessages::find()->all();
+
+        if (Yii::$app->user->identity->role == User::ROLE_PARTNER) {
+            $partner = Partner::find()->where(['user_id' => Yii::$app->user->identity->id])->one();
+            
+            foreach ($subscriber as $subscribe) {
+                // if ($subscribe->user_id === 345) array_push($subscriber_messages, $subscribe);
+                if ($subscribe->partner->id === $partner->id) array_push($subscriber_messages, $subscribe);
+            }
+
+        }else {
+            $subscriber_messages = $subscriber;
+        }
+        
+
+
+        return $this->render('subscriber', [
+            'title' => 'Членские взносы группы!',
+            'account' => floor($account->total),
+            // 'superadmin' => $superadmin,
+            'web' => $web,
+            // 'request' => Yii::$app->request,
+            'subscriber_messages' => $subscriber_messages,
         ]);
     }
 
