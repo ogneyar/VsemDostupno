@@ -119,6 +119,9 @@ class Email extends \yii\db\ActiveRecord
             $send .= "\r\n\r\n";
             $send .= preg_replace($patterns, $replacements, $email->body);
 
+            // $send = preg_replace('/\\\r/', '\r', $send);
+            // $send = preg_replace('/\\\n/', '\n', $send);
+
             $toChatIds = is_array($to) ? $to : [$to];
             foreach ($toChatIds as $chat_id) {
                 $bot->sendMessage($chat_id, $send);

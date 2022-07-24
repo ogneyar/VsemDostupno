@@ -203,27 +203,50 @@ class EntryRequestController extends BaseController
     
     public function actionAccept($id)
     {
+        
         $user = User::findOne($id);
+        $tg_id = $user->tg_id;
         $user->number = (int) User::find()->max('number') + 1;
         $user->request = 0;
         $user->disabled = 0;
         $user->scenario = 'admin_creation';
         $user->save();
         if (isset($user->provider)) {
-            Email::send('active-profile-provider', $user->email, [
-                'firstname' => $user->firstname,
-                'patronymic' => $user->patronymic,
-                'reg_number' => $user->number,
-                'url' => Url::to(['/profile/login'], true),
-            ]);
+            if ($tg_id) {
+                Email::tg_send('active-profile-provider-tg', $tg_id, [
+                    'firstname' => $user->firstname,
+                    'patronymic' => $user->patronymic,
+                    'reg_number' => $user->number,
+                    // 'url' => Url::to(['/profile/login'], true),
+                    'url' => 'https://будь-здоров.рус/web/profile/login',
+                ]);
+            }else {
+                Email::send('active-profile-provider', $user->email, [
+                    'firstname' => $user->firstname,
+                    'patronymic' => $user->patronymic,
+                    'reg_number' => $user->number,
+                    'url' => Url::to(['/profile/login'], true),
+                ]);
+            }
         } else if (isset($user->member)) {
-            Email::send('active-profile', $user->email, [
-                'firstname' => $user->firstname,
-                'patronymic' => $user->patronymic,
-                'reg_number' => $user->number,
-                'url' => Url::to(['/profile/login'], true),
-            ]);
+            if ($tg_id) {
+                Email::tg_send('active-profile-tg', $tg_id, [
+                    'firstname' => $user->firstname,
+                    'patronymic' => $user->patronymic,
+                    'reg_number' => $user->number,
+                    // 'url' => Url::to(['/profile/login'], true),
+                    'url' => 'https://будь-здоров.рус/web/profile/login',
+                ]);
+            }else {
+                Email::send('active-profile', $user->email, [
+                    'firstname' => $user->firstname,
+                    'patronymic' => $user->patronymic,
+                    'reg_number' => $user->number,
+                    'url' => Url::to(['/profile/login'], true),
+                ]);
+            }
         }
         return $this->redirect(['index']);
+        // UPDATE `user` SET `disabled` = '1', `request` = '1' WHERE `user`.`id` = 423;
     }
 }
