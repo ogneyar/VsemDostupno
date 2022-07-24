@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\modules\bots\api\Bot;
 
 /**
  * This is the model class for table "email".
@@ -84,4 +85,45 @@ class Email extends \yii\db\ActiveRecord
             }
         }
     }
+
+    
+    public static function tg_send($name, $to, $params = [])
+    {
+        $config = require(__DIR__ . '/../config/constants.php');
+        // $web = $config['WEB'];
+        $token = $config['BOT_TOKEN'];
+
+        $bot = new Bot($token);
+
+        $email = self::findOne(['name' => $name]);
+
+        if ($email) {
+            $send = "";
+            if ($params) {
+                $patterns = [];
+                $replacements = [];
+
+                foreach ($params as $pattern => $replacement) {
+                    $patterns[] = '/{{%' . $pattern . '}}/';
+                    $replacements[] = $replacement;
+                }
+
+                $email->subject = preg_replace($patterns, $replacements, $email->subject);
+                $email->body = preg_replace($patterns, $replacements, $email->body);
+            }
+
+            $email->subject = preg_replace('/{{%.*?}}/', '', $email->subject);
+            $email->body = preg_replace('/{{%.*?}}/', '', $email->body);
+
+            $send .= preg_replace($patterns, $replacements, $email->subject);
+            $send .= "\r\n\r\n";
+            $send .= preg_replace($patterns, $replacements, $email->body);
+
+            $toChatIds = is_array($to) ? $to : [$to];
+            foreach ($toChatIds as $chat_id) {
+                $bot->sendMessage($chat_id, $send);
+            }
+        }
+    }
+
 }

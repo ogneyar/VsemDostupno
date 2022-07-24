@@ -147,6 +147,7 @@ class User extends \yii\db\ActiveRecord
             'fullName' => 'ФИО',
             'shortName' => 'ФИО',
             're_captcha' => 'Проверка',
+            'tg_id' => 'user_id в телеграм',
         ];
     }
 
@@ -447,4 +448,13 @@ class User extends \yii\db\ActiveRecord
         $user = self::find()->where(['request' => 1])->one();
         return $user ? 1 : 0;
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTgId()
+    {
+        return $this->hasOne(User::className(), ['id' => 'tg_id']);
+    }
+
 }

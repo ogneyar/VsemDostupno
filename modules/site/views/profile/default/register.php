@@ -39,10 +39,16 @@ $this->registerJs($script, $this::POS_END);
 
 <?= Html::pageHeader(Html::encode($this->title), '', ['id' => 'page-header-category']) ?>
 
+<?php 
+// if (isset($get['tg'])) {
+//     echo $get['tg'];
+// }
+?>
+
 <div id="inner-cat">
 <?php $form = ActiveForm::begin([
     'id' => 'register-form',
-    // 'method' => 'get',
+    'method' => 'post',
     // 'action' => '/',
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
@@ -181,7 +187,10 @@ $this->registerJs($script, $this::POS_END);
 
     <?= $form->field($model, 'password_repeat')->passwordInput() ?>
     
-    <?= $form->field($model, 're_captcha')->widget(ReCaptcha::className()) ?>
+    <?php 
+    echo $form->field($model, 're_captcha')->widget(ReCaptcha::className());
+    // echo $form->field($model, 're_captcha');
+    ?>
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">

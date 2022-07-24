@@ -4,6 +4,11 @@ use yii\bootstrap\Nav;
 use kartik\helpers\Html;
 use kartik\icons\Icon;
 
+      
+$constants = require(__DIR__ . '/../../../../../../../config/constants.php');
+$urls = $constants['urls'];
+
+
 echo Nav::widget([
     'options' => ['class' => 'navbar-nav navbar-right'],
     'items' => [
@@ -48,15 +53,18 @@ echo Nav::widget([
             'items' => [
                 [
                     'label' => Icon::show('sign-in') . ' Вход',
-                    'url' => Url::to(['/profile/login']),
+                    // 'url' => Url::to(['/profile/login']),
+                    'url' => Url::to([$urls['login']]),
                 ],
                 [
                     'label' => Icon::show('user-plus') . ' Регистрация участника',
-                    'url' => Url::to(['/profile/register']),
+                    // 'url'=>Url::to(['/profile/register']),
+                    'url' => Url::to([$urls['register_member']]),
                 ],
                 [
                     'label'=> Icon::show('user-plus') . 'Регистрация поставщика',
-                    'url'=>Url::to(['/profile/register-provider']),
+                    // 'url'=>Url::to(['/profile/register-provider']),
+                    'url'=>Url::to([$urls['register_provider']]),
                 ],
             ],
         ],

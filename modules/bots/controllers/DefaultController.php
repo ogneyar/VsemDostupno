@@ -142,6 +142,29 @@ function requestMessage($bot, $message) {
         $chat_id = $chat['id'];
     $text = $message['text'];
 
+    $text_split = explode(" ", $text);
+    // $bot->sendMessage($chat_id, $text_split[1]);
+    if ( ! $text_split[1]) $text = $text[0];
+    else {
+        if ($text_split[0] == "/start") {
+            $send = "Здравствуй " . $first_name . "!\r\n\r\n";
+            $send .= "Добро пожаловать, это регистрация на сайте Будь-Здоров.рус.\r\n";
+            $send .= "В боте Вы уже зарегестрированны. Для продолжения регистрации нажмите на кнопку ниже (прикреплена к этому сообщению).";
+            $host = "https://будь-здоров.рус/web";
+            // $host = "http://localhost:8080";
+            if ($text_split[1] == "member") $action = "register";
+            else if ($text_split[1] == "provider") $action = "register-provider";
+            $url = "$host/profile/$action?tg=$chat_id";
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [[[
+                    'text' => 'Продолжить',
+                    'url' => "$url"
+                ]]]
+            ];
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+        }
+    }
+
     if ($text == "/start") {
         $send = "Здравствуй " . $first_name . "!\r\n\r\n";
         $send .= "Чтобы узнать свой chat_id, нажми кнопку ниже.";

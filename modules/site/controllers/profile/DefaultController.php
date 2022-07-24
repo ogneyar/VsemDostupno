@@ -53,6 +53,7 @@ class DefaultController extends BaseController
                             'forgot-request',
                             'message',
                             'register-provider',    
+                            'register-telegram',    
                         ],
                         'roles' => ['?'],
                     ],
@@ -224,6 +225,9 @@ class DefaultController extends BaseController
                 $user->recommender_id = $recommender->id ? $recommender->id : 95;
 
                 $user->re_captcha = $model->re_captcha;
+
+                if (isset($get['tg']) && $get['tg'] != "false") $user->tg_id = $get['tg'];
+                else $user->tg_id = "";
                 
                 if (!$user->save()) {
                     throw new Exception('Ошибка создания пользователя!');
@@ -273,12 +277,7 @@ class DefaultController extends BaseController
                 Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
                     'link' => $candidate
                 ]);
-            }
-
-            Email::send('entity-request', $user->email, [
-                'fio' => $user->respectedName,
-                'u_role' => 'Участника'
-            ]);
+            }            
             
             if ($emails = NoticeEmail::getEmails()) {
                 Email::send('admin-entity-request', $emails, [
@@ -286,8 +285,24 @@ class DefaultController extends BaseController
                 ]);
             }
 
-            Yii::$app->session->setFlash('profile-message', 'profile-entity-request');
-            return $this->redirect($baseUrl . 'profile/message');
+            if (isset($get['tg']) && $get['tg'] == "false" || ! isset($get['tg'])) {
+                Email::send('entity-request', $user->email, [
+                    'fio' => $user->respectedName,
+                    'u_role' => 'Участника'
+                ]);                
+
+                Yii::$app->session->setFlash('profile-message', 'profile-entity-request');
+                return $this->redirect($baseUrl . 'profile/message');
+                
+            }else {
+                Email::tg_send('entity-request-tg', $user->tg_id, [
+                    'fio' => $user->respectedName,
+                    'u_role' => 'Участника'
+                ]);
+
+                Yii::$app->session->setFlash('profile-message', 'profile-entity-request-tg');
+                return $this->redirect($baseUrl . 'profile/message');
+            }
         } else {
             
             $model->password =
@@ -297,6 +312,7 @@ class DefaultController extends BaseController
             return $this->render('register', [
                 'model' => $model,
                 'menu_first_level' => $menu_first_level ? $menu_first_level : [],
+                'get' => $get,
             ]);
         }
     }
@@ -401,6 +417,9 @@ class DefaultController extends BaseController
     {
         $config = require(__DIR__ . '/../../../../config/urlManager.php');
         $baseUrl = $config['baseUrl'];
+
+        $request = Yii::$app->request;
+        $get = $request->get();
         
         $model_provider = new Provider();
         $model_user = new User();
@@ -565,6 +584,7 @@ class DefaultController extends BaseController
            'model_user' => $model_user,
            'step' => $step,
            'menu_first_level' => $menu_first_level ? $menu_first_level : [],
+           'get' => $get,
         ]);
     }
 
@@ -603,6 +623,16 @@ class DefaultController extends BaseController
 
         return $this->redirect($baseUrl);
 
+    }
+
+    
+    public function actionRegisterTelegram()
+    {
+        $request = Yii::$app->request;
+        $get = $request->get();
+        return $this->render('register-telegram', [
+            'get' => $get,
+        ]);
     }
 
 
