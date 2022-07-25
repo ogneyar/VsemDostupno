@@ -41,7 +41,7 @@ class DefaultController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $post = $request->post();
             if ($post) {
-                $bot->sendMessage("1038937592", "пост");
+                $bot->sendMessage($master, "пост");
             }else {
                 $data = $bot->init('php://input');
                 if ($data) {                     
@@ -51,7 +51,7 @@ class DefaultController extends Controller
                     $from_id = null;
                     if (isset($data['message'])) $from_id = $data['message']['from']['id'];
                     else if (isset($data['callback_query'])) $from_id = $data['callback_query']['from']['id'];
-                    // if ($from_id && $from_id == "1038937592") {
+                    // if ($from_id && $from_id == $master) {
                     //     $bot->sendMessage($from_id, $bot->PrintArray($data));
                     // } 
                     $bot->sendMessage($master, $bot->PrintArray($data));
@@ -59,7 +59,7 @@ class DefaultController extends Controller
                     requestProcessing($bot);
                     // -----------------------------------------
                 }else {
-                    $bot->sendMessage("1038937592", "пост пуст");
+                    $bot->sendMessage($master, "пост пуст");
                 }
             }
             return "ok";
@@ -68,18 +68,18 @@ class DefaultController extends Controller
                 if (isset($get['url'])) {
                     $url = "https://xn----9sbegbr4cary4h.xn--p1acf/web/bots";
                     $response = $bot->setWebhook($url); // $get['url']
-                    $bot->sendMessage("1038937592", "set webhook");
+                    $bot->sendMessage($master, "set webhook");
                     return "set webhook";
                 }else {
                     if (isset($get['message'])) {
-                        $bot->sendMessage("1038937592", $get['message']);
+                        $bot->sendMessage($master, $get['message']);
                     }else{
-                        $bot->sendMessage("1038937592", "гет");
+                        $bot->sendMessage($master, "гет");
                     }
                     return "Поступил гет запрос!";
                 }
             }else {
-                $bot->sendMessage("1038937592", "гет пуст");
+                $bot->sendMessage($master, "гет пуст");
                 return "Добро пожаловать!";
             }
         }
