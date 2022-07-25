@@ -30,6 +30,8 @@ class DefaultController extends Controller
         $web = $config['WEB'];
         $token = $config['BOT_TOKEN'];
 
+        $master = "1038937592";
+
         $bot = new Bot($token);
 
         $request = Yii::$app->request;
@@ -49,9 +51,10 @@ class DefaultController extends Controller
                     $from_id = null;
                     if (isset($data['message'])) $from_id = $data['message']['from']['id'];
                     else if (isset($data['callback_query'])) $from_id = $data['callback_query']['from']['id'];
-                    if ($from_id && $from_id == "1038937592") {
-                        $bot->sendMessage($from_id, $bot->PrintArray($data));
-                    } 
+                    // if ($from_id && $from_id == "1038937592") {
+                    //     $bot->sendMessage($from_id, $bot->PrintArray($data));
+                    // } 
+                    $bot->sendMessage($master, $bot->PrintArray($data));
                     // -----------------------------------------
                     requestProcessing($bot);
                     // -----------------------------------------
