@@ -13,7 +13,30 @@ $this->title = 'Вход в личный кабинет';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
+
 <?= Html::pageHeader(Html::encode($this->title), '', ['id' => 'page-header-category']) ?>
+
+
+<!-- 
+<div style="text-align:center;">
+    <div>
+        <p>Если Вы регистрировались с помощью нашего телеграм-бота, то можете войти с помощью него.</p>
+        <p>Для этого нажмите кнопку ниже. После этого Вам будет предложенно перейти в телеграм, а в телеграм Вам бот подскажет что делать далее.</p>
+        <br/>            
+    </div>
+    <div>
+        <a href="https://t.me/bud_zdorov_rus_bot?start=login"><button>Подключиться к боту</button></a>
+        <br/>            
+        <br/>            
+        <br/>            
+    </div>
+    <div>
+        <p>Если Вы регистрировались БЕЗ нашего телеграм-бота, то можете войти с помощью Вашего email, указанного при регистрации.</p>
+        <br/>            
+    </div>
+</div> -->
+
+
 
 <div id="inner-cat">
 <?php $form = ActiveForm::begin([

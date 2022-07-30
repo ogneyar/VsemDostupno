@@ -5,6 +5,9 @@ namespace app\modules\bots\controllers;
 use Yii;
 use yii\web\Controller;
 use app\modules\bots\api\Bot;
+use app\models\User;
+use app\models\Forgot;
+use app\models\Email;
 
 
 
@@ -30,7 +33,7 @@ class DefaultController extends Controller
         $web = $config['WEB'];
         $token = $config['BOT_TOKEN'];
 
-        $master = "1038937592";
+        $master = Yii::$app->params['masterChatId']; 
 
         $bot = new Bot($token);
 
@@ -161,21 +164,43 @@ function requestMessage($bot, $message) {
     $text_split = explode(" ", $text);
 
     if ($text_split[0] == "/start" && $text_split[1]) {
-        $send = "Здравствуй " . $first_name . "!\r\n\r\n";
-        $send .= "Добро пожаловать, это регистрация на сайте Будь-Здоров.рус.\r\n";
-        $send .= "В боте Вы уже зарегестрированны. Для продолжения регистрации нажмите на кнопку ниже (прикреплена к этому сообщению).";
-        $host = "https://будь-здоров.рус/web";
-        // $host = "http://localhost:8080";
-        if ($text_split[1] == "member") $action = "register";
-        else if ($text_split[1] == "provider") $action = "register-provider";
-        $url = "$host/profile/$action?tg=$chat_id";
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' => [[[
-                'text' => 'Продолжить',
-                'url' => "$url"
-            ]]]
-        ];
-        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+        if ($text_split[1] == "forgot") {
+
+            $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
+
+            if (!$user) {
+                $bot->sendMessage($chat_id, "Вы не зарегестрированны!");
+                return;
+            }
+
+            $forgot = Forgot::findOne(['user_id' => $user->id]);
+            if (!$forgot) {
+                $forgot = new Forgot();
+                $forgot->user_id = $user->id;
+            }
+            $forgot->save();
+
+            Email::tg_send('forgot-tg', $chat_id, ['url' => $forgot->url]);
+
+        }else {
+
+            $send = "Здравствуй " . $first_name . "!\r\n\r\n";
+            $send .= "Добро пожаловать, это регистрация на сайте Будь-Здоров.рус.\r\n";
+            $send .= "В боте Вы уже зарегестрированны. Для продолжения регистрации нажмите на кнопку ниже (прикреплена к этому сообщению).";
+            $host = "https://будь-здоров.рус/web";
+            // $host = "http://localhost:8080";
+            if ($text_split[1] == "member") $action = "register";
+            else if ($text_split[1] == "provider") $action = "register-provider";
+            $url = "$host/profile/$action?tg=$chat_id";
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [[[
+                    'text' => 'Продолжить',
+                    'url' => "$url"
+                ]]]
+            ];
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+                
+        }
     }
 
 }
