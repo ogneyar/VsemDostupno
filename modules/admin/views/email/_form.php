@@ -19,13 +19,19 @@ $this->registerJs("CKEDITOR.plugins.addExternal('youtube', '/ckeditor/plugins/yo
 
     <?= $form->field($model, 'subject') ?>
 
-    <?= $form->field($model, 'body')->widget(CKEditor::className(), [
-        'editorOptions' => [
-            'extraPlugins' => 'youtube',
-            'preset' => 'full',
-            'inline' => false,
-        ],
-    ]) ?>
+    <?php 
+    if (!$model['name'] || strpos($model['name'], "-tg") === false) {
+        echo $form->field($model, 'body')->widget(CKEditor::className(), [
+            'editorOptions' => [
+                'extraPlugins' => 'youtube',
+                'preset' => 'full',
+                'inline' => false,
+            ],
+        ]); 
+    }else {
+        echo $form->field($model, 'body'); 
+    }
+    ?>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Добавить' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
