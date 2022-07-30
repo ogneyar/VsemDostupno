@@ -176,12 +176,21 @@ class DefaultController extends BaseController
                 $register->user->save();
                 $register->delete();
 
-                Email::send('active-profile', $register->user->email, [
-                    'firstname' => $register->user->firstname,
-                    'patronymic' => $register->user->patronymic,
-                    'url' => Url::to(['/profile/member/personal'], true),
-                    'reg_number' => $register->user->number,
-                ]);
+                if ($register->user->tg_id) {
+                    Email::tg_send('active-profile-tg', $register->user->tg_id, [
+                        'firstname' => $register->user->firstname,
+                        'patronymic' => $register->user->patronymic,
+                        'url' => Url::to(['/profile/member/personal'], true),
+                        'reg_number' => $register->user->number,
+                    ]);
+                }else {
+                    Email::send('active-profile', $register->user->email, [
+                        'firstname' => $register->user->firstname,
+                        'patronymic' => $register->user->patronymic,
+                        'url' => Url::to(['/profile/member/personal'], true),
+                        'reg_number' => $register->user->number,
+                    ]);
+                }
                 
                 Yii::$app->session->setFlash('profile-message', 'profile-register-success');
                 return $this->redirect($baseUrl . 'profile/message');
@@ -274,13 +283,19 @@ class DefaultController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                //     'link' => $candidate
+                // ]);
+                Email::tg_send('register-candidate-tg', Yii::$app->params['superadminChatId'], [
                     'link' => $candidate
                 ]);
             }            
             
             if ($emails = NoticeEmail::getEmails()) {
-                Email::send('admin-entity-request', $emails, [
+                // Email::send('admin-entity-request', $emails, [
+                //     'fio' => $user->fullName,
+                // ]);
+                Email::tg_send('admin-entity-request-tg', Yii::$app->params['adminChatId'], [
                     'fio' => $user->fullName,
                 ]);
             }
@@ -342,7 +357,10 @@ class DefaultController extends BaseController
 
             Yii::$app->session->setFlash('profile-message', 'profile-forgot-finish');
             return $this->redirect($baseUrl . 'profile/message');
-        } else {
+            
+        // }else if (false) {
+
+        }else {
             $menu_first_level = Category::find()->where(['parent' => 0, 'visibility' => 1])->all();
             return $this->render('forgot-request', [
                 'model' => $model,
@@ -480,6 +498,11 @@ class DefaultController extends BaseController
                             $recommender = User::findOne(['number' => $model->recommender_id]); 
                             $model_user->recommender_id = $recommender->id ? $recommender->id : 95;
                             
+                            
+                            if (isset($get['tg']) && $get['tg'] != "false") $model_user->tg_id = $get['tg'];
+                            else $model_user->tg_id = "";
+                
+
                             if (!$model_user->save()) {
                                 throw new Exception('Ошибка создания пользователя!');
                             }
@@ -541,7 +564,10 @@ class DefaultController extends BaseController
                         ];
                         $candidate = Candidate::isCandidate($c_params);
                         if ($candidate) {
-                            Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                            // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                            //     'link' => $candidate
+                            // ]);
+                            Email::tg_send('register-candidate-tg', Yii::$app->params['superadminChatId'], [
                                 'link' => $candidate
                             ]);
                         }
@@ -560,13 +586,23 @@ class DefaultController extends BaseController
                             'reg_number' => $model_user->number,
                         ]);*/
                         
-                        Email::send('entity-request', $model_user->email, [
-                            'fio' => $model_user->respectedName,
-                            'u_role' => 'Поставщика'
-                        ]);
-                        
+                        if (isset($get['tg']) && $get['tg'] == "false" || ! isset($get['tg'])) {
+                            Email::send('entity-request', $model_user->email, [
+                                'fio' => $model_user->respectedName,
+                                'u_role' => 'Поставщика'
+                            ]);
+                        }else {
+                            Email::tg_send('entity-request-tg', $get['tg'], [
+                                'fio' => $model_user->respectedName,
+                                'u_role' => 'Поставщика'
+                            ]);
+                        }
+
                         if ($emails = NoticeEmail::getEmails()) {
-                            Email::send('admin-entity-request', $emails, [
+                            // Email::send('admin-entity-request', $emails, [
+                            //     'fio' => $model_user->fullName,
+                            // ]);
+                            Email::send('admin-entity-request-tg', Yii::$app->params['adminChatId'], [
                                 'fio' => $model_user->fullName,
                             ]);
                         }
