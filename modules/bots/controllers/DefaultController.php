@@ -148,13 +148,34 @@ function requestMessage($bot, $message) {
         $chat_id = $chat['id'];
     $text = $message['text'];
 
-    if ($text == "/start") {
+    if ($text == "/start" || $text == "Главное меню" || $text == "Назад")
+    {    
         $send = "Здравствуй " . $first_name . "!\r\n\r\n";
-        $send .= "Чтобы узнать свой chat_id, нажми кнопку ниже.";
+               
+        $ReplyKeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Информация' ],
+                    [ 'text' => 'Регистрация' ]
+                ]
+            ],
+            'resize_keyboard' => true,
+            'selective' => true,
+        ];        
+        $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
+
+        $send = "Дорогой друг, мы приветствуем тебя на нашем общем и увлекательном проекте. 🌈
+        Сердечно ❤️ БлагоДарим тебя за принятое решение, присоединиться. 
+        Вместе мы сможем большее!🌟
+        
+        Ниже, в \"Меню\" ты сможешь найти всю, последовательность нужных тебе действий и пройти \"Регистрацию\".
+        
+        Чтобы узнать свой регистрационный номер для связи через Телеграмм канала, нажми кнопку ниже  👇";
+
         $InlineKeyboardMarkup = [
             'inline_keyboard' => [[[
-                'text' => 'Информация',
-                'callback_data' => 'information'
+                'text' => 'Узнать свой номер',
+                'callback_data' => 'client_id'
             ]]]
         ];
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
@@ -203,7 +224,86 @@ function requestMessage($bot, $message) {
         }
     }
 
+    
+    if ($text == "Помощь" || $text == "/help")
+    {
+        $send = "Команда 'Помощь' в разработке";
+        $bot->sendMessage($chat_id, $send);
+    }
+    
+    if ($text == "Информация" || $text == "/info")
+    {
+        $send = "Команда 'Информация' в разработке";
+        $bot->sendMessage($chat_id, $send);
+    }
+    
+    if ($text == "Регистрация" || $text == "/regist")
+    {
+        $send = "Существует два возможных варианта регистрации на сайте Будь-здоров.рус:
+
+            1.    Упрощённая 
+            2.    Полная
+
+        Упрощённая регистрация позволяет Вам делать заказы из личного кабинета на сайте, но без предоставления скидок и накоплений.
+        
+        Что бы узнать какие возможности даёт “[Полная регистрация](https://будь-здоров.рус/web/category/454)” 👈 пройдите по ссылке.";
+        
+        $KeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Упрощённая' ],
+                    [ 'text' => 'Полная' ],
+                ],
+                [
+                    [ 'text' => 'Назад' ],
+                ]
+            ],
+            'resize_keyboard' => true
+        ];
+
+        $bot->sendMessage($chat_id, $send, "markdown", $KeyboardMarkup);
+    }
+
+    if ($text == "Упрощённая")
+    {
+        $send = "Перейдя к дальнейшей регистрации, выберите удобное место (адрес) получения  заказов, укажите своё имя и отчество, а так же  телефон для связи.";
+        
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[[
+                'text' => 'Перейти к дальнейшей регистрации',
+                'url' => "https://Будь-здоров.рус/web/profile/register?tg=".$chat_id
+            ]]]
+        ];
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+    }
+
+    if ($text == "Полная")
+    {
+        $send = "Перейдя к дальнейшей регистрации, введите все обязательные данные, они помечены красной звёздочкой.";
+        
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[[
+                'text' => 'Перейти к дальнейшей регистрации',
+                'url' => "https://Будь-здоров.рус/web/profile/register?tg=".$chat_id
+            ]]]
+        ];
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+    }
+
 }
+
+/*
+$ReplyKeyboardRemove = [
+    'remove_keyboard' => true
+];
+
+$HideKeyboard = [
+    'hide_keyboard' => true
+];
+*/
+// [Полная регистрация](https://Будь-здоров.рус/web/profile/register?tg=".$chat_id.")
+
+
 
 function requestCallbackQuery($bot, $callback_query) {
     $from = $callback_query['from'];
@@ -213,8 +313,18 @@ function requestCallbackQuery($bot, $callback_query) {
             $message_from_first_name = $message_from['first_name'];
         $chat = $message['chat'];
             $chat_id = $chat['id'];
-        $text = $message['text'];
+        $text = $message['text'];        
+    $data = $callback_query['data'];
     
-    $send = "Твой chat_id: \r\n\r\n" . $from_id;
-    $bot->sendMessage($from_id, $send);
+        
+    if ($data == "client_id")
+    {
+        $send = "Ваш номер: \r\n\r\n" . $from_id;
+        $bot->sendMessage($from_id, $send);
+    }
+    else 
+    {
+        $send = "Неизвестная команда";
+        $bot->sendMessage($from_id, $send);
+    }
 }
