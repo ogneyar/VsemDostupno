@@ -13,6 +13,7 @@ use yii\base\Exception;
 use app\modules\site\controllers\BaseController;
 use app\modules\site\models\profile\LoginForm;
 use app\modules\site\models\profile\RegisterForm;
+use app\modules\site\models\profile\RegisterSmallForm;
 use app\modules\site\models\profile\ForgotRequestForm;
 use app\modules\site\models\profile\ForgotChangeForm;
 use app\models\User;
@@ -54,6 +55,7 @@ class DefaultController extends BaseController
                             'message',
                             'register-provider',    
                             'register-telegram',    
+                            'register-small',    
                         ],
                         'roles' => ['?'],
                     ],
@@ -283,9 +285,9 @@ class DefaultController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
-                //     'link' => $candidate
-                // ]);
+                Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                    'link' => $candidate
+                ]);
                 Email::tg_send('register-candidate-tg', Yii::$app->params['superadminChatId'], [
                     'link' => $candidate
                 ]);
@@ -671,5 +673,186 @@ class DefaultController extends BaseController
         ]);
     }
 
+    
+    public function actionRegisterSmall()
+    {
+        $config = require(__DIR__ . '/../../../../config/urlManager.php');
+        $baseUrl = $config['baseUrl'];
+        
+        $get = Yii::$app->request->get();
+        if (isset($get['token'])) {
+            $register = Register::findOne(['token' => $get['token']]); 
+
+            if ($register && $register->user->disabled) {
+                $register->user->disabled = 0;
+                $register->user->save();
+                $register->delete();
+
+                if ($register->user->tg_id) {
+                    Email::tg_send('active-profile-tg', $register->user->tg_id, [
+                        'firstname' => $register->user->firstname,
+                        'patronymic' => $register->user->patronymic,
+                        'url' => Url::to(['/profile/member/personal'], true),
+                        'reg_number' => $register->user->number,
+                    ]);
+                }else {
+                    Email::send('active-profile', $register->user->email, [
+                        'firstname' => $register->user->firstname,
+                        'patronymic' => $register->user->patronymic,
+                        'url' => Url::to(['/profile/member/personal'], true),
+                        'reg_number' => $register->user->number,
+                    ]);
+                }
+                
+                Yii::$app->session->setFlash('profile-message', 'profile-register-success');
+                return $this->redirect($baseUrl . 'profile/message');
+            }
+
+            Yii::$app->session->setFlash('profile-message', 'profile-register-fail');
+            return $this->redirect($baseUrl . 'profile/message');
+        }
+
+        $model = new RegisterSmallForm();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) { 
+        // if ($model->load(Yii::$app->request->post())) {
+
+            $transaction = Yii::$app->db->beginTransaction();
+
+            try {
+                $user = new User();
+                $user->role = User::ROLE_MEMBER;
+                $user->password = $model->password;
+                $user->password_repeat = $model->password_repeat;
+                $user->email = "tg".$get['tg']."@mail.ru";
+                $user->phone = '+' . preg_replace('/\D+/', '', $model->phone);
+                $user->ext_phones = "";
+                $user->firstname = $model->firstname;
+                $user->lastname = "lastname";
+                $user->patronymic = $model->patronymic;
+                $user->created_ip = Yii::$app->getRequest()->getUserIP();
+
+                $user->citizen = "citizen";
+                $user->registration = "registration";
+                $user->passport = "passport";
+                $user->passport_department = "passport_department";
+
+                $user->passport_date = null;
+                $user->birthdate = null;
+
+                $user->residence = null;
+                $user->itn = null;
+                $user->skills = null;
+
+                $recommender = User::findOne(['number' => 40]); 
+                $user->recommender_id = $recommender->id ? $recommender->id : 3;
+
+                $user->recommender_info = null;
+
+                $user->re_captcha = $model->re_captcha;
+
+                if (isset($get['tg']) && $get['tg'] != "false") $user->tg_id = $get['tg'];
+                else $user->tg_id = "";
+                
+                if (!$user->save()) { 
+                    
+                    // Email::tg_send('entity-request-tg', $get['tg'], [
+                    //     'fio' => 'Ошибка создания пользователя!',
+                    //     'u_role' => 'Участника'
+                    // ]);
+
+                    throw new Exception('Ошибка создания пользователя!');
+                }
+
+                $member = new Member();
+                $member->partner_id = $model->partner;
+                $member->user_id = $user->id;
+                if (!$member->save()) {
+
+                    // Email::tg_send('entity-request-tg', $get['tg'], [
+                    //     'fio' => 'Ошибка создания участника!',
+                    //     'u_role' => 'Участника'
+                    // ]);
+
+                    throw new Exception('Ошибка создания участника!');
+                }
+
+                $register = new Register();
+                $register->user_id = $user->id;
+                if (!$register->save()) {
+
+                    // Email::tg_send('entity-request-tg', $get['tg'], [
+                    //     'fio' => 'Ошибка при регистрации пользователя!',
+                    //     'u_role' => 'Участника'
+                    // ]);
+
+                    throw new Exception('Ошибка при регистрации пользователя!');
+                }
+
+                $types = [Account::TYPE_DEPOSIT, Account::TYPE_BONUS, Account::TYPE_SUBSCRIPTION];
+                foreach ($types as $type) {
+                    $account = new Account(['user_id' => $user->id, 'type' => $type, 'total' => 0]);
+                    if (!$account->save()) {
+
+                        // Email::tg_send('entity-request-tg', $get['tg'], [
+                        //     'fio' => 'Ошибка создания счета пользователя!',
+                        //     'u_role' => 'Участника'
+                        // ]);
+    
+                        throw new Exception('Ошибка создания счета пользователя!');
+                    }
+                }
+
+                $transaction->commit();
+            } catch (Exception $e) {
+                $transaction->rollBack();
+
+                // Email::tg_send('entity-request-tg', $get['tg'], [
+                //     'fio' => 'Exception!',
+                //     'u_role' => 'Участника'
+                // ]);
+
+                Yii::$app->session->setFlash('profile-message', 'profile-register-fail');
+                return $this->redirect($baseUrl . 'profile/message');
+                //throw new ForbiddenHttpException($e->getMessage());
+            }
+
+            $c_params = [
+                'email' => $user->email,
+            ];
+            $candidate = Candidate::isCandidate($c_params);
+            if ($candidate) {
+                
+                Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                    'link' => $candidate
+                ]);
+
+                Email::tg_send('register-candidate-tg', Yii::$app->params['superadminChatId'], [
+                    'link' => $candidate
+                ]);
+
+            }            
+            
+            Email::tg_send('entity-request-tg', $user->tg_id, [
+                'fio' => $user->respectedName,
+                'u_role' => 'Участника'
+            ]);
+
+            Yii::$app->session->setFlash('profile-message', 'profile-entity-request-tg');
+            return $this->redirect($baseUrl . 'profile/message');              
+
+
+        } else {
+            
+            $model->password =
+            $model->password_repeat = '';
+            $menu_first_level = Category::find()->where(['parent' => 0, 'visibility' => 1])->all();
+
+            return $this->render('register-small', [
+                'model' => $model,
+                'menu_first_level' => $menu_first_level ? $menu_first_level : [],
+                'get' => $get,
+            ]);
+        }
+    }
 
 }

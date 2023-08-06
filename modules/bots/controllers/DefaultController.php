@@ -148,7 +148,7 @@ function requestMessage($bot, $message) {
         $chat_id = $chat['id'];
     $text = $message['text'];
 
-    if ($text == "/start" || $text == "Главное меню" || $text == "Назад")
+    if ($text == "/start" || $text == "Старт" || $text == "Начало")
     {    
         $send = "Здравствуй " . $first_name . "!\r\n\r\n";
                
@@ -170,7 +170,7 @@ function requestMessage($bot, $message) {
         
         Ниже, в \"Меню\" ты сможешь найти всю, последовательность нужных тебе действий и пройти \"Регистрацию\".
         
-        Чтобы узнать свой регистрационный номер для связи через Телеграмм канала, нажми кнопку ниже  👇";
+        Чтобы узнать свой регистрационный номер для связи через Телеграмм канал, нажми кнопку ниже  👇";
 
         $InlineKeyboardMarkup = [
             'inline_keyboard' => [[[
@@ -237,7 +237,7 @@ function requestMessage($bot, $message) {
         $bot->sendMessage($chat_id, $send);
     }
     
-    if ($text == "Регистрация" || $text == "/regist")
+    if ($text == "/regist" || $text == "Регистрация" || $text == "Назад")
     {
         $send = "Существует два возможных варианта регистрации на сайте Будь-здоров.рус:
 
@@ -255,7 +255,7 @@ function requestMessage($bot, $message) {
                     [ 'text' => 'Полная' ],
                 ],
                 [
-                    [ 'text' => 'Назад' ],
+                    [ 'text' => 'Главное меню' ],
                 ]
             ],
             'resize_keyboard' => true
@@ -266,12 +266,25 @@ function requestMessage($bot, $message) {
 
     if ($text == "Упрощённая")
     {
+        $send = "--------------------------------------";
+
+        $KeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Назад' ],
+                ]
+            ],
+            'resize_keyboard' => true
+        ];
+
+        $bot->sendMessage($chat_id, $send, "markdown", $KeyboardMarkup);
+
         $send = "Перейдя к дальнейшей регистрации, выберите удобное место (адрес) получения  заказов, укажите своё имя и отчество, а так же  телефон для связи.";
         
         $InlineKeyboardMarkup = [
             'inline_keyboard' => [[[
                 'text' => 'Перейти к дальнейшей регистрации',
-                'url' => "https://Будь-здоров.рус/web/profile/register?tg=".$chat_id
+                'url' => "https://Будь-здоров.рус/web/profile/register-small?tg=".$chat_id
             ]]]
         ];
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
@@ -279,6 +292,19 @@ function requestMessage($bot, $message) {
 
     if ($text == "Полная")
     {
+        $send = "--------------------------------------";
+
+        $KeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Назад' ],
+                ]
+            ],
+            'resize_keyboard' => true
+        ];
+
+        $bot->sendMessage($chat_id, $send, "markdown", $KeyboardMarkup);
+        
         $send = "Перейдя к дальнейшей регистрации, введите все обязательные данные, они помечены красной звёздочкой.";
         
         $InlineKeyboardMarkup = [
@@ -288,6 +314,25 @@ function requestMessage($bot, $message) {
             ]]]
         ];
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+    }
+    
+    if ($text == "/menu" || $text == "Главное меню")
+    {     
+        $send = "Добро пожаловать в меню.";
+               
+        $ReplyKeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Информация' ],
+                    [ 'text' => 'Регистрация' ]
+                ]
+            ],
+            'resize_keyboard' => true,
+            'selective' => true,
+        ];        
+        $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
+
+        return;
     }
 
 }
