@@ -161,5 +161,67 @@ class Bot {
 		
 		return $response;
 	}
+
+	
+	/*
+	**  функция отправки видео
+	**
+	**  @param int $chat_id
+ 	**  @param str $video
+	**  @param str $caption
+	**  @param str $parse_mode
+	**  @param array $reply_markup
+	**  @param int $reply_to_message_id	
+	**  @param int $duration
+	**  @param int $width
+	**  @param int $height
+	**  @param str $thumb
+	**  @param bool $disable_notification
+	**  @param bool $supports_streaming
+	**  
+	**  @return array
+	*/
+    public function sendVideo(
+		$chat_id, 
+		$video,		
+		$caption = null,
+		$parse_mode = null,
+		$reply_markup = null,
+		$reply_to_message_id = null,		
+		$duration = null,
+		$width = null,
+		$height = null,
+		$thumb = null,
+		$disable_notification = false,
+		$supports_streaming = false
+	) {
+		
+		if ($reply_markup) $reply_markup = json_encode($reply_markup);
+		
+		$response = $this->call("sendVideo", [
+			'chat_id' => $chat_id,
+			'video' => $video,
+			'duration' => $duration,
+			'width' => $width,
+			'height' => $height,
+			'thumb' => $thumb,
+			'caption' => $caption,
+			'parse_mode' => $parse_mode,		
+			'supports_streaming' => $supports_streaming,
+			'disable_notification' => $disable_notification,
+			'reply_to_message_id' => $reply_to_message_id,
+			'reply_markup' => $reply_markup
+		]);	
+				
+		$response = json_decode($response, true);
+		
+		if ($response['ok']) {
+			$response = $response['result'];
+		}else $response = false;
+		
+		return $response;
+	}
+	
+	
 	
 }
