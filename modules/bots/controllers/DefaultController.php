@@ -141,6 +141,7 @@ function requestProcessing($bot) {
     }    
 }
 
+
 function requestMessage($bot, $message) {
     $from = $message['from'];
         $first_name = $from['first_name'];
@@ -148,7 +149,13 @@ function requestMessage($bot, $message) {
         $chat_id = $chat['id'];
     $text = $message['text'];
 
-    if ($text == "/start" || $text == "Старт" || $text == "/menu" || $text == "Главное меню" || $text == "Назад")
+
+    /*******************
+    
+        ГЛАВНОЕ МЕНЮ
+
+    ********************/
+    if ($text == "/start" || $text == "Старт" || $text == "/menu" || $text == "Главное меню" || $text == "Назад" ||  $text == "🌟Главное меню")
     {    
         $send = "В голубом кружочке  с низу, в меню, Вы найдёте ссылки на всю необходимую информацию";
                
@@ -167,6 +174,7 @@ function requestMessage($bot, $message) {
         return;
     }
 
+    //-----------------------------------------------------------------------
     $text_split = explode(" ", $text);
 
     if ($text_split[0] == "/start" && $text_split[1]) {
@@ -212,8 +220,14 @@ function requestMessage($bot, $message) {
                 
         }
     }
+    //-----------------------------------------------------------------------
 
+
+    /********************
     
+           ПОМОЩЬ
+
+    *********************/
     if ($text == "Помощь" || $text == "/help")
     {
         $send = "Команда 'Помощь' в разработке";
@@ -222,6 +236,12 @@ function requestMessage($bot, $message) {
         return;
     }
     
+
+    /***********************
+    
+           ИНФОРМАЦИЯ
+
+    ************************/
     if ($text == "Информация" || $text == "/info")
     {
         $send = "Команда 'Информация' в разработке";
@@ -230,7 +250,13 @@ function requestMessage($bot, $message) {
         return;
     }
     
-    if ($text == "/regist" || $text == "Регистрация")
+
+    /***********************
+    
+           РЕГИСТРАЦИЯ
+
+    ************************/
+    if ($text == "/regist" || $text == "Регистрация" || $text == "Шаг назад")
     {
         $send = "Существует два возможных варианта регистрации на сайте Будь-здоров.рус:
 
@@ -259,6 +285,12 @@ function requestMessage($bot, $message) {
         return;
     }
 
+
+    /***********************
+    
+     УПРОЩЁННАЯ регистрация
+
+    ************************/
     if ($text == "Упрощённая")
     {
         $send = "--------------------------------------";
@@ -266,7 +298,7 @@ function requestMessage($bot, $message) {
         $KeyboardMarkup = [
             'keyboard' => [
                 [
-                    [ 'text' => 'Назад' ],
+                    [ 'text' => 'Шаг назад' ],
                 ]
             ],
             'resize_keyboard' => true
@@ -287,6 +319,12 @@ function requestMessage($bot, $message) {
         return;
     }
 
+    
+    /*******************
+    
+     ПОЛНАЯ регистрация
+
+    ********************/
     if ($text == "Полная")
     {
         $send = "--------------------------------------";
@@ -294,7 +332,7 @@ function requestMessage($bot, $message) {
         $KeyboardMarkup = [
             'keyboard' => [
                 [
-                    [ 'text' => 'Назад' ],
+                    [ 'text' => 'Шаг назад' ],
                 ]
             ],
             'resize_keyboard' => true
@@ -314,26 +352,7 @@ function requestMessage($bot, $message) {
 
         return;
     }
-    
-    // if ($text == "/menu" || $text == "Главное меню")
-    // {     
-    //     $send = "Добро пожаловать в меню.";
-               
-    //     $ReplyKeyboardMarkup = [
-    //         'keyboard' => [
-    //             [
-    //                 [ 'text' => 'Информация' ],
-    //                 [ 'text' => 'Регистрация' ]
-    //             ]
-    //         ],
-    //         'resize_keyboard' => true,
-    //         'selective' => true,
-    //     ];        
-    //     $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
-
-    //     return;
-    // }
-    
+        
     
     /*********
     
@@ -353,6 +372,9 @@ function requestMessage($bot, $message) {
                 [
                     [ 'text' => 'Информация' ],
                     [ 'text' => 'Регистрация' ]
+                ],
+                [
+                    [ 'text' => '🌟Главное меню' ]
                 ]
             ],
             'resize_keyboard' => true,
