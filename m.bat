@@ -1,1 +1,1 @@
-mysql -u root
+mysql -u root --password=root
