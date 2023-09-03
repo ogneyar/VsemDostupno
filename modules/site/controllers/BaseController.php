@@ -16,7 +16,7 @@ class BaseController extends Controller
         Yii::$app->assetManager->bundles = [
             'app\assets\AppAsset' => [
                 'css'=>[
-                    'css/site/style.css?v=' . (int) (time() / 3600),
+                    'css/site/style1.css?v=' . (int) (time() / 3600),
                 ],
                 'js'=>[
                     'js/site/WidgetHelpers.js?v=' . (int) (time() / 3600),

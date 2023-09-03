@@ -444,6 +444,7 @@ $this->registerJs($script, $this::POS_END);
                     </div>
                 </div>
             </div>
+
         <!--Показ всплывающего окошка об успехе-->
         <?php if (Yii::$app->session->hasFlash('Успех')){
             echo Alert::widget([
@@ -451,12 +452,11 @@ $this->registerJs($script, $this::POS_END);
                 'body'=>Yii::$app->session->getFlash('Успех'),
             ]);
         } ?>
-
-
         <!--Показ всплывающего окошка об успехе-->
 
         
-        <!--LiveInternet counter--><a href="https://www.liveinternet.ru/click"
+        <!--LiveInternet counter-->
+        <!-- <a href="https://www.liveinternet.ru/click"
         target="_blank"><img id="licntC6F2" width="88" height="120" style="border:0;padding:10px;" 
         title="LiveInternet: показано количество просмотров и посетителей"
         src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAEALAAAAAABAAEAAAIBTAA7"
@@ -465,7 +465,8 @@ $this->registerJs($script, $this::POS_END);
         ((typeof(s)=="undefined")?"":";s"+s.width+"*"+s.height+"*"+
         (s.colorDepth?s.colorDepth:s.pixelDepth))+";u"+escape(d.URL)+
         ";h"+escape(d.title.substring(0,150))+";"+Math.random()})
-        (document,screen)</script><!--/LiveInternet-->
+        (document,screen)</script> -->
+        <!--/LiveInternet-->
 
 
             <footer class="footer">
