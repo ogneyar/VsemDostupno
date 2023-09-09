@@ -35,7 +35,7 @@ class SubscriberPayment extends \yii\db\ActiveRecord
             [['user_id'], 'required'],
             [['user_id', 'number_of_times'], 'integer'],
             [['created_at'], 'safe'],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            // [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 

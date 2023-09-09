@@ -160,7 +160,7 @@ class Account extends \yii\db\ActiveRecord
         return true;
     }
 
-    public static function swap($from, $to, $amount, $message, $sendEmail = true)
+    public static function swap($from, $to, $amount, $message, $sendEmail = false)
     {
         $transaction = Yii::$app->db->beginTransaction();
 

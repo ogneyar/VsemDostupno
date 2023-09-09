@@ -27,7 +27,7 @@ class SubscriberMonthPaymentController extends Controller
 
         // отправлять ли сообщение на почту
         if ($web == "") $sendMessage = false;
-        else $sendMessage = true;
+        else $sendMessage = false;
 
         // сообщение которое записывается в AccountLog
         $message = "Списание членского взноса";
@@ -54,6 +54,8 @@ class SubscriberMonthPaymentController extends Controller
 
         foreach ($users as $user) {
             try {
+                if ($user->lastname == "lastname") // пройдена упрощённая регистрация
+                    continue;
                 // подсчёт общей суммы, снятой в этом месяце
                 $amount = 0;
 
