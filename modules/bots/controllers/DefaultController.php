@@ -288,7 +288,7 @@ function requestMessage($bot, $message) {
         
         
 
-        $send = "*Доброго времени суток, ".$user->firstname." ".$user->patronymic."!!!*\r\n";
+        $send = "*Доброго времени суток,\r\n    ".$user->firstname." ".$user->patronymic."!!!*\r\n\r\n";
 
         if ($user->role == User::ROLE_ADMIN) {
             $send .= "Вы же администратор, какой вам счёт?";
@@ -315,11 +315,17 @@ function requestMessage($bot, $message) {
             $send .= "*Пайщик - Поставщик:*\r\n";
         }
 
-        $send .= "Лицевой счёт:                     ".formatPrice($face->total)."\r\n";
-        $send .= "Инвестиционный счёт:     ".formatPrice($invest->total)." *Накопительный счёт не задействован.*";
+        $send .= "Лицевой счёт:\r\n    ".formatPrice($face->total)."\r\n";
+        $send .= "Инвестиционный счёт:\r\n    ".formatPrice($invest->total);
+
+        if ($user->role == User::ROLE_MEMBER) {
+            if ($user->lastname == "lastname") $send .= "\r\n*Накопительный счёт не задействован.*";
+        }
+
+        $send .= "\r\n";
 
         if ($user->role == User::ROLE_PARTNER) {
-            $send .= "Партнёрский счёт:             ".formatPrice($partner->total)."\r\n";
+            $send .= "Партнёрский счёт:\r\n    ".formatPrice($partner->total)."\r\n";
         }
         
         if ( ! ($user->role == User::ROLE_MEMBER && $user->lastname == "lastname")) {
@@ -372,7 +378,7 @@ function requestMessage($bot, $message) {
     if ($text == "Наши программы" || $text == "/programs")
     {
         
-        $send = "--------------------------------------";
+        $send = "Уважаемый пользователь.";
 
         $KeyboardMarkup = [
             'keyboard' => [
@@ -407,7 +413,7 @@ function requestMessage($bot, $message) {
     ************************/
     if ($text == "Кооперация" || $text == "/cooperation")
     {
-        $send = "--------------------------------------";
+        $send = "Бизнес или кооперация";
     
         $KeyboardMarkup = [
             'keyboard' => [
@@ -421,9 +427,7 @@ function requestMessage($bot, $message) {
 
         $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
         
-        $send = "Бизнес или кооперация
-
-Мы рады представить Вам нашу мини-книгу, посвященную вопросам потребительских обществ в России.
+        $send = "Мы рады представить Вам нашу мини-книгу, посвященную вопросам потребительских обществ в России.
 
 Несмотря на то, что потребительские кооперативы все время у нас «на слуху», мало кто знает, что они из себя представляют. Максимум, что известно – что это общество, образованное пайщиками, чтобы вместе что-то делать или закупать.
 
@@ -485,7 +489,7 @@ function requestMessage($bot, $message) {
     ************************/
     if ($text == "Упрощённая")
     {
-        $send = "--------------------------------------";
+        $send = "Уважаемый пользователь.";
 
         $KeyboardMarkup = [
             'keyboard' => [
@@ -519,7 +523,7 @@ function requestMessage($bot, $message) {
     ********************/
     if ($text == "Полная")
     {
-        $send = "--------------------------------------";
+        $send = "Уважаемый пользователь.";
 
         $KeyboardMarkup = [
             'keyboard' => [
@@ -661,7 +665,7 @@ function requestMessage($bot, $message) {
 function formatPrice($price) {
     if (! $price || $price == 0) return "00 руб. 00";
     $floor_price = floor($price);
-    $response = $floor_price . " руб. " . ($price - $floor_price);
+    $response = $floor_price . " руб. " . (($price - $floor_price)*100);
     return $response;
 }
 
