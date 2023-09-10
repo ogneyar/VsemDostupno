@@ -8,6 +8,7 @@ use yii\bootstrap\ActiveForm;
 use himiklab\yii2\recaptcha\ReCaptcha;
 use kartik\select2\Select2;
 use kartik\date\DatePicker;
+use app\models\User;
 use app\models\City;
 use app\models\Partner;
 use app\models\Category;
@@ -36,6 +37,13 @@ JS;
 $this->registerJs($script, $this::POS_END);
 ?>
 
+<?php
+if ($get['tg']) {
+    $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
+    if ($user) header("Location: https://".$_SERVER['SERVER_NAME'].$web."/profile/login");    
+}
+?>
+
 <?= Html::pageHeader(Html::encode($this->title), '', ['id' => 'page-header-category']) ?>
 
 <?php 
@@ -48,7 +56,7 @@ $this->registerJs($script, $this::POS_END);
 <?php $form = ActiveForm::begin([
     'id' => 'register-small-form',
     'method' => 'post',
-    'action' => $web.'profile/register-small?tg='.$get['tg'],
+    'action' => $web.'/profile/register-small?tg='.$get['tg'],
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
         'template' => "{label}\n<div class=\"col-md-6\">{input}</div>\n<div class=\"col-md-4\">{error}</div>",
