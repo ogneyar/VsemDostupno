@@ -162,6 +162,190 @@ class Bot {
 		return $response;
 	}
 
+    /*
+	**  функция пересылки сообщения 
+	**
+	**  @param int $chat_id
+	**  @param int $message_thread_id
+	**  @param int $from_chat_id
+	**  @param bool $disable_notification
+	**  @param bool $protect_content
+	**  @param int $message_id
+	**  
+	**  @return array
+	*/
+    public function forwardMessage(
+		$chat_id, 
+		$from_chat_id,
+		$message_id,
+		$message_thread_id = null,
+		$disable_notification = false,
+		$protect_content = false
+	) {
+				
+		$response = $this->call("forwardMessage", [
+			'chat_id' => $chat_id,
+			'from_chat_id' => $from_chat_id,
+			'message_id' => $message_id,			
+			'message_thread_id' => $message_thread_id,
+			'disable_notification' => $disable_notification,
+			'protect_content' => $protect_content
+		]);	
+				
+		$response = json_decode($response);
+		
+		if ($response && $response->ok) {
+			$response = $response->result;
+		}else $response = false;
+		
+		return $response;
+	}
+
+    /*
+	**  функция копирования сообщения 
+	**
+	**  @param int $chat_id
+	**  @param int $message_thread_id
+	**  @param int $from_chat_id
+	**  @param int $message_id
+	**  @param str $caption
+	**  @param str $parse_mode
+	**  @param array $caption_entities
+	**  @param bool $disable_notification
+	**  @param bool $protect_content
+	**  @param int $reply_to_message_id
+	**  @param bool $allow_sending_without_reply
+	**  @param array $reply_markup
+	**  
+	**  @return array
+	*/
+    public function copyMessage(
+		$chat_id, 
+		$from_chat_id,
+		$message_id,
+		$caption = null,
+		$parse_mode = null,
+		$message_thread_id = null,
+		$caption_entities = null,
+		$disable_notification = false,
+		$protect_content = false,
+		$reply_to_message_id = null,
+		$allow_sending_without_reply = false,
+		$reply_markup = null
+		) {
+
+		if ($reply_markup) $reply_markup = json_encode($reply_markup);
+				
+		$response = $this->call("copyMessage", [
+			'chat_id' => $chat_id,
+			'message_thread_id' => $message_thread_id,
+			'from_chat_id' => $from_chat_id,
+			'message_id' => $message_id,			
+			'caption' => $caption,
+			'parse_mode' => $parse_mode,
+			'caption_entities' => $caption_entities,
+			'disable_notification' => $disable_notification,
+			'protect_content' => $protect_content,
+			'reply_to_message_id' => $reply_to_message_id,
+			'allow_sending_without_reply' => $allow_sending_without_reply,
+			'reply_markup' => $reply_markup
+		]);	
+				
+		$response = json_decode($response);
+		
+		if ($response && $response->ok) {
+			$response = $response->result;
+		}else $response = false;
+		
+		return $response;
+	}
+
+    /*
+	**  функция удаления сообщения 
+	**
+	**  @param int $chat_id
+	**  @param int $message_id
+	**  
+	**  @return array
+	*/
+    public function deleteMessage(
+		$chat_id, 
+		$message_id
+		) {
+
+		$response = $this->call("deleteMessage", [
+			'chat_id' => $chat_id,
+			'message_id' => $message_id
+		]);	
+				
+		$response = json_decode($response);
+		
+		if ($response && $response->ok) {
+			$response = $response->result;
+		}else $response = false;
+		
+		return $response;
+	}
+
+    /*
+	**  функция отправки голосового сообщения 
+	**
+	**  @param int $chat_id
+	**  @param int $message_thread_id
+	**  @param str $voice
+	**  @param str $caption
+	**  @param str $parse_mode
+	**  @param array $caption_entities
+	**  @param int $duration
+	**  @param bool $disable_notification
+	**  @param bool $protect_content
+	**  @param int $reply_to_message_id
+	**  @param bool $allow_sending_without_reply
+	**  @param array $reply_markup
+	**  
+	**  @return array
+	*/
+    public function sendVoice(
+		$chat_id, 
+		$voice,
+		$caption = null,
+		$parse_mode = null,
+		$duration = null,
+		$message_thread_id = null,
+		$caption_entities = null,
+		$disable_notification = false,
+		$protect_content = false,
+		$reply_to_message_id = null,
+		$allow_sending_without_reply = false,
+		$reply_markup = null
+		) {
+
+		if ($reply_markup) $reply_markup = json_encode($reply_markup);
+				
+		$response = $this->call("sendVoice", [
+			'chat_id' => $chat_id,
+			'message_thread_id' => $message_thread_id,
+			'voice' => $voice,
+			'caption' => $caption,
+			'parse_mode' => $parse_mode,
+			'caption_entities' => $caption_entities,
+			'duration' => $duration,			
+			'disable_notification' => $disable_notification,
+			'protect_content' => $protect_content,
+			'reply_to_message_id' => $reply_to_message_id,
+			'allow_sending_without_reply' => $allow_sending_without_reply,
+			'reply_markup' => $reply_markup
+		]);	
+				
+		$response = json_decode($response);
+		
+		if ($response && $response->ok) {
+			$response = $response->result;
+		}else $response = false;
+		
+		return $response;
+	}
+
 	
 	/*
 	**  функция отправки видео

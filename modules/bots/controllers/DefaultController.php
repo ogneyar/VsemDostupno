@@ -36,6 +36,9 @@ class DefaultController extends Controller
         $token = $config['BOT_TOKEN'];
 
         $master = Yii::$app->params['masterChatId']; 
+        
+        // $admin = $master; 
+        $admin = Yii::$app->params['adminChatId'];
 
         $bot = new Bot($token);
 
@@ -61,7 +64,7 @@ class DefaultController extends Controller
                     // } 
                     $bot->sendMessage($master, $bot->PrintArray($data));
                     // -----------------------------------------
-                    requestProcessing($bot);
+                    requestProcessing($bot, $master, $admin);
                     // -----------------------------------------
                 }else {
                     $bot->sendMessage($master, "пост пуст");
@@ -133,23 +136,41 @@ class DefaultController extends Controller
 }
 
 
-function requestProcessing($bot) {
+function requestProcessing($bot, $master, $admin) {
     $data = $bot->data;
 
     if (isset($data['message'])) {
-        requestMessage($bot, $data['message']);
+        requestMessage($bot, $data['message'], $master, $admin);
     }else if (isset($data['callback_query'])) {
-        requestCallbackQuery($bot, $data['callback_query']);
+        requestCallbackQuery($bot, $data['callback_query'], $master, $admin);
     }    
 }
 
 
-function requestMessage($bot, $message) {
+function requestMessage($bot, $message, $master, $admin) {
+
+    $message_id = $message['message_id'];
     $from = $message['from'];
         $first_name = $from['first_name'];
     $chat = $message['chat'];
         $chat_id = $chat['id'];
     $text = $message['text'];
+
+    if ($message['reply_to_message']) {
+        $reply_to_message = $message['reply_to_message'];
+        
+        if ($reply_to_message['text']) {
+            $reply_text = $reply_to_message['text'];
+        }else 
+        if ($reply_to_message['voice']) {
+            $caption = $reply_to_message['caption'];
+        }
+    }
+
+    if ($message['voice']) {
+        $voice = $message['voice'];
+        $file_id = $voice['file_id'];
+    }
 
 
     /*******************
@@ -232,13 +253,50 @@ function requestMessage($bot, $message) {
     *********************/
     if ($text == "Помощь" || $text == "/help")
     {
-        $send = "Команда 'Помощь' в разработке";
-        $bot->sendMessage($chat_id, $send);
+        $send = "Вы зашли на страницу обратной связи, выбирите нужное действие.";
+    
+        $KeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Специалисты' ],
+                    [ 'text' => 'Проголосовать' ],
+                ],
+                [
+                    [ 'text' => 'Задать вопрос админу' ],
+                ],
+            ],
+            'resize_keyboard' => true
+        ];
+
+        $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
 
         return;
     }
-    
 
+
+
+    /***********************************
+    
+           ЗАДАТЬ ВОПРОС АДМИНУ
+
+    ************************************/
+    if ($text == "Задать вопрос админу" || $text == "/question")
+    {
+        // $send = "Здесь Вы можете задать свой вопрос, пожаловаться на нашу работу или внести своё предложение. Внесите текст в строку сообщения и отправьте его нам.";
+        $send = "Вы в любое время можете задать свой вопрос, пожаловаться на нашу работу или внести своё предложение отправив текстовое или голосовое сообщения.\r\n\r\nПосле отправки Вам придёт сообщение с вопросом: 'Вы желаете задать вопрос?', подтвердите нажав кнопку 'Да'. Если передумали или не верно написали, нажмите 'Нет'.";
+    
+       
+        $HideKeyboard = [
+            'hide_keyboard' => true
+        ];
+
+        $bot->sendMessage($chat_id, $send, null, $HideKeyboard);
+
+        return;
+    }
+
+
+    
     /***********************
     
            ИНФОРМАЦИЯ
@@ -248,17 +306,17 @@ function requestMessage($bot, $message) {
     {
         $send = "В разделе Информация, Вы можете узнать баланс своих счетов а так же восполнить информацию о нашей деятельности.";
     
-    $KeyboardMarkup = [
-        'keyboard' => [
-            [
-                [ 'text' => 'Баланс' ],
-                [ 'text' => 'Общее' ],
+        $KeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Баланс' ],
+                    [ 'text' => 'Общее' ],
+                ],
             ],
-        ],
-        'resize_keyboard' => true
-    ];
+            'resize_keyboard' => true
+        ];
 
-    $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
+        $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
 
         return;
     }
@@ -644,7 +702,7 @@ function requestMessage($bot, $message) {
         Пропаганда здорового образ жизни и здоровья для своих участников.
         Приоритетными вопросами Общества являются продовольственные и образовательные программы. 
          
-        Производители отечественных (местных) товаров и услуг, предлагают качественную продукцию участникам Общества по доступным ценам.
+        Производители отечественных (местных) товаров и услуг, предлагают качественную продукцию участникам Общества по доступным ценам.
         Общество со своей стороны осуществляет контроль и мониторинг цены и качества.";
                
         $InlineKeyboardMarkup = [
@@ -659,7 +717,63 @@ function requestMessage($bot, $message) {
     }
     
 
+
+    /******************************************
+    
+        ЕСЛИ ПРИСЛАЛИ НЕИЗВЕСТНОЕ СООБЩЕНИЕ
+
+    *******************************************/
+    if ($chat_id != $admin) {
+    // if ($chat_id != $master && $chat_id != $admin) {        
+
+        // $bot->sendMessage($chat_id, "Ваше сообщение отправлено администратору!");
+        // if ($text) {
+        //     $bot->sendMessage($admin, $chat_id . "\r\nСообщение от клиента!\r\n\r\n" . $text, "markdown");
+        // }else if ($voice) {
+        //     $bot->sendVoice($admin, $file_id, $chat_id . "\r\nСообщение от клиента!");
+        // }
+
+        $send = "Вы желаете задать вопрос?";
+
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[
+                [
+                    'text' => 'Да',
+                    'callback_data' => 'question_yes'
+                ],
+                [
+                    'text' => 'Нет',
+                    'callback_data' => 'question_no'
+                    ],
+            ]]
+        ];  
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup, $message_id);
+
+    }else    
+    // это для админа
+    if ($reply_to_message) {
+        if ($caption) {            
+            // $caption = str_replace("\r\n", "", $caption);
+            $reply_id = substr($caption, 0, strpos($caption, "Сообщение от клиента!"));
+        }else
+        if ($reply_text) {            
+            // $reply_text = str_replace("\r\n", "", $reply_text);
+            $reply_id = substr($reply_text, 0, strpos($reply_text, "Сообщение от клиента!"));
+        }
+
+        if ($reply_id) {
+            $bot->sendMessage($reply_id, "Сообщение от админа!\r\n\r\n" . $text);
+        }
+    }else {        
+        $bot->sendMessage($chat_id, "Ваше сообщение НЕ БУДЕТ отправлено администратору!\r\n\r\nВы и есть администратор!!!");
+    }
+
+
+
 }
+
+
+
 
 
 function formatPrice($price) {
@@ -670,6 +784,9 @@ function formatPrice($price) {
     else $response = $floor_price . " руб. " . $drobnaya;
     return $response;
 }
+
+
+
 
 /*
 $ReplyKeyboardRemove = [
@@ -682,12 +799,29 @@ $HideKeyboard = [
 */
 // [Полная регистрация](https://Будь-здоров.рус/web/profile/register?tg=".$chat_id.")
 
+// $bot->forwardMessage($admin_id, $chat_id, $message_id);
+// $bot->copyMessage($admin_id, $chat_id, $message_id);
 
 
-function requestCallbackQuery($bot, $callback_query) {
+
+
+
+function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     $from = $callback_query['from'];
         $from_id = $from['id'];
     $message = $callback_query['message'];
+
+        if ($message['reply_to_message']) {
+            $reply_to_message = $message['reply_to_message'];
+            if ($reply_to_message['voice']) {
+                $reply_voice = $reply_to_message['voice'];
+            }        
+            if ($reply_to_message['text']) {
+                $reply_text = $reply_to_message['text'];
+            }
+        }
+
+        $message_id = $message['message_id'];
         $message_from = $message['from'];
             $message_from_first_name = $message_from['first_name'];
         $chat = $message['chat'];
@@ -704,6 +838,44 @@ function requestCallbackQuery($bot, $callback_query) {
         return;
     }
     
+
+    /**************************
+    
+        ВОПРОС ОТ ПОЛЬЗОВАТЕЛЯ (Да, задать)
+
+    **************************/
+    if ($data == "question_yes")
+    {         
+
+        $bot->deleteMessage($from_id, $message_id);
+        if ($reply_text) {
+            $bot->sendMessage($admin, $from_id . "\r\nСообщение от клиента!\r\n\r\n" . $reply_text);
+            $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
+        }else if ($reply_voice) {
+            $bot->sendVoice($admin, $file_id, $from_id . "\r\nСообщение от клиента!");
+            $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
+        }else {
+            $bot->sendMessage($from_id, "Можно отправлять только текстовые и голосовые сообщения!");
+        }
+        
+        return;
+    }
+
+    
+    /**************************
+    
+        ВОПРОС ОТ ПОЛЬЗОВАТЕЛЯ (Нет, не надо)
+
+    **************************/
+    if ($data == "question_no")
+    {         
+        $bot->deleteMessage($from_id, $message_id);
+        $bot->sendMessage($from_id, "Не сразу понял Ваших намерений, извините. Жду дальнейших команд.");
+
+        return;
+    }
+    
+
     /**************************
     
         О НАС (страница 2)
