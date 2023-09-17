@@ -802,10 +802,10 @@ function requestMessage($bot, $message, $master, $admin) {
 
         if ($reply_id) {
              if ($text) {
-                $bot->sendMessage($reply_id, $chat_id . "\r\nСообщение от клиента!\r\n\r\n" . $text);
+                $bot->sendMessage($reply_id, $chat_id . "\r\nСообщение от администратора!\r\n\r\n" . $text);
                 $bot->sendMessage($admin, "Сообщение клиенту отправлено!");
             }else if ($voice) {
-                $bot->sendVoice($reply_id, $file_id, $chat_id . "\r\nСообщение от клиента!");
+                $bot->sendVoice($reply_id, $file_id, $chat_id . "\r\nСообщение от администратора!");
                 $bot->sendMessage($admin, "Сообщение клиенту отправлено!");
             }else {
                 $bot->sendMessage($admin, "Можно отправлять только текстовые и голосовые сообщения!");
