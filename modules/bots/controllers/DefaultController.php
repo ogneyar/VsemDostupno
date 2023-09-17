@@ -274,6 +274,46 @@ function requestMessage($bot, $message, $master, $admin) {
     }
 
 
+    /********************
+    
+           СПЕЦИАЛИСТЫ
+
+    *********************/
+    if ($text == "Специалисты" || $text == "/specialists")
+    {
+        $send = "Ещё не реализованно!\r\n\r\n--------------------------------------";
+    
+        $bot->sendMessage($chat_id, $send);
+
+        $send = "Тест редактирования сообщения вместе с кнопками";
+    
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[[
+                'text' => 'Начать тест',
+                'callback_data' => 'test_edit'
+            ]]]
+        ];
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }
+
+
+    /********************
+    
+           ПРОГОЛОСОВАТЬ
+
+    *********************/
+    if ($text == "Проголосовать" || $text == "/vote")
+    {
+        $send = "Ещё не реализованно!";
+
+        $bot->sendMessage($chat_id, $send);
+
+        return;
+    }
+
+
 
     /***********************************
     
@@ -847,12 +887,38 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     if ($data == "question_yes")
     {         
 
+        $user = User::findOne(['tg_id' => $from_id, 'disabled' => 0]);
+
+        $send = $from_id . "\r\nСообщение от клиента!\r\n\r\n";
+
+        if ($user) {
+            if ($user->role == User::ROLE_MEMBER) {
+                if ($user->lastname == "lastname") {
+                    $send .= "Участник (упрощённая регистрация)";
+                }else {
+                    $send .= "Пайщик / Участник";
+                }
+            }else if ($user->role == User::ROLE_PARTNER) {
+                $send .= "Пайщик / Партнёр";
+            }else if ($user->role == User::ROLE_PROVIDER) {
+                $send .= "Пайщик / Поставщик";
+            }
+
+            if ($user->role == "member" && $user->lastname == "lastname") {
+                $send .= "\r\n" . $user->firstname . " " . $user->patronymic;
+            }else {
+                $send .= "\r\n" . $user->lastname . " " . $user->firstname . " " . $user->patronymic;
+            }
+        }else {
+            $send .= "Пользователь не зарегистрирован";
+        }
+
         $bot->deleteMessage($from_id, $message_id);
         if ($reply_text) {
-            $bot->sendMessage($admin, $from_id . "\r\nСообщение от клиента!\r\n\r\n" . $reply_text);
+            $bot->sendMessage($admin, $send . "\r\n\r\n" . $reply_text);
             $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
         }else if ($reply_voice) {
-            $bot->sendVoice($admin, $file_id, $from_id . "\r\nСообщение от клиента!");
+            $bot->sendVoice($admin, $file_id, $send);
             $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
         }else {
             $bot->sendMessage($from_id, "Можно отправлять только текстовые и голосовые сообщения!");
@@ -875,6 +941,42 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         return;
     }
     
+
+    /**************************
+    
+        ТЕСТ
+
+    **************************/
+    if ($data == "test_edit")
+    {    
+        $send = "Исправленный текст!!!";
+               
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[
+                [
+                    'text' => 'Пример 1',
+                    'callback_data' => 'callback_data'
+                ],
+                [
+                    'text' => 'Пример 2',
+                    'url' => 'https://ya.ru'
+                ],
+            ]]
+        ];  
+
+        $bot->editMessageText($from_id, $message_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }    
+    if ($data == "callback_data")
+    {    
+        $send = "Тест!!!";
+               
+        $bot->sendMessage($from_id, $send);
+
+        return;
+    }
+
 
     /**************************
     

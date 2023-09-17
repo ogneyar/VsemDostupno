@@ -261,6 +261,53 @@ class Bot {
 	}
 
     /*
+	**  функция редактирования сообщения 
+	**
+	**  @param int $chat_id
+	**  @param int $message_id
+	**  @param int $inline_message_id
+	**  @param str $text
+	**  @param str $parse_mode
+	**  @param array $entities
+	**  @param bool $disable_web_page_preview
+	**  @param array $reply_markup
+	**  
+	**  @return array
+	*/
+    public function editMessageText(
+		$chat_id = null, 
+		$message_id = null,
+		$text,
+		$parse_mode = null,
+		$reply_markup = null,
+		$disable_web_page_preview = false,
+		$inline_message_id = null,
+		$entities = null
+		) {
+
+		if ($reply_markup) $reply_markup = json_encode($reply_markup);
+				
+		$response = $this->call("editMessageText", [
+			'chat_id' => $chat_id,
+			'message_id' => $message_id,
+			'inline_message_id' => $inline_message_id,
+			'text' => $text,			
+			'parse_mode' => $parse_mode,
+			'entities' => $entities,
+			'disable_web_page_preview' => $disable_web_page_preview,
+			'reply_markup' => $reply_markup
+		]);	
+				
+		$response = json_decode($response);
+		
+		if ($response && $response->ok) {
+			$response = $response->result;
+		}else $response = false;
+		
+		return $response;
+	}
+
+    /*
 	**  функция удаления сообщения 
 	**
 	**  @param int $chat_id
