@@ -768,7 +768,7 @@ function requestMessage($bot, $message, $master, $admin) {
 
         // $bot->sendMessage($chat_id, "Ваше сообщение отправлено администратору!");
         // if ($text) {
-        //     $bot->sendMessage($admin, $chat_id . "\r\nСообщение от клиента!\r\n\r\n" . $text, "markdown");
+        //     $bot->sendMessage($admin, $chat_id . "\r\nСообщение от клиента!\r\n\r\n" . $text);
         // }else if ($voice) {
         //     $bot->sendVoice($admin, $file_id, $chat_id . "\r\nСообщение от клиента!");
         // }
@@ -802,7 +802,15 @@ function requestMessage($bot, $message, $master, $admin) {
         }
 
         if ($reply_id) {
-            $bot->sendMessage($reply_id, "Сообщение от админа!\r\n\r\n" . $text);
+             if ($text) {
+                $bot->sendMessage($reply_id, $chat_id . "\r\nСообщение от клиента!\r\n\r\n" . $text);
+                $bot->sendMessage($admin, "Сообщение клиенту отправлено!");
+            }else if ($voice) {
+                $bot->sendVoice($reply_id, $file_id, $chat_id . "\r\nСообщение от клиента!");
+                $bot->sendMessage($admin, "Сообщение клиенту отправлено!");
+            }else {
+                $bot->sendMessage($admin, "Можно отправлять только текстовые и голосовые сообщения!");
+            }
         }
     }else {        
         $bot->sendMessage($chat_id, "Ваше сообщение НЕ БУДЕТ отправлено администратору!\r\n\r\nВы и есть администратор!!!");
@@ -855,6 +863,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $reply_to_message = $message['reply_to_message'];
             if ($reply_to_message['voice']) {
                 $reply_voice = $reply_to_message['voice'];
+                $file_id = $reply_voice['file_id'];
             }        
             if ($reply_to_message['text']) {
                 $reply_text = $reply_to_message['text'];
@@ -914,11 +923,11 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         }
 
         $bot->deleteMessage($from_id, $message_id);
-        if ($reply_text) {
-            $bot->sendMessage($admin, $send . "\r\n\r\n" . $reply_text);
-            $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
-        }else if ($reply_voice) {
+        if ($reply_voice) {
             $bot->sendVoice($admin, $file_id, $send);
+            $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
+        }else if ($reply_text) {
+            $bot->sendMessage($admin, $send . "\r\n\r\n" . $reply_text);
             $bot->sendMessage($from_id, "Сообщение отправлено на обработку администратору, в ближайшее время он Вам ответит!");
         }else {
             $bot->sendMessage($from_id, "Можно отправлять только текстовые и голосовые сообщения!");
