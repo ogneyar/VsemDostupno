@@ -31,11 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <label for="providers">Для Поставщиков</label>
         </div>
         
-        <div class="form-group">
+
+        <!-- style="display: none;" -->
+        <div class="form-group" style="display: none;">
             <?= Html::checkbox('candidates', false, ['id' => 'candidates']); ?>
             <label for="candidates">Для Кандидатов</label>
-        </div>
-        
+        </div>        
         <div class="form-group" id="candidates-groups" style="display: none;">
             <?php if ($groups): ?>
                 <?= Html::checkbox('candidates-all', false, ['id' => 'candidates-all']); ?>
@@ -46,6 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
+
+
         
         <div class="form-group">
             <label>Информационная категория</label>

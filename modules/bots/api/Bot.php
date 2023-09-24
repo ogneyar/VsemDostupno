@@ -454,5 +454,65 @@ class Bot {
 	}
 	
 	
+	/*
+	**  функция отправки фото
+	**
+	**  @param int $chat_id
+	**  @param int $message_thread_id
+ 	**  @param str $photo
+	**  @param str $caption
+	**  @param str $parse_mode
+	**  @param array $caption_entities
+	**  @param bool $has_spoiler
+	**  @param bool $disable_notification
+	**  @param bool $protect_content
+	**  @param int $reply_to_message_id	
+	**  @param bool $allow_sending_without_reply
+	**  @param array $reply_markup
+	**  
+	**  @return array
+	*/
+    public function sendPhoto(
+		$chat_id, 
+		$photo,		
+		$caption = null,
+		$parse_mode = null,
+		$reply_markup = null,
+		$reply_to_message_id = null,		
+		$caption_entities = null,
+		$has_spoiler = false,
+		$protect_content = false,
+		$allow_sending_without_reply = null,
+		$disable_notification = false,
+		$message_thread_id = false
+	) {
+		
+		if ($reply_markup) $reply_markup = json_encode($reply_markup);
+		
+		$response = $this->call("sendPhoto", [
+			'chat_id' => $chat_id,
+			'message_thread_id' => $message_thread_id,
+			'photo' => $photo,
+			'caption' => $caption,
+			'parse_mode' => $parse_mode,		
+			'caption_entities' => $caption_entities,
+			'has_spoiler' => $has_spoiler,
+			'disable_notification' => $disable_notification,
+			'protect_content' => $protect_content,
+			'reply_to_message_id' => $reply_to_message_id,
+			'allow_sending_without_reply' => $allow_sending_without_reply,
+			'reply_markup' => $reply_markup
+		]);	
+				
+		$response = json_decode($response, true);
+		
+		if ($response['ok']) {
+			$response = $response['result'];
+		}else $response = false;
+		
+		return $response;
+	}
+	
+	
 	
 }

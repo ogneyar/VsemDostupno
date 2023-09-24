@@ -4,7 +4,7 @@ namespace app\modules\mailing\controllers\admin;
 
 use Yii;
 use app\models\CandidateGroup;
-use app\models\EmailLetters;
+// use app\models\EmailLetters;
 use yii\web\Response;
 use yii\data\ActiveDataProvider;
 use app\modules\mailing\models\MailingNews;
@@ -13,8 +13,9 @@ use app\modules\mailing\models\MailingVoteStat;
 use app\modules\mailing\models\MailingProduct;
 use app\modules\mailing\models\MailingMessage;
 use yii\bootstrap\Modal;
-
 use app\models\User;
+use app\modules\bots\api\Bot;
+
 
 /**
  * Default controller for the `mailing` module
@@ -34,38 +35,41 @@ class DefaultController extends BaseController
             $data['for_members'] = isset($_POST['members']) ? true : false; 
             $data['for_partners'] = isset($_POST['partners']) ? true : false; 
             $data['for_providers'] = isset($_POST['providers']) ? true : false; 
-            $data['for_candidates'] = isset($_POST['candidates']) ? true : false;
+            // $data['for_candidates'] = isset($_POST['candidates']) ? true : false;
             
-            if ($data['for_candidates']) {
-                if ($_POST['candidates-all'] == '1') {
-                    $data['for_candidates'] = 'all';
-                } else {
-                    $data['for_candidates'] = [];
-                    foreach ($_POST['candidates'] as $k => $val) {
-                        $data['for_candidates'][] = $k;
-                    }
-                }
-            }
+            // if ($data['for_candidates']) {
+            //     if ($_POST['candidates-all'] == '1') {
+            //         $data['for_candidates'] = 'all';
+            //     } else {
+            //         $data['for_candidates'] = [];
+            //         foreach ($_POST['candidates'] as $k => $val) {
+            //             $data['for_candidates'][] = $k;
+            //         }
+            //     }
+            // }
             
             $data['files'] = [];
             $data['files_names'] = '';
             foreach ($_FILES['attachment']['tmp_name'] as $k => $filepath) {
                 if (!empty($filepath) && $_FILES['attachment']['error'][$k] == 0) {
-                    $data['files'][$k] = ['filepath' => $filepath, 'filename' => $_FILES['attachment']['name'][$k]];
+                    $data['files'][$k] = [
+                        'filepath' => $filepath, 
+                        'filename' => $_FILES['attachment']['name'][$k]
+                    ];
                     $data['files_names'] .= $_FILES['attachment']['name'][$k] . ",";
                 }
             }
             
             if ($category == 1) {
                 $data['subject'] = htmlspecialchars($_POST['subject']);
-                // MailingNews::sendMailing($data);
+                MailingNews::sendMailing($data);
 
-                EmailLetters::sendMailingNews($data);
+                // EmailLetters::sendMailingNews($data);
             } elseif ($category == 5) {
                 $data['subject'] = htmlspecialchars($_POST['subject_vote']);
-                // MailingVote::sendMailing($data); 
+                MailingVote::sendMailing($data); 
 
-                EmailLetters::sendMailingVote($data); 
+                // EmailLetters::sendMailingVote($data); 
             }
         }
         
@@ -80,7 +84,7 @@ class DefaultController extends BaseController
         
         return $this->render('vote', [
             'votes' => $votes,
-        ]);
+        ]); 
     }
     
     public function actionVoteDetails($id, $vote = "")
