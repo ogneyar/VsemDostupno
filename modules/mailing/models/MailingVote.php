@@ -10,6 +10,7 @@ use app\models\Partner;
 use app\models\Provider;
 use app\models\User;
 use app\modules\mailing\models\MailingVoteStat;
+use app\modules\bots\api\Bot;
 
 /**
  * This is the model class for table "mailing_vote".
@@ -70,10 +71,16 @@ class MailingVote extends \yii\db\ActiveRecord
             if ($members) {
                 foreach ($members as $rec) {
                     if ($rec->user->disabled != 1) {
-                        $send_to[] = [
-                            'email' => $rec->user->email, 
-                            'name' => $rec->user->respectedName,
-                        ];
+                        // $send_to[] = [
+                        //     'email' => $rec->user->email,
+                        //     'name' => $rec->user->respectedName,
+                        // ];                            
+                        if ($rec->user->tg_id) {                                
+                            $send_to[] = [
+                                'tg_id' => $rec->user->tg_id,
+                                'name' => $rec->user->respectedName,
+                            ];                            
+                        }
                     }
                 }
             }
@@ -85,10 +92,16 @@ class MailingVote extends \yii\db\ActiveRecord
                 foreach ($partners as $rec) {
                     if ($rec->user->disabled != 1) {
                         if (!isset($rec->user->member)) {
-                            $send_to[] = [
-                                'email' => $rec->user->email,
-                                'name' => $rec->user->respectedName,
-                            ];
+                            // $send_to[] = [
+                            //     'email' => $rec->user->email,
+                            //     'name' => $rec->user->respectedName,
+                            // ];                            
+                            if ($rec->user->tg_id) {                                
+                                $send_to[] = [
+                                    'tg_id' => $rec->user->tg_id,
+                                    'name' => $rec->user->respectedName,
+                                ];                            
+                            }
                         }
                     }
                 }
@@ -101,33 +114,51 @@ class MailingVote extends \yii\db\ActiveRecord
                 foreach ($providers as $rec) {
                     if ($rec->user->disabled != 1) {
                         if (!isset($rec->user->member)) {
-                            $send_to[] = [
-                                'email' => $rec->user->email,
-                                'name' => $rec->user->respectedName,
-                            ];
+                            // $send_to[] = [
+                            //     'email' => $rec->user->email,
+                            //     'name' => $rec->user->respectedName,
+                            // ];
+                            if ($rec->user->tg_id) {                                
+                                $send_to[] = [
+                                    'tg_id' => $rec->user->tg_id,
+                                    'name' => $rec->user->respectedName,
+                                ];                            
+                            }
                         }
                     }
                 }
             }
-        }
+        } 
         
         if (count($send_to)) {
-            foreach ($send_to as $to) {
-                $body = 'Уважаемый/ая ' . $to['name'] . ', просим Вас высказать своё мнение по работе Потребительского общества через участие в голосовании из <a href="' . Url::to('profile/login', true) . '">личного кабинета</a>.';
-                $body .= '<br><br>';
-                $body .= 'На это письмо отвечать не нужно, рассылка произведена автоматически.';
-                $mail = Yii::$app->mailer->compose()
-                    ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-                    ->setTo($to['email'])
-                    ->setSubject(UtilsHelper::cutStr($data['subject'], 150))
-                    ->setHtmlBody($body);
-                if (count($data['files'])) {
-                    foreach ($data['files'] as $file) {
-                        $mail->attach($file['filepath'], ['fileName' => $file['filename']]);
-                    }
-                }
-                $mail->send();
-            }
+            
+            $config = require(__DIR__ . '/../../../config/constants.php');
+            $web = $config['WEB'];
+            $token = $config['BOT_TOKEN'];
+            $master = Yii::$app->params['masterChatId'];             
+            $admin = $master; 
+            // $admin = Yii::$app->params['adminChatId'];    
+            $bot = new Bot($token);
+
+            $count_exceptions = 0; // count exceptions - количество исключений
+
+            // foreach ($send_to as $to) {
+            //     $body = 'Уважаемый/ая ' . $to['name'] . ', просим Вас высказать своё мнение по работе Потребительского общества через участие в голосовании из <a href="' . Url::to('profile/login', true) . '">личного кабинета</a>.';
+            //     $body .= '<br><br>';
+            //     $body .= 'На это письмо отвечать не нужно, рассылка произведена автоматически.';
+            //     $mail = Yii::$app->mailer->compose()
+            //         ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
+            //         ->setTo($to['email'])
+            //         ->setSubject(UtilsHelper::cutStr($data['subject'], 150))
+            //         ->setHtmlBody($body);
+            //     if (count($data['files'])) {
+            //         foreach ($data['files'] as $file) {
+            //             $mail->attach($file['filepath'], ['fileName' => $file['filename']]);
+            //         }
+            //     }
+            //     $mail->send();
+            // }
+
             
             $mailing = new MailingVote();
             $mailing->for_members = $data['for_members'] ? 1 : 0;
@@ -136,6 +167,68 @@ class MailingVote extends \yii\db\ActiveRecord
             $mailing->subject = $data['subject'];
             $mailing->attachment = $data['files_names'];
             $mailing->save();
+
+            // $bot->sendMessage($master, "mailing->id - " .$mailing->id);
+            
+            if ($mailing->id) {
+
+                if (count($data['files'])) {
+                    foreach ($data['files'] as $file) {
+                        
+                        move_uploaded_file($file['filepath'], __DIR__ . "/../../../web/images/store/temp/".$file['filename']);
+
+                        foreach ($send_to as $to) {
+                            try {
+                                // if ($to['tg_id'] == $master) {     
+                                    $bot->sendPhoto($to['tg_id'], "https://будь-здоров.рус/web/images/store/temp/".$file['filename']);
+                                // }
+                            }catch (Exception $e) {}
+                        }
+
+                        unlink(__DIR__ . "/../../../web/images/store/temp/".$file['filename']);
+                        
+                    }
+                }
+                
+                $InlineKeyboardMarkup = [
+                    'inline_keyboard' => [[
+                        [
+                            'text' => 'За',
+                            'callback_data' => 'vote_agree'
+                        ],
+                        [
+                            'text' => 'Против',
+                            'callback_data' => 'vote_against'
+                        ],
+                        [
+                            'text' => 'Воздержался',
+                            'callback_data' => 'vote_hold'
+                        ]
+                    ]]
+                ];
+
+                $response = $mailing->id . "\r\nГолосование\r\n\r\n" . $data['subject'];
+
+                foreach ($send_to as $to) {
+                    try {
+                        // if ($to['tg_id'] == $master) {                        
+                            $bot->sendMessage(
+                                $to['tg_id'], 
+                                $response,
+                                null,
+                                $InlineKeyboardMarkup
+                            );
+                        // }
+                    }catch (Exception $e) {
+                        $count_exceptions++;
+                    }
+                }
+                
+                if ($count_exceptions) {
+                    $bot->sendMessage($master, "КОЛИЧЕСТВО ИСКЛЮЧЕНИЙ - " . $count_exceptions);
+                }
+            }
+            
         }
     }
     

@@ -10,6 +10,8 @@ use app\models\User;
 use app\models\Forgot;
 use app\models\Email;
 use app\models\Account;
+use yii\web\Response;
+use app\modules\mailing\models\MailingVoteStat;
 
 
 
@@ -885,13 +887,58 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
         return;
     }
+       
     
+   
 
-    /**************************
+    /********************************************
+    
+        ГОЛОСОВАНИЕ
+
+    *********************************************/
+    if ($data == "vote_agree" || $data == "vote_against" || $data == "vote_hold")
+    {    
+        
+        if ($data == "vote_agree") $vote = 'hoagreeld'; // За
+        if ($data == "vote_against") $vote = 'against'; // Против
+        if ($data == "vote_hold") $vote = 'hold'; // Воздержался
+
+        $user = User::findOne(['tg_id' => $from_id, 'disabled' => 0]);
+
+        if ( ! $user) {
+            $bot->sendMessage($from_id, "Вы не зарегестрированны!");
+            return;
+        }
+        
+        if ( ! $text){
+            $bot->sendMessage($from_id, "Ошибка, не найден номер голосования!");
+            return;
+        }
+        
+        $vote_id = substr($text, 0, strpos($text, "Голосование"));
+
+        $stat = new MailingVoteStat;
+        $stat->mailing_vote_id = $vote_id;
+        $stat->user_id = $user->id;
+        $stat->vote = $vote;
+        if ($stat->save()) {            
+            $bot->deleteMessage($from_id, $message_id);
+            $bot->sendMessage($from_id, "Благодарим за ваше решение, информация отправлена администратору для сбора статистики.  Позднее мы сообщим Вам  результаты голосования.");
+        }else {
+            $bot->sendMessage($from_id, "Ошибка сохранения результата голосования!");
+        }
+
+        return;
+    }
+
+
+
+
+    /*******************************************
     
         ВОПРОС ОТ ПОЛЬЗОВАТЕЛЯ (Да, задать)
 
-    **************************/
+    ********************************************/
     if ($data == "question_yes")
     {         
 
