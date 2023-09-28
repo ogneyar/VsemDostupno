@@ -261,7 +261,7 @@ function requestMessage($bot, $message, $master, $admin) {
             'keyboard' => [
                 [
                     [ 'text' => 'Специалисты' ],
-                    [ 'text' => 'Проголосовать' ],
+                    // [ 'text' => 'Проголосовать' ],
                 ],
                 [
                     [ 'text' => 'Задать вопрос админу' ],
@@ -899,7 +899,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     if ($data == "vote_agree" || $data == "vote_against" || $data == "vote_hold")
     {    
         
-        if ($data == "vote_agree") $vote = 'hoagreeld'; // За
+        if ($data == "vote_agree") $vote = 'agree'; // За
         if ($data == "vote_against") $vote = 'against'; // Против
         if ($data == "vote_hold") $vote = 'hold'; // Воздержался
 
