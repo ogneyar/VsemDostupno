@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'name' => 'attachment[]',
                     'id' => 'attachment',
                     'language' => 'ru',
-                    'options' => ['multiple' => true],
+                    'options' => ['multiple' => true, 'accept' => 'image/jpeg,image/png,image/gif'],
                     'pluginOptions' => ['previewFileType' => 'any']
                 ]); ?>
             </div>

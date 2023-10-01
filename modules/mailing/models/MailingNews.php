@@ -3,6 +3,7 @@
 namespace app\modules\mailing\models;
 
 use Yii;
+use app\models\User;
 use app\models\Member;
 use app\models\Partner;
 use app\models\Provider;
@@ -68,98 +69,36 @@ class MailingNews extends \yii\db\ActiveRecord
     public static function sendMailing($data)
     {
         $send_to = [];
-        $candidates_list = "";
-        if ($data['for_members']) {
-            $members = Member::find()->all();
-            if ($members) {
-                foreach ($members as $rec) {
-                    if ($rec->user->disabled != 1) {
-                        // $send_to[] = $rec->user->email;
-                        if ($rec->user->tg_id) $send_to[] = $rec->user->tg_id;
-                    }
-                }
-            }
-        }
+        
+        $users = User::find(['disabled' => 0])->all();
 
-        if ($data['for_partners']) {
-            $partners = Partner::find()->all();
-            if ($partners) {
-                foreach ($partners as $rec) {
-                    if ($rec->user->disabled != 1) {
-                        if (!isset($rec->user->member)) {
-                            // $send_to[] = $rec->user->email;
-                            if ($rec->user->tg_id) $send_to[] = $rec->user->tg_id;
-                        }
+        if ($users) {
+            foreach ($users as $user) {
+                if ($user->tg_id) {
+                    if ($data['for_members'] && $user->role == User::ROLE_MEMBER) {
+                        $send_to[] = $user->tg_id;
+                    }else                    
+                    if ($data['for_partners'] && $user->role == User::ROLE_PARTNER) {
+                        $send_to[] = $user->tg_id;
+                    }else                    
+                    if ($data['for_providers'] && $user->role == User::ROLE_PROVIDER) {
+                        $send_to[] = $user->tg_id;
                     }
                 }
             }
         }
-        
-        if ($data['for_providers']) {
-            $providers = Provider::find()->all();
-            if ($providers) {
-                foreach ($providers as $rec) {
-                    if ($rec->user->disabled != 1) {
-                        if (!isset($rec->user->member)) {
-                            // $send_to[] = $rec->user->email;
-                            if ($rec->user->tg_id) $send_to[] = $rec->user->tg_id;
-                        }
-                    }
-                }
-            }
-        }
-        
-        // if ($data['for_candidates']) {
-        //     if ($data['for_candidates'] == 'all') {
-        //         $candidates_list = "all";
-        //         $candidates = Candidate::find()->where(['block_mailing' => 0])->all();
-        //         if ($candidates) {
-        //             foreach ($candidates as $rec) {
-        //                 // $send_to[] = $rec->email;
-        //                 if ($rec->tg_id) $send_to[] = $rec->tg_id;
-        //             }
-        //         }
-        //     } else {
-        //         foreach ($data['for_candidates'] as $group) {
-        //             $candidates_list .= $group . ",";
-        //             $candidates = Candidate::find()->where(['group_id' => $group, 'block_mailing' => 0])->all();
-        //             if ($candidates) {
-        //                 foreach ($candidates as $rec) {
-        //                     // $send_to[] = $rec->email;
-        //                     if ($rec->tg_id) $send_to[] = $rec->tg_id;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        
-        if (count($send_to)) {
+                
+        if (count($send_to)) {       
             
             $config = require(__DIR__ . '/../../../config/constants.php');
             $web = $config['WEB'];
             $token = $config['BOT_TOKEN'];
-            $master = Yii::$app->params['masterChatId'];             
-            $admin = $master; 
-            // $admin = Yii::$app->params['adminChatId'];    
+            $master = Yii::$app->params['masterChatId'];         
+            
             $bot = new Bot($token);
 
             $count_exceptions = 0; // count exceptions - количество исключений
             
-            // $mail = Yii::$app->mailer->compose()
-            //     ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-            //     ->setTo($send_to)
-            //     ->setSubject($data['subject'])
-            //     ->setHtmlBody($data['body']);
-            // if (count($data['files'])) {
-            //     foreach ($data['files'] as $file) {
-            //         $mail->attach($file['filepath'], ['fileName' => $file['filename']]);
-            //     }
-            // }                
-            // try {
-            //     $response = $mail->send();
-            // }catch (Exception $e) {
-            //     $count_exceptions++;
-            // }
 
             $body = $data['body'];
             $body = str_replace("<br>","\r\n", $body);
@@ -176,7 +115,7 @@ class MailingNews extends \yii\db\ActiveRecord
 
                     for ($iter = 0; $iter < count($send_to); $iter++) {
                         try {
-                            // if ($send_to[$iter] == $master) {     
+                            // if ($send_to[$iter] == $master) {
                                 $bot->sendPhoto($send_to[$iter], "https://будь-здоров.рус/web/images/store/temp/".$file['filename']);
                             // }
                         }catch (Exception $e) {}
@@ -188,8 +127,8 @@ class MailingNews extends \yii\db\ActiveRecord
             }
 
             for ($iter = 0; $iter < count($send_to); $iter++) {
-                try {
-                    // if ($send_to[$iter] == $master) {                        
+                try {                   
+                    // if ($send_to[$iter] == $master) {
                         $bot->sendMessage(
                             $send_to[$iter], 
                             $data['subject'] . 
@@ -206,16 +145,8 @@ class MailingNews extends \yii\db\ActiveRecord
 
             // $bot->sendMessage($master, "пост не прост, ёпрст (Ы)");
 
-
            
             if ($count_exceptions) {
-                // $mail_to_me = Yii::$app->mailer->compose()
-                //     ->setFrom([Yii::$app->params['fromEmail'] => Yii::$app->params['name']])
-                //     ->setTo("ya13th@mail.ru")
-                //     ->setSubject($data['subject'])
-                //     ->setHtmlBody("КОЛИЧЕСТВО ИСКЛЮЧЕНИЙ - " . $count_exceptions)
-                //     ->send();
-            
                 $bot->sendMessage($master, "КОЛИЧЕСТВО ИСКЛЮЧЕНИЙ - " . $count_exceptions);
             }
             
@@ -227,12 +158,11 @@ class MailingNews extends \yii\db\ActiveRecord
             $mailing->subject = $data['subject'];
             $mailing->message = $data['body'];
             $mailing->attachment = $data['files_names'];
-            // $mailing->save();
+            $mailing->save();
             
         } 
         
     }
-
 
     
 }
