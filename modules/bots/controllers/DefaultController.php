@@ -5,13 +5,14 @@ namespace app\modules\bots\controllers;
 use Yii;
 use DateTime;
 use yii\web\Controller;
+use yii\web\Response;
+use app\modules\mailing\models\MailingVoteStat;
 use app\modules\bots\api\Bot;
 use app\models\User;
 use app\models\Forgot;
 use app\models\Email;
 use app\models\Account;
-use yii\web\Response;
-use app\modules\mailing\models\MailingVoteStat;
+use app\models\TgCommunication;
 
 
 
@@ -247,6 +248,36 @@ function requestMessage($bot, $message, $master, $admin) {
     }
     //-----------------------------------------------------------------------
 
+
+    /******************
+    
+           ТЕСТ
+
+    *******************/
+    if ($text == "Тест" || $text == "/test")
+    {
+        $send = "Вы зашли на тестовую страницу, отправьте запрос тестовому пользователю.";
+    
+        $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);
+
+        if (!$tgCom) {
+            $tgCom = new TgCommunication();
+        }
+            
+        $tgCom->chat_id = $chat_id;
+        $tgCom->to_chat_id = $master;
+        // $tgCom->to_chat_id = $admin;
+        
+        if ( ! $tgCom->save() ) {            
+            $send = "Ошибка создания/сохранения экземпляра класса TgCommunication!";
+            $bot->sendMessage($chat_id, $send);
+            // throw new Exception($send);
+        }
+
+        $bot->sendMessage($chat_id, $send);
+
+        return;
+    }
 
     /********************
     
@@ -765,14 +796,20 @@ function requestMessage($bot, $message, $master, $admin) {
 
     *******************************************/
     if ($chat_id != $admin) {
-    // if ($chat_id != $master && $chat_id != $admin) {        
+        
+        $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);
 
-        // $bot->sendMessage($chat_id, "Ваше сообщение отправлено администратору!");
-        // if ($text) {
-        //     $bot->sendMessage($admin, $chat_id . "\r\nСообщение от клиента!\r\n\r\n" . $text);
-        // }else if ($voice) {
-        //     $bot->sendVoice($admin, $file_id, $chat_id . "\r\nСообщение от клиента!");
-        // }
+        if ($tgCom) {
+            $send = "Сообщение от пользователя №" . $chat_id . "\r\n\r\n" . $text;
+            $bot->sendMessage($tgCom->to_chat_id, $send);
+
+            $send = "Сообщение отправлено пользователю №" . $tgCom->to_chat_id;
+            $bot->sendMessage($chat_id, $send);
+    
+            $tgCom->delete();
+
+            return;
+        }
 
         $send = "Вы желаете задать вопрос?";
 
