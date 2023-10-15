@@ -7,6 +7,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\models\Category;
+use app\models\User;
 
 class CategoryController extends BaseController
 {
@@ -26,10 +27,16 @@ class CategoryController extends BaseController
         }
         
         $menu_first_level = Category::find()->where(['parent' => 0, 'visibility' => 1])->all();
+        
+        // $tg_view = false;
+        // if (in_array(Yii::$app->user->identity->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
+        //     $tg_view = true;
+        // }
 
         return $this->render('index', [
             'model' => $model,
             'menu_first_level' => $menu_first_level ? $menu_first_level : [],
+            // 'tg_view' => $tg_view,
         ]);
     }
 }

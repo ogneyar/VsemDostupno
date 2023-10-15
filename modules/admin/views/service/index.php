@@ -13,6 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $updateVisibilityUrl = Url::to(['/api/profile/admin/service/update-visibility']);
 $updatePublishedUrl = Url::to(['/api/profile/admin/service/update-published']);
+$updateTgVisibleUrl = Url::to(['/api/profile/admin/service/update-tgvisible']);
 $script = <<<JS
 $(function () {
     $('input[type="checkbox"][class="update-visibility"]').on('change', function () {
@@ -43,6 +44,27 @@ $(function () {
             data: {
                 id: $(this).attr('data-service-id'),
                 published: $(this).is(':checked') ? 1 : 0
+            },
+            success: function (data) {
+                if (!(data && data.success)) {
+                    alert('Ошибка обновления опубликования услуги');
+                }
+            },
+            error: function () {
+                alert('Ошибка обновления опубликования услуги');
+            },
+        });
+
+        return false;
+    });
+    
+    $('input[type="checkbox"][class="update-tg_visible"]').on('change', function () {
+        $.ajax({
+            url: '$updateTgVisibleUrl',
+            type: 'POST',
+            data: {
+                id: $(this).attr('data-service-id'),
+                tg_visible: $(this).is(':checked') ? 1 : 0
             },
             success: function (data) {
                 if (!(data && data.success)) {
@@ -93,6 +115,12 @@ $this->registerJs($script, $this::POS_END);
                 'attribute' => 'published',
                 'content' => function ($model) {
                     return '<input type="checkbox" ' . ($model->published ? 'checked' : '') . ' data-service-id="' . $model->id . '" class="update-published">';
+                }
+            ],
+            [
+                'attribute' => 'tg_visible',
+                'content' => function ($model) {
+                    return '<input type="checkbox" ' . ($model->tg_visible ? 'checked' : '') . ' data-service-id="' . $model->id . '" class="update-tg_visible">';
                 }
             ],
             'price',

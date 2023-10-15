@@ -22,6 +22,7 @@ class ServiceController extends BaseController
                 'actions' => [
                     'updateVisibility' => ['post'],
                     'updatePublished' => ['post'],
+                    'updateTgvisible' => ['post'],
                 ],
             ],
         ]);
@@ -61,6 +62,27 @@ class ServiceController extends BaseController
         }
 
         $model->published = $post['published'];
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        return [
+            'success' => $model->save(),
+        ];
+    }
+    
+    public function actionUpdateTgvisible()
+    {
+        $post = Yii::$app->request->post();
+        if (!(isset($post['id']) && isset($post['tg_visible']))) {
+            throw new ForbiddenHttpException('Действие не разрешено.');
+        }
+
+        $model = Service::findOne($post['id']);
+        if (!$model) {
+            throw new NotFoundHttpException('Страница не найдена.');
+        }
+
+        $model->tg_visible = $post['tg_visible'];
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
