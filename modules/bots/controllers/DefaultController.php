@@ -13,6 +13,9 @@ use app\models\Forgot;
 use app\models\Email;
 use app\models\Account;
 use app\models\TgCommunication;
+use app\models\Service;
+use app\models\Category;
+use app\models\CategoryHasService;
 
 
 
@@ -314,18 +317,38 @@ function requestMessage($bot, $message, $master, $admin) {
     *********************/
     if ($text == "Специалисты" || $text == "/specialists")
     {
-        $send = "Ещё не реализованно!\r\n\r\n--------------------------------------";
-    
-        $bot->sendMessage($chat_id, $send);
+        // $services = Service::find(['tg_visible' => 1])->all();
+        $services = Service::find()->where(['tg_visible' => 1])->all();
 
-        $send = "Тест редактирования сообщения вместе с кнопками";
+        $inline_keyboard = [];
+
+        foreach ($services as $i => $value) {
+            $service = $services[$i];
+
+            $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
+
+            if ($categoryHasService) {
+                
+                $category_id = $categoryHasService->category_id;
+    
+                $category = Category::findOne(['id' => $category_id]);
+            
+                array_push($inline_keyboard, [
+                    [
+                        'text' => $category->name,
+                        'callback_data' => 'specialists_' . $category->id
+                    ]
+                ]);
+
+            }
+        }
+
+        $send = "В разделе “Специалисты” Вы можете получить помощь нужного специалиста.";
     
         $InlineKeyboardMarkup = [
-            'inline_keyboard' => [[[
-                'text' => 'Начать тест',
-                'callback_data' => 'test_edit'
-            ]]]
+            'inline_keyboard' => $inline_keyboard
         ];
+
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
 
         return;
@@ -342,6 +365,17 @@ function requestMessage($bot, $message, $master, $admin) {
         $send = "Ещё не реализованно!";
 
         $bot->sendMessage($chat_id, $send);
+
+        $send = "Тест редактирования сообщения вместе с кнопками";
+    
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[[
+                'text' => 'Начать тест',
+                'callback_data' => 'test_edit'
+            ]]]
+        ];
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+
 
         return;
     }

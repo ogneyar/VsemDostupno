@@ -92,6 +92,7 @@ class Service extends \yii\db\ActiveRecord
             'manufacturer_photo_id' => 'Номер фото мастера',
             'photo' => 'Фото мастера',
             'thumbUrlManufacturer' => 'Фото мастера',
+            'tg_visible' => 'Показ в Телеграм',
         ];
     }
 
