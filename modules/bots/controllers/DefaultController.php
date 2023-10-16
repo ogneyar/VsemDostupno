@@ -2316,4 +2316,48 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
 
 
+
+    /************************************************
+    
+        ИНАЧЕ если не нашёл ищем в СЕРВИСАХ
+
+    ************************************************/
+
+    $services = Service::find()->where(['tg_visible' => 1])->all();
+
+    foreach ($services as $i => $value) {
+        $service = $services[$i];
+
+        $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
+
+        if ($categoryHasService) {
+            
+            $category_id = $categoryHasService->category_id;
+                
+            $category = Category::findOne(['id' => $category_id]);
+
+            if ($data == 'specialists_' . $category->id) {
+                $send = $service->name;
+                $send .= "\r\n\r\n";
+                $description = str_replace("<br />", "\r\n", $service->description);
+                $description = str_replace("<br/>", "\r\n", $description);
+                $description = str_replace("<br>", "\r\n", $description);
+                $description = str_replace("&nbsp;", " ", $description);
+                $description = str_replace("&mdash;", "—", $description);
+                $send .= preg_replace('(\<(/?[^>]+)>)', "", $description);
+                $send .= "\r\n\r\n";
+                $send .= "Цена: ";
+                $send .= $service->price;
+                $send .= "\r\n\r\n";
+                $send .= "Цена для пайщика: ";
+                $send .= $service->member_price;
+
+                $bot->sendMessage($from_id, $send);
+            }
+
+        }
+    }
+
+
+
 }
