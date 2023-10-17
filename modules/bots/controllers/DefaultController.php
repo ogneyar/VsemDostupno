@@ -16,6 +16,9 @@ use app\models\TgCommunication;
 use app\models\Service;
 use app\models\Category;
 use app\models\CategoryHasService;
+use app\models\ServiceHasPhoto;
+use app\models\Photo;
+use app\models\Image;
 
 
 
@@ -295,7 +298,6 @@ function requestMessage($bot, $message, $master, $admin) {
             'keyboard' => [
                 [
                     [ 'text' => 'Специалисты' ],
-                    // [ 'text' => 'Проголосовать' ],
                 ],
                 [
                     [ 'text' => 'Задать вопрос админу' ],
@@ -317,65 +319,45 @@ function requestMessage($bot, $message, $master, $admin) {
     *********************/
     if ($text == "Специалисты" || $text == "/specialists")
     {
-        // $services = Service::find(['tg_visible' => 1])->all();
-        $services = Service::find()->where(['tg_visible' => 1])->all();
-
-        $inline_keyboard = [];
-
-        foreach ($services as $i => $value) {
-            $service = $services[$i];
-
-            $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
-
-            if ($categoryHasService) {
-                
-                $category_id = $categoryHasService->category_id;
+        // $send = "------------------------------------";
     
-                $category = Category::findOne(['id' => $category_id]);
-            
-                array_push($inline_keyboard, [
-                    [
-                        'text' => $category->name,
-                        'callback_data' => 'specialists_' . $category->id
-                    ]
-                ]);
+        // $KeyboardMarkup = [
+        //     'keyboard' => [
+        //         [
+        //             [ 'text' => 'Задать вопрос админу' ],
+        //         ],
+        //     ],
+        //     'resize_keyboard' => true
+        // ];
 
-            }
-        }
+        // $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
 
         $send = "В разделе “Специалисты” Вы можете получить помощь нужного специалиста.";
     
         $InlineKeyboardMarkup = [
-            'inline_keyboard' => $inline_keyboard
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => "Юриспруденция",
+                        'callback_data' => 'specialists_jurisprudence'
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Оздоровление",
+                        'callback_data' => 'specialists_recovery'
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Эзотерика",
+                        'callback_data' => 'specialists_esotericism'
+                    ],
+                ]
+            ]
         ];
 
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
-
-        return;
-    }
-
-
-    /********************
-    
-           ПРОГОЛОСОВАТЬ
-
-    *********************/
-    if ($text == "Проголосовать" || $text == "/vote")
-    {
-        $send = "Ещё не реализованно!";
-
-        $bot->sendMessage($chat_id, $send);
-
-        $send = "Тест редактирования сообщения вместе с кнопками";
-    
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' => [[[
-                'text' => 'Начать тест',
-                'callback_data' => 'test_edit'
-            ]]]
-        ];
-        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
-
 
         return;
     }
@@ -2316,6 +2298,160 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
 
 
+    /*************************************
+    
+           СПЕЦИАЛИСТЫ Юриспруденция
+
+    *************************************/
+    if ($data == "specialists_jurisprudence")
+    {
+        $services = Service::find()->where(['tg_visible' => 1])->all();
+
+        $inline_keyboard = [];
+        $send = "";
+
+        foreach ($services as $i => $value) {
+            $service = $services[$i];
+
+            $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
+            
+            if ($categoryHasService) {
+                
+                $category_id = $categoryHasService->category_id;
+    
+                $category = Category::findOne(['id' => $category_id]);
+
+                $parent = Category::findOne(['id' => $category->parent]);
+                // $send .= "parent_id: ".$parent->id." - parent->name: ".$parent->name." \r\n"; // для тестов
+
+                if ($parent && $parent->name == "Юриспруденция") {      
+
+                    array_push($inline_keyboard, [
+                        [
+                            'text' => $category->name,
+                            'callback_data' => 'specialists_' . $category->id
+                        ]
+                    ]);          
+
+                }
+
+            }
+        }
+
+        $send .= "В разделе “Юриспруденция” Вы можете получить помощь нужного специалиста.";
+    
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => $inline_keyboard
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }
+
+    /*************************************
+    
+           СПЕЦИАЛИСТЫ Оздоровление
+
+    *************************************/
+    if ($data == "specialists_recovery")
+    {
+        $services = Service::find()->where(['tg_visible' => 1])->all();
+
+        $inline_keyboard = [];
+        $send = "";
+
+        foreach ($services as $i => $value) {
+            $service = $services[$i];
+
+            $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
+
+            if ($categoryHasService) {
+                
+                $category_id = $categoryHasService->category_id;
+    
+                $category = Category::findOne(['id' => $category_id]);
+
+                $parent = Category::findOne(['id' => $category->parent]);
+                // $send .= "parent_id: ".$parent->id." - parent->name: ".$parent->name." \r\n"; // для тестов
+                
+                if ($parent && $parent->name == "Оздоровление") {
+            
+                    array_push($inline_keyboard, [
+                        [
+                            'text' => $category->name,
+                            'callback_data' => 'specialists_' . $category->id
+                        ]
+                    ]);
+                    
+                }
+
+            }
+        }
+
+        $send .= "В разделе “Оздоровление” Вы можете получить помощь нужного специалиста.";
+    
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => $inline_keyboard
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }
+
+
+    /*************************************
+    
+           СПЕЦИАЛИСТЫ Эзотерика
+
+    *************************************/
+    if ($data == "specialists_esotericism")
+    {
+        $services = Service::find()->where(['tg_visible' => 1])->all();
+
+        $inline_keyboard = [];
+        $send = "";
+
+        foreach ($services as $i => $value) {
+            $service = $services[$i];
+
+            $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
+
+            if ($categoryHasService) {
+                
+                $category_id = $categoryHasService->category_id;
+    
+                $category = Category::findOne(['id' => $category_id]);
+
+                $parent = Category::findOne(['id' => $category->parent]);
+                // $send .= "parent_id: ".$parent->id." - parent->name: ".$parent->name." \r\n"; // для тестов
+                
+                if ($parent && $parent->name == "Эзотерика") {
+            
+                    array_push($inline_keyboard, [
+                        [
+                            'text' => $category->name,
+                            'callback_data' => 'specialists_' . $category->id
+                        ]
+                    ]);
+                    
+                }
+
+            }
+        }
+        
+        $send .= "В разделе “Эзотерика” Вы можете получить помощь нужного специалиста.";
+    
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => $inline_keyboard
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }
+
 
     /************************************************
     
@@ -2329,6 +2465,17 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $service = $services[$i];
 
         $categoryHasService = CategoryHasService::findOne(['service_id' => $service->id]);
+
+        $serviceHasPhoto = ServiceHasPhoto::findOne(['service_id' => $service->id]);
+
+        $image_url = "";
+        if ($serviceHasPhoto) {
+            $photo_id = $serviceHasPhoto->photo_id;
+            $photo = Photo::findOne(['id' => $photo_id]);
+            $image_id = $photo->image_id;            
+            $image = Image::findOne(['id' => $image_id]);
+            $image_url = "https://будь-здоров.рус/web".$image->file;
+        }
 
         if ($categoryHasService) {
             
@@ -2344,6 +2491,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 $description = str_replace("<br>", "\r\n", $description);
                 $description = str_replace("&nbsp;", " ", $description);
                 $description = str_replace("&mdash;", "—", $description);
+                $description = str_replace("&ndash;", "-", $description);
                 $send .= preg_replace('(\<(/?[^>]+)>)', "", $description);
                 $send .= "\r\n\r\n";
                 $send .= "Цена: ";
@@ -2352,7 +2500,23 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 $send .= "Цена для пайщика: ";
                 $send .= $service->member_price;
 
-                $bot->sendMessage($from_id, $send);
+                if ($image_url) {
+                    if (strlen($send) > 1024) { // limit caption
+                    // if (strlen($send) > 400) {
+                        // $bot->sendPhoto($from_id, $image_url, substr($send, 0, 400)."...");
+                        $bot->sendPhoto($from_id, $image_url, $service->name);
+                    }else {
+                        $bot->sendPhoto($from_id, $image_url, $send);
+                    }
+                }else {
+                    if (strlen($send) > 4096) { // limit text
+                    // if (strlen($send) > 400) {
+                        // $bot->sendMessage($from_id, substr($send, 0, 400)."...");
+                        $bot->sendMessage($from_id, $service->name);
+                    }else {
+                        $bot->sendMessage($from_id, $send);
+                    }                   
+                }
             }
 
         }

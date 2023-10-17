@@ -133,7 +133,7 @@ class Bot {
 	*/
     public function sendMessage(
 		$chat_id, 
-		$text,
+		$text, // limit text 4096
 		$parse_mode = null,
 		$reply_markup = null,
 		$reply_to_message_id = null,
@@ -475,7 +475,7 @@ class Bot {
     public function sendPhoto(
 		$chat_id, 
 		$photo,		
-		$caption = null,
+		$caption = null, // limit caption 1024
 		$parse_mode = null,
 		$reply_markup = null,
 		$reply_to_message_id = null,		
