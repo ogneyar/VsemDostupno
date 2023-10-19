@@ -118,9 +118,11 @@ class Email extends \yii\db\ActiveRecord
             $send .= preg_replace($patterns, $replacements, $email->subject);
             $send .= "\r\n\r\n";
             $send .= preg_replace($patterns, $replacements, $email->body);
-
+            
             // $send = preg_replace('/\\\r/', '\r', $send);
             // $send = preg_replace('/\\\n/', '\n', $send);
+            
+            $send = preg_replace("(\<(/?[^>]+)>)", "", $send); // удаление HTML тегов
 
             $toChatIds = is_array($to) ? $to : [$to];
             foreach ($toChatIds as $chat_id) {

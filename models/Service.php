@@ -93,6 +93,7 @@ class Service extends \yii\db\ActiveRecord
             'photo' => 'Фото мастера',
             'thumbUrlManufacturer' => 'Фото мастера',
             'tg_visible' => 'Показ в Телеграм',
+            'tgraph_path' => 'Путь к Телеграф',
         ];
     }
 

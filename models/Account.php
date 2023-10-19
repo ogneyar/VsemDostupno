@@ -149,7 +149,14 @@ class Account extends \yii\db\ActiveRecord
         }
 
         if ($sendEmail) {
-            Email::send('account-log', $account->user->email, [
+            // Email::send('account-log', $account->user->email, [
+            //     'typeName' => $account->typeName,
+            //     'message' => $message,
+            //     'amount' => $amount,
+            //     'total' => $account->total,
+            // ]);
+            
+            if ($account->user->tg_id) Email::tg_send('account-log', $account->user->tg_id, [
                 'typeName' => $account->typeName,
                 'message' => $message,
                 'amount' => $amount,
@@ -190,7 +197,14 @@ class Account extends \yii\db\ActiveRecord
 
         if ($sendEmail) {
             if ($from) {
-                Email::send('account-log', $from->user->email, [
+                // Email::send('account-log', $from->user->email, [
+                //     'typeName' => $from->typeName,
+                //     'message' => $message,
+                //     'amount' => -$amount,
+                //     'total' => $from->total,
+                // ]);
+
+                if ($from->user->tg_id) Email::tg_send('account-log', $from->user->tg_id, [
                     'typeName' => $from->typeName,
                     'message' => $message,
                     'amount' => -$amount,
@@ -199,7 +213,14 @@ class Account extends \yii\db\ActiveRecord
             }
 
             if ($to) {
-                Email::send('account-log', $to->user->email, [
+                // Email::send('account-log', $to->user->email, [
+                //     'typeName' => $to->typeName,
+                //     'message' => $message,
+                //     'amount' => $amount,
+                //     'total' => $to->total,
+                // ]);
+
+                if ($to->user->tg_id) Email::tg_send('account-log', $to->user->tg_id, [
                     'typeName' => $to->typeName,
                     'message' => $message,
                     'amount' => $amount,
