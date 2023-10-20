@@ -169,14 +169,14 @@ function requestMessage($bot, $message, $master, $admin) {
     }
 
 
-    /********************
+    /***********************
     
            СПЕЦИАЛИСТЫ
 
-    *********************/
+    ************************/
     if ($text == "Специалисты" || $text == "/specialists")
     {
-        $send = "------------------------------------";    
+        $send = "Выберите";    
         $KeyboardMarkup = [
             'keyboard' => [
                 [
@@ -188,7 +188,7 @@ function requestMessage($bot, $message, $master, $admin) {
         $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
 
 
-        $send = "В разделе “Специалисты” Вы можете получить помощь нужного специалиста.";
+        $send = "проффесиональное направление.";
     
         $InlineKeyboardMarkup = [
             'inline_keyboard' => [
@@ -664,67 +664,10 @@ function requestMessage($bot, $message, $master, $admin) {
 
     /******************************************
     
-        ЕСЛИ ПРИСЛАЛИ НЕИЗВЕСТНОЕ СООБЩЕНИЕ
+        ЕСЛИ ПРИСЛАЛИ ОТВЕТНОЕ СООБЩЕНИЕ (reply)
 
     *******************************************/
-    if ($chat_id != $admin) {
-        
-        $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);
-
-        if ($tgCom) {
-            
-            $user = User::findOne(['tg_id' => $from_id, 'disabled' => 0]);
-
-            if ( ! $user || $user->lastname == "lastname") {
-                $send = "Не зарегистрированный пользователь". "\r\n\r\n" . $text;
-            }else {
-                // $send = "Сообщение от пользователя №" . $chat_id . "\r\n\r\n" . $text;
-                $send = "Сообщение от клиента" . "\r\n\r\n" . $text;                  
-            }     
-                         
-            $InlineKeyboardMarkup = [
-                'inline_keyboard' => [
-                    [
-                        [
-                            'text' => 'Ответить',
-                            'callback_data' => 'otvetit_' . $chat_id
-                        ],
-                    ],
-                ]
-            ];
-
-            $bot->sendMessage($tgCom->to_chat_id, $send, null, $InlineKeyboardMarkup);
-            // $bot->sendMessage($tgCom->to_chat_id, $send);
-
-            // $send = "Сообщение отправлено пользователю №" . $tgCom->to_chat_id;
-            // $send = "Ваше сообщение отправлено, при наличии времени специалист с вами сразу свяжется";
-            $send = "Ваше сообщение отправлено";
-            $bot->sendMessage($chat_id, $send);
-    
-            $tgCom->delete();
-
-            return;
-        }
-
-        $send = "Вы желаете задать вопрос?";
-
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' => [[
-                [
-                    'text' => 'Да',
-                    'callback_data' => 'question_yes'
-                ],
-                [
-                    'text' => 'Нет',
-                    'callback_data' => 'question_no'
-                    ],
-            ]]
-        ];  
-        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup, $message_id);
-
-    }else    
-    // это для админа
-    if ($reply_to_message) {
+	if ($reply_to_message && $chat_id == $admin) {
         if ($caption) {            
             // $caption = str_replace("\r\n", "", $caption);
             $reply_id = substr($caption, 0, strpos($caption, "Сообщение от клиента!"));
@@ -745,10 +688,78 @@ function requestMessage($bot, $message, $master, $admin) {
                 $bot->sendMessage($admin, "Можно отправлять только текстовые и голосовые сообщения!");
             }
         }
-    }else {        
-        $bot->sendMessage($chat_id, "Ваше сообщение НЕ БУДЕТ отправлено администратору!\r\n\r\nВы и есть администратор!!!");
+        return;
+    }
+        
+
+
+    /******************************************
+    
+        ЕСЛИ ПРИСЛАЛИ НЕИЗВЕСТНОЕ СООБЩЕНИЕ
+
+    *******************************************/
+    $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);
+
+    if ($tgCom) { // если есть запись, отправляем переписку
+        
+        $user = User::findOne(['tg_id' => $from_id, 'disabled' => 0]);
+
+        if ( ! $user || $user->lastname == "lastname") {
+            $send = "Не зарегистрированный пользователь". "\r\n\r\n" . $text;
+        }else {
+            // $send = "Сообщение от пользователя №" . $chat_id . "\r\n\r\n" . $text;
+            $send = "Сообщение от клиента" . "\r\n\r\n" . $text;                  
+        }     
+                     
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => 'Ответить',
+                        'callback_data' => 'otvetit_' . $chat_id
+                    ],
+                ],
+            ]
+        ];
+
+        $bot->sendMessage($tgCom->to_chat_id, $send, null, $InlineKeyboardMarkup);
+        // $bot->sendMessage($tgCom->to_chat_id, $send);
+
+        // $send = "Сообщение отправлено пользователю №" . $tgCom->to_chat_id;
+        // $send = "Ваше сообщение отправлено, при наличии времени специалист с вами сразу свяжется";
+        $send = "Ваше сообщение отправлено";
+        $bot->sendMessage($chat_id, $send);
+            $tgCom->delete();
+
+        return;
     }
 
+    
+    if ($chat_id != $admin) {
+
+        $send = "Вы желаете задать вопрос?";
+
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[
+                [
+                    'text' => 'Да',
+                    'callback_data' => 'question_yes'
+                ],
+                [
+                    'text' => 'Нет',
+                    'callback_data' => 'question_no'
+                    ],
+            ]]
+        ];  
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup, $message_id);
+		
+        return;
+		
+	}else {        
+        $bot->sendMessage($chat_id, "Ваше сообщение НЕ БУДЕТ отправлено администратору!\r\n\r\nВы и есть администратор!!!");
+		
+        return;
+    }
 
 
 }

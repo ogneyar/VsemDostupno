@@ -1690,11 +1690,15 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 $end = "";
                 $end .= "\r\n\r\n";
                 $end .= "Цена: ";
-                $end .= $service->price;
+                // $end .= $service->price;
                 // $end .= "\r\n\r\n";
                 // $end .= "Цена для пайщика: ";
-                // $end .= $service->member_price;
-                
+                $end .= $service->member_price;
+
+                //-----------------------------------
+                $price = $service->member_price;
+                //-----------------------------------
+
                 $InlineKeyboardMarkup = [
                     'inline_keyboard' => [
                         [
@@ -1751,7 +1755,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                     $textKeyOne = "Да отправить";
                     $textKeyTwo = "Нет";
                 }else {
-                    $send = "После Нажатия кнопки “Далее” с Вашего лицевого счёта будет списана сумма за  услугу ".$service->price."р., как обмен паями";
+                    $send = "После Нажатия кнопки “Далее” с Вашего лицевого счёта будет списана сумма за  услугу ".$price."р., как обмен паями";
                     $textKeyOne = "Далее";
                     $textKeyTwo = "Отказаться";
                 }
@@ -1818,29 +1822,26 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 
                     return;
                 }else {
-            
-                    // $account = Account::findOne(['id' => $user->id]);
                     
                     $face = $user->getAccount(Account::TYPE_DEPOSIT); // расчётный (лицевой) счёт
                     // $invest = $user->getAccount(Account::TYPE_BONUS); // инвестиционный счёт
                     // $partner = $user->getAccount(Account::TYPE_STORAGE); // партнёрский счёт
                     // $pay = $user->getAccount(Account::TYPE_SUBSCRIPTION); // членский взнос
                     
-                    if ($face->total >= $service->price) {
-                        $send = "На вашем счету было => " . $face->total;
-                        $send .= "На вашем счету стало => меньше на " . $service->price . " руб";
-                    
-                        $bot->sendMessage($from_id, $send);
+                    if ($face->total >= $price) {
+                        // $send = "На вашем счету было => " . $face->total;
+                        // $send .= "На вашем счету стало => меньше на " . $price . " руб";                    
+                        // $bot->sendMessage($from_id, $send);
 
                         $sendMessage = true;          
 
                         $message = "Консультация";
-                        // Account::transfer($face, $face->user, $to_user->getAccount(Account::TYPE_DEPOSIT)->user, -$service->price, $message, $sendMessage);
+                        // Account::transfer($face, $face->user, $to_user->getAccount(Account::TYPE_DEPOSIT)->user, -$price, $message, $sendMessage);
                         
                         $message = "За консультацию";
-                        // Account::transfer($to_user->getAccount(Account::TYPE_DEPOSIT), $to_user->getAccount(Account::TYPE_DEPOSIT)->user, $face->user, $service->price, $message, $sendMessage);
+                        // Account::transfer($to_user->getAccount(Account::TYPE_DEPOSIT), $to_user->getAccount(Account::TYPE_DEPOSIT)->user, $face->user, $price, $message, $sendMessage);
 
-                        Account::swap($face, $to_user->getAccount(Account::TYPE_DEPOSIT), $service->price, $message, $sendMessage);
+                        Account::swap($face, $to_user->getAccount(Account::TYPE_DEPOSIT), $price, $message, $sendMessage);
                         
                         $send = "Обмен паями проведён успешно, в поле “Сообщение” внесите интересующие Вас вопросы  и отправьте их для связи с Специалистом";
                         
