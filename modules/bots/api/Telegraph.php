@@ -149,6 +149,47 @@ class Telegraph {
 		
 		return $response;
 	}
+    
+    
+    /*
+	**  функция редактирования страницы
+	**
+ 	**  @param str $path
+ 	**  @param str $title
+	**  @param str $author_name
+	**  @param str $author_url
+	**  @param array $content	// '[{"tag":"p","children":["Hello,+world!"]}]'
+	**  @param bool $return_content
+	**  
+	**  @return object
+	*/
+    public function editPage(
+		$path,
+		$title, // max length 256
+		$content, // max 64Kb
+		$author_name = null, // max length 128
+		$author_url = null, // max length 512
+		$return_content = false
+	) {
+		$response = $this->call("editPage", [
+			'path' => $path,
+			'title' => $title,
+			'content' => $content,
+			'author_name' => $author_name,			
+			'author_url' => $author_url,
+			'return_content' => $return_content
+		]);	
+				
+		$response = json_decode($response);
+		
+		if ($response && $response->ok) {
+			$response = $response->result;
+		}else $response = false;
+		
+		return $response;
+	}
+
+
 }
 
 ?>

@@ -1670,6 +1670,11 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
         if ($categoryHasService) {
             
+            //-----------------------------------
+            // $price = $service->price;
+            $price = $service->member_price;
+            //-----------------------------------
+
             $category_id = $categoryHasService->category_id;
                 
             $category = Category::findOne(['id' => $category_id]);
@@ -1683,6 +1688,10 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 $description = str_replace("&nbsp;", " ", $description);
                 $description = str_replace("&mdash;", "—", $description);
                 $description = str_replace("&ndash;", "-", $description);
+                $description = str_replace("&ldquo;", "“", $description);
+                $description = str_replace("&rdquo;", "”", $description);
+                $description = str_replace("&laquo;", "«", $description);
+                $description = str_replace("&raquo;", "»", $description);
                 $send = preg_replace("(\<(/?[^>]+)>)", "", $description); // удаление HTML тегов
                 // $send = trim($send);
                 $preg_replace_send = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $send); //  удаление пустых строк
@@ -1690,14 +1699,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 $end = "";
                 $end .= "\r\n\r\n";
                 $end .= "Цена: ";
-                // $end .= $service->price;
-                // $end .= "\r\n\r\n";
-                // $end .= "Цена для пайщика: ";
-                $end .= $service->member_price;
-
-                //-----------------------------------
-                $price = $service->member_price;
-                //-----------------------------------
+                $end .= $price;
 
                 $InlineKeyboardMarkup = [
                     'inline_keyboard' => [
@@ -1716,21 +1718,20 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
                 $max_length = 150;
                 if (strlen($preg_replace_send) > $max_length) {
+                    $access_token = Yii::$app->params['access_token'];         
+                    $tGraph = new Telegraph($access_token);
+                    $content = '[{"tag":"p","children":["'.$send.'"]}]';
                     if ($service->tgraph_path) {
-                        $tGraphUrl = "https://telegra.ph/" . $service->tgraph_path;
-                        $tGraphUrl = "[подробнее](".$tGraphUrl.")";
+                        $data = $tGraph->editPage($service->tgraph_path, $service->name, $content);
                     }else {
-                        $access_token = Yii::$app->params['access_token'];         
-                        $tGraph = new Telegraph($access_token);
-                        $content = '[{"tag":"p","children":["'.$send.'"]}]';
                         $data = $tGraph->createPage($service->name, $content);
-                        // $bot->sendMessage($master, $bot->PrintArray($data));
-                        $tGraphUrl = $data->url;
-                        $tGraphUrl = "[подробнее](".$tGraphUrl.")";
-
-                        $service->tgraph_path = $data->path;
-                        $service->save();
                     }
+                    // $bot->sendMessage($master, $bot->PrintArray($data));
+                    $tGraphUrl = $data->url;
+                    $tGraphUrl = "[подробнее](".$tGraphUrl.")";
+
+                    $service->tgraph_path = $data->path;
+                    $service->save();
 
                     $text = $name . mb_substr($preg_replace_send, 0, $max_length) . "...\r\n" . $tGraphUrl . $end;
 
@@ -1835,13 +1836,14 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
                         $sendMessage = true;          
 
-                        $message = "Консультация";
-                        // Account::transfer($face, $face->user, $to_user->getAccount(Account::TYPE_DEPOSIT)->user, -$price, $message, $sendMessage);
+                        $message = "Списание за консультацию";
+                        Account::transfer($face, $face->user, $to_user->getAccount(Account::TYPE_DEPOSIT)->user, -$price, $message, $sendMessage);
                         
-                        $message = "За консультацию";
-                        // Account::transfer($to_user->getAccount(Account::TYPE_DEPOSIT), $to_user->getAccount(Account::TYPE_DEPOSIT)->user, $face->user, $price, $message, $sendMessage);
+                        $message = "Зачисление за консультацию";
+                        Account::transfer($to_user->getAccount(Account::TYPE_DEPOSIT), $to_user->getAccount(Account::TYPE_DEPOSIT)->user, $face->user, $price, $message, $sendMessage);
 
-                        Account::swap($face, $to_user->getAccount(Account::TYPE_DEPOSIT), $price, $message, $sendMessage);
+                        // $message = "За консультацию";`
+                        // Account::swap($face, $to_user->getAccount(Account::TYPE_DEPOSIT), $price, $message, $sendMessage);
                         
                         $send = "Обмен паями проведён успешно, в поле “Сообщение” внесите интересующие Вас вопросы  и отправьте их для связи с Специалистом";
                         

@@ -52,7 +52,7 @@ $this->registerJs("CKEDITOR.plugins.addExternal('youtube', '/ckeditor/plugins/yo
 
     <?= $form->field($model, 'published')->checkbox() ?>
 
-    <?= $form->field($model, 'tg_visible')->checkbox() ?>
+    <?//= $form->field($model, 'tg_visible')->checkbox() ?>
 
     <?= $form->field($model, 'categoryIds')->hiddenInput()->label(false) ?>
 
