@@ -1842,7 +1842,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                         $message = "Зачисление за консультацию";
                         Account::transfer($to_user->getAccount(Account::TYPE_DEPOSIT), $to_user->getAccount(Account::TYPE_DEPOSIT)->user, $face->user, $price, $message, $sendMessage);
 
-                        // $message = "За консультацию";`
+                        // $message = "За консультацию";
                         // Account::swap($face, $to_user->getAccount(Account::TYPE_DEPOSIT), $price, $message, $sendMessage);
                         
                         $send = "Обмен паями проведён успешно, в поле “Сообщение” внесите интересующие Вас вопросы  и отправьте их для связи с Специалистом";
