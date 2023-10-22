@@ -8,8 +8,8 @@ use app\models\Email;
 use app\models\Account;
 use app\models\TgCommunication;
 
-require __DIR__ . '/../utils/formatPrice.php';
-require __DIR__ . '/../utils/getBalance.php';
+require_once __DIR__ . '/../utils/formatPrice.php';
+require_once __DIR__ . '/../utils/getBalance.php';
 
 
 
@@ -667,8 +667,9 @@ function requestMessage($bot, $message, $master, $admin) {
         }else {
             $send = "Ваше сообщение отправлено, при наличии времени специалист с вами сразу свяжется";
         }
+
         $bot->sendMessage($chat_id, $send);
-            $tgCom->delete();
+        $tgCom->delete();
 
         return;
     }

@@ -9,7 +9,7 @@ use app\models\Account;
 // use app\models\TgCommunication;
 
 
-function getBalance($bot, $chat_id, $additional_text) {
+function getBalance($bot, $chat_id, $additional_text = null) {
     
     $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
 
