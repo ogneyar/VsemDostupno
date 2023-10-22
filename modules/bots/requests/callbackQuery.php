@@ -13,6 +13,8 @@ use app\models\Photo;
 use app\models\Image;
 use app\models\Account;
 
+require_once __DIR__ . '/../utils/getBalance.php';
+
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     $from = $callback_query['from'];
@@ -1636,6 +1638,14 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $tgCom->chat_id = $from_id;
         }
         $tgCom->to_chat_id = $array[1];
+        
+        $array_text = explode("\n", $text);
+        if ($array_text[0] != "Сообщение от специалиста") { // если сообщение не от специалиста, значит вы специалист
+            $tgCom->from_whom = "specialist";
+        }else {
+            $tgCom->from_whom = "client";
+        }
+
         $tgCom->save();
         
         $send = "Введите ваше сообщение.";
@@ -1752,7 +1762,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 $user = User::findOne(['tg_id' => $from_id, 'disabled' => 0]);
 
                 if (!$user || $user->lastname == "lastname") {
-                    $send = "Консультации специалиста для незарегистрированных пользователей возможна исключительно по личной договорённости Специалиста, хотите отправить ему сообщение?";   
+                    $send = "Консультации специалиста для незарегистрированных пользователей возможны исключительно по личной договорённости Специалиста, хотите отправить ему сообщение?";   
                     $textKeyOne = "Да отправить";
                     $textKeyTwo = "Нет";
                 }else {
@@ -1803,6 +1813,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                     $tgCom->chat_id = $from_id;
                 }
                 $tgCom->to_chat_id = $to_user->tg_id;
+                $tgCom->from_whom = "client";
                 $tgCom->save();
 
                 if ( ! $user || $user->lastname == "lastname") {
@@ -1830,35 +1841,22 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                     // $pay = $user->getAccount(Account::TYPE_SUBSCRIPTION); // членский взнос
                     
                     if ($face->total >= $price) {
-                        // $send = "На вашем счету было => " . $face->total;
-                        // $send .= "На вашем счету стало => меньше на " . $price . " руб";                    
-                        // $bot->sendMessage($from_id, $send);
 
-                        $sendMessage = true;          
+                        $sendMessage = false;          
 
                         $message = "Списание за консультацию";
                         Account::transfer($face, $face->user, $to_user->getAccount(Account::TYPE_DEPOSIT)->user, -$price, $message, $sendMessage);
+                        getBalance($bot, $from_id, "Произведено списание за консультацию ".$price."р");
                         
                         $message = "Зачисление за консультацию";
                         Account::transfer($to_user->getAccount(Account::TYPE_DEPOSIT), $to_user->getAccount(Account::TYPE_DEPOSIT)->user, $face->user, $price, $message, $sendMessage);
+                        getBalance($bot, $to_user->tg_id, "Произведено зачисление за консультацию ".$price."р");
 
                         // $message = "За консультацию";
                         // Account::swap($face, $to_user->getAccount(Account::TYPE_DEPOSIT), $price, $message, $sendMessage);
                         
                         $send = "Обмен паями проведён успешно, в поле “Сообщение” внесите интересующие Вас вопросы  и отправьте их для связи с Специалистом";
                         
-                        // $InlineKeyboardMarkup = [
-                        //     'inline_keyboard' => [
-                        //         [
-                        //             [
-                        //                 'text' => 'Отмена',
-                        //                 'callback_data' => 'otmena_otpravki'
-                        //             ],
-                        //         ],
-                        //     ]
-                        // ];
-                        // $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
-
                         $bot->sendMessage($from_id, $send);
                     
                         return;

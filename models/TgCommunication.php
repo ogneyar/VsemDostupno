@@ -45,6 +45,7 @@ class TgCommunication extends \yii\db\ActiveRecord
             'id' => 'Идентификатор',
             'chat_id' => 'От кого сообщение',
             'to_chat_id' => 'Кому сообщение',
+            'from_whom' => 'От кого', // от клиента или от специалиста
         ];
     }
 
@@ -62,6 +63,14 @@ class TgCommunication extends \yii\db\ActiveRecord
     public function getToChatId()
     {
         return $this->hasOne(User::className(), ['id' => 'to_chat_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFromWhom()
+    {
+        return $this->hasOne(User::className(), ['id' => 'from_whom']);
     }
 
 }
