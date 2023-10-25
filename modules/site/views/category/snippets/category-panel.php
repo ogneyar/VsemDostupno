@@ -15,6 +15,7 @@ use app\modules\purchase\models\PurchaseProduct;
                 </div>
             </div>
         <?php endif ?>
+        
         <?= $this->renderFile('@app/modules/site/views/category/snippets/category-grid.php', [
             'categories' => $categories,
         ]) ?>

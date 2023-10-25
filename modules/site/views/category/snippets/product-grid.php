@@ -26,7 +26,7 @@ use app\modules\purchase\models\PurchaseProduct;
                     <?php endif ?>
                     <div class="col-md-3 product-item">
                         
-                            <div style="height: 25px;">
+                            <div style="height: 50px;">
                                 <h5 class="text-center" style="font-size: 20px;"><strong><?= (isset($date) && strtotime($date) > 0) ? 'Доставка ' . date('d.m.Yг.', strtotime($date)) : '' ?></strong></h5>
                             </div>
                        

@@ -27,6 +27,7 @@ class PurchaseNotificationController extends Controller
             foreach ($products as $product) {
                 $orders_to_send = [];
                 $product_total = PurchaseOrderProduct::getProductTotal($product->id);
+
                 if (!empty($product_total) && $product_total >= $product->purchase_total) {
                     $product->status = 'held';
                     $product->save();
@@ -217,16 +218,20 @@ class PurchaseNotificationController extends Controller
     
     protected function sendEmailToProvider($details, $provider_id, $partner_id, $date)
     {
-        $provider = Provider::find()->where(['id' => $provider_id])->with('user')->one();
-        $partner = Partner::findOne($partner_id);
-        Yii::$app->mailer->compose('provider/order', [
-                'details' => $details,
-                'partner' => $partner,
-                'date' => $date
-            ])
-            ->setFrom(Yii::$app->params['fromEmail'])
-            ->setTo($provider->user->email)
-            ->setSubject('Поступил заказ с сайта "' . Yii::$app->params['name'] . '"')
-            ->send();
+        try {
+            $provider = Provider::find()->where(['id' => $provider_id])->with('user')->one();
+            $partner = Partner::findOne($partner_id);
+            Yii::$app->mailer->compose('provider/order', [
+                    'details' => $details,
+                    'partner' => $partner,
+                    'date' => $date
+                ])
+                ->setFrom(Yii::$app->params['fromEmail'])
+                ->setTo($provider->user->email)
+                ->setSubject('Поступил заказ с сайта "' . Yii::$app->params['name'] . '"')
+                ->send();
+        } catch (Exception $e) {
+            unset($e);
+        }
     }
 }
