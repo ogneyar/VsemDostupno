@@ -588,14 +588,21 @@ class OrderController extends BaseController
                                     if (!Account::swap($user->deposit, $provider_account, $paid_for_provider, 'Перевод пая на счёт', false)) {
                                         throw new Exception('Ошибка модификации счета пользователя!');
                                     }
-                                    try {
-                                        Email::send('account-log', $provider_account->user->email, [
+                                    // try {
+                                    //     Email::send('account-log', $provider_account->user->email, [
+                                    //         'message' => 'Перевод пая на счёт',
+                                    //         'amount' => $paid_for_provider,
+                                    //         'total' => $provider_account->total,
+                                    //     ]);
+                                    // } catch (Exception $e) {
+                                    //     unset($e);
+                                    // }
+                                    if ($provider_account->user->tg_id) {
+                                        Email::tg_send('account-log', $provider_account->user->tg_id, [
                                             'message' => 'Перевод пая на счёт',
                                             'amount' => $paid_for_provider,
                                             'total' => $provider_account->total,
                                         ]);
-                                    } catch (Exception $e) {
-                                        unset($e);
                                     }
                                     $total_paid_for_provider += $paid_for_provider;
                                 }
@@ -632,7 +639,8 @@ class OrderController extends BaseController
                     
                     $message = 'Членский взнос';
 
-                    if (!Account::swap($user->deposit, null, $order->paid_total - $total_paid_for_provider, $message, !$is_purchase)) {
+                    // if (!Account::swap($user->deposit, null, $order->paid_total - $total_paid_for_provider, $message, !$is_purchase)) {
+                    if (!Account::swap($user->deposit, null, $order->paid_total - $total_paid_for_provider, $message, false)) {
                         throw new Exception('Ошибка модификации счета пользователя!');
                     }
                     if ($user->role == User::ROLE_PROVIDER) {
@@ -642,15 +650,23 @@ class OrderController extends BaseController
                     if ($is_purchase) {
                         $deposit = $user->deposit;
                         $message = 'Списание на закупку';
-                        try {
-                            Email::send('account-log', $deposit->user->email, [
+                        // try {
+                        //     Email::send('account-log', $deposit->user->email, [
+                        //         'typeName' => $deposit->typeName,
+                        //         'message' => $message,
+                        //         'amount' => -$order->paid_total,
+                        //         'total' => $deposit->total,
+                        //     ]);                            
+                        // } catch (Exception $e) {
+                        //     unset($e);
+                        // }                        
+                        if ($deposit->user->tg_id) {
+                            Email::tg_send('account-log', $deposit->user->tg_id, [
                                 'typeName' => $deposit->typeName,
                                 'message' => $message,
                                 'amount' => -$order->paid_total,
                                 'total' => $deposit->total,
-                            ]);                            
-                        } catch (Exception $e) {
-                            unset($e);
+                            ]);       
                         }
                     }
                     
@@ -671,45 +687,75 @@ class OrderController extends BaseController
                 $orderId = sprintf("%'.05d\n", $order->order_id);
                 
                 if ($emails = NoticeEmail::getEmails()) {
-                    try {
-                        Email::send('order-customer', $emails, [
-                            'id' => $orderId,
-                            'information' => $order->htmlEmailFormattedInformation,
-                        ]);                        
-                    } catch (Exception $e) {
-                        unset($e);
+                    // try {
+                    //     Email::send('order-customer', $emails, [
+                    //         'id' => $orderId,
+                    //         'information' => $order->htmlEmailFormattedInformation,
+                    //     ]);                        
+                    // } catch (Exception $e) {
+                    //     unset($e);
+                    // }                    
+                    foreach ($emails as $email) {
+                        $userOne = User::findOne(['email' => $email]);                       
+                        if ($userOne->tg_id) {
+                            Email::tg_send('order-customer', $userOne->tg_id, [
+                                'id' => $orderId,
+                                'information' => $order->htmlEmailFormattedInformation,
+                            ]);       
+                        }
                     }
-
                 }
 
                 if ($order->partner) {
-                    try {
-                        Email::send('order-partner', $order->partner->email, [
+                    // try {
+                    //     Email::send('order-partner', $order->partner->email, [
+                    //         'id' => $orderId,
+                    //         'information' => $order->htmlEmailFormattedInformation,
+                    //     ]);                       
+                    // } catch (Exception $e) {
+                    //     unset($e);
+                    // }
+                    $userOne = User::findOne(['email' => $order->partner->email]);                       
+                    if ($userOne->tg_id) {
+                        Email::tg_send('order-partner', $userOne->tg_id, [
                             'id' => $orderId,
                             'information' => $order->htmlEmailFormattedInformation,
-                        ]);                       
-                    } catch (Exception $e) {
-                        unset($e);
+                        ]);            
                     }
                 }
 
-                try {
-                    Email::send('order-customer', $order->email, [
+                // try {
+                //     Email::send('order-customer', $order->email, [
+                //         'id' => $orderId,
+                //         'information' => $order->htmlEmailFormattedInformation,
+                //     ]);                       
+                // } catch (Exception $e) {
+                //     unset($e);
+                // }
+                $userOne = User::findOne(['email' => $order->email]);                       
+                if ($userOne->tg_id) {
+                    Email::tg_send('order-customer', $userOne->tg_id, [
                         'id' => $orderId,
                         'information' => $order->htmlEmailFormattedInformation,
-                    ]);                       
-                } catch (Exception $e) {
-                    unset($e);
+                    ]);       
                 }
             } else {
-                try {
-                    Email::send('add_advance_order', $order->email, [
+                // try {
+                //     Email::send('add_advance_order', $order->email, [
+                //         'fio' => $user->respectedName,
+                //         'order_products' => $order->htmlEmailFormattedInformation,
+                //         'order_number' => $order->order_number,
+                //     ]);                 
+                // } catch (Exception $e) {
+                //     unset($e);
+                // }
+                $userOne = User::findOne(['email' => $order->email]);                       
+                if ($userOne->tg_id) {
+                    Email::tg_send('add_advance_order', $userOne->tg_id, [
                         'fio' => $user->respectedName,
                         'order_products' => $order->htmlEmailFormattedInformation,
                         'order_number' => $order->order_number,
-                    ]);                 
-                } catch (Exception $e) {
-                    unset($e);
+                    ]);       
                 }
             }
             
