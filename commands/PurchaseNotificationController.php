@@ -4,6 +4,7 @@ namespace app\commands;
 use Yii;
 use yii\console\Controller;
 use app\models\Email;
+use app\models\User;
 use app\models\Provider;
 use app\models\Partner;
 use app\models\Fund;
@@ -13,11 +14,13 @@ use app\modules\purchase\models\PurchaseOrderProduct;
 use app\modules\purchase\models\PurchaseOrder;
 use app\modules\purchase\models\PurchaseFundBalance;
 use app\modules\purchase\models\PurchaseProviderBalance;
+use app\modules\bots\api\Bot;
+
 
 class PurchaseNotificationController extends Controller
 {
     public function actionIndex()
-    {
+    {            
         $date = date('Y-m-d');
         // $date = '2021-11-01';
          $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();
@@ -53,8 +56,21 @@ class PurchaseNotificationController extends Controller
                     
                     foreach ($orders_to_send as $val) {
                         $order = PurchaseOrder::findOne($val);
-                        try {
-                            Email::send('held_order_member', $order->email, [
+                        // try {
+                        //     Email::send('held_order_member', $order->email, [
+                        //         'fio' => $order->firstname . ' ' . $order->patronymic,
+                        //         'created_at' => date('d.m.Y', strtotime($order->created_at)),
+                        //         'order_number' => $order->order_number_copy,
+                        //         'order_id' => sprintf("%'.05d\n", $order->order_id),
+                        //         'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
+                        //         'purchase_date' => date('d.m.Y', strtotime($product->purchase_date))
+                        //     ]);
+                        // } catch (Exception $e) {
+                        //     unset($e);
+                        // }
+                        $userOne = User::findOne(['email' => $order->email]);
+                        if ($userOne->tg_id) {
+                            Email::tg_send('held_order_member', $userOne->tg_id, [
                                 'fio' => $order->firstname . ' ' . $order->patronymic,
                                 'created_at' => date('d.m.Y', strtotime($order->created_at)),
                                 'order_number' => $order->order_number_copy,
@@ -62,18 +78,6 @@ class PurchaseNotificationController extends Controller
                                 'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
                                 'purchase_date' => date('d.m.Y', strtotime($product->purchase_date))
                             ]);
-                        } catch (Exception $e) {
-                            unset($e);
-                        }
-                    }
-                    
-                    if ($product->send_notification) {
-                        $partners = PurchaseOrder::getPartnerIdByProvider($product->purchase_date, $product->provider_id);
-                        if ($partners) {
-                            foreach ($partners as $partner) {
-                                $details = PurchaseOrder::getOrderDetailsByProviderPartner($product->purchase_date, $product->provider_id, $partner['partner_id']);
-                                $this->sendEmailToProvider($details, $product->provider_id, $partner['partner_id'], $product->purchase_date);
-                            }
                         }
                     }
                     
@@ -105,6 +109,17 @@ class PurchaseNotificationController extends Controller
                         $new_product->copy = $product->id;
                         $new_product->save();
                     }
+                    
+                    if ($product->send_notification) {
+                        $partners = PurchaseOrder::getPartnerIdByProvider($product->purchase_date, $product->provider_id);
+                        if ($partners) {
+                            foreach ($partners as $partner) {
+                                $details = PurchaseOrder::getOrderDetailsByProviderPartner($product->purchase_date, $product->provider_id, $partner['partner_id']);
+                                $this->sendEmailToProvider($details, $product->provider_id, $partner['partner_id'], $product->purchase_date);
+                            }
+                        }
+                    }
+
                 } else {
                     $product->status = 'abortive';
                     $product->save();
@@ -128,26 +143,42 @@ class PurchaseNotificationController extends Controller
                             $orders_to_send[] = $order_product->purchase_order_id;
                         }
 
-                        try {
-                            Email::send('account-log', $provider_account->user->email, [
+                        // try {
+                        //     Email::send('account-log', $provider_account->user->email, [
+                        //         'typeName' => $provider_account->typeName,
+                        //         'message' => 'Списан возврат от закупки',
+                        //         'amount' => -$provider_balance->total,
+                        //         'total' => $provider_account->total,
+                        //     ]);
+                        // } catch (Exception $e) {
+                        //     unset($e);
+                        // }
+                        if ($provider_account->user->tg_id) { 
+                            Email::tg_send('account-log', $provider_account->user->tg_id, [
                                 'typeName' => $provider_account->typeName,
                                 'message' => 'Списан возврат от закупки',
                                 'amount' => -$provider_balance->total,
                                 'total' => $provider_account->total,
                             ]);
-                        } catch (Exception $e) {
-                            // unset($e);
                         }
                         
-                        try {
-                            Email::send('account-log', $deposit->user->email, [
+                        // try {
+                        //     Email::send('account-log', $deposit->user->email, [
+                        //         'typeName' => $deposit->typeName,
+                        //         'message' => 'Зачислен возврат от закупки',
+                        //         'amount' => $provider_balance->total + $fund_balance->total,
+                        //         'total' => $deposit->total,
+                        //     ]); 
+                        // } catch (Exception $e) {
+                        //     unset($e);
+                        // }
+                        if ($deposit->user->tg_id) { 
+                            Email::tg_send('account-log', $deposit->user->tg_id, [
                                 'typeName' => $deposit->typeName,
                                 'message' => 'Зачислен возврат от закупки',
                                 'amount' => $provider_balance->total + $fund_balance->total,
                                 'total' => $deposit->total,
                             ]); 
-                        } catch (Exception $e) {
-                            // unset($e);
                         }
                         
                     }
@@ -183,32 +214,51 @@ class PurchaseNotificationController extends Controller
                     
                     foreach ($orders_to_send as $val) {
                         $order = PurchaseOrder::findOne($val);
-                        try {
-                            Email::send('abortive_order_member', $order->email, [
+                        // try {
+                        //     Email::send('abortive_order_member', $order->email, [
+                        //         'fio' => $order->firstname . ' ' . $order->patronymic,
+                        //         'created_at' => date('d.m.Y', strtotime($order->created_at)),
+                        //         'order_number' => $order->order_number,
+                        //         'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
+                        //         'new_purchase_date' => $product->renewal ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
+                        //     ]);
+                        // } catch (Exception $e) {
+                        //     unset($e);
+                        // }
+                        $userOne = User::findOne(['email' => $order->email]);
+                        if ($userOne->tg_id) {
+                            Email::tg_send('abortive_order_member', $userOne->tg_id, [
                                 'fio' => $order->firstname . ' ' . $order->patronymic,
                                 'created_at' => date('d.m.Y', strtotime($order->created_at)),
                                 'order_number' => $order->order_number,
                                 'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
                                 'new_purchase_date' => $product->renewal ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
                             ]);
-                        } catch (Exception $e) {
-                            // unset($e);
                         }
                     }
                     
                     foreach ($order_products as $order_product) {
                         PurchaseOrder::setOrderStatus($order_product->purchase_order_id);
                     }
-                    try {
-                        Email::send('abortive_order_provider', $product->provider->user->email, [
+                    // try {
+                    //     Email::send('abortive_order_provider', $product->provider->user->email, [
+                    //         'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
+                    //         'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
+                    //         'new_purchase_date' => $product->renewal ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
+                    //         'new_stop_date' => $product->renewal ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
+                    //         'purchase_total' => $product->purchase_total . ' рублей',
+                    //     ]);
+                    // } catch (Exception $e) {
+                    //     unset($e);
+                    // }
+                    if ($product->provider->user->tg_id) {
+                        Email::tg_send('abortive_order_provider', $product->provider->user->tg_id, [
                             'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
                             'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
                             'new_purchase_date' => $product->renewal ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
                             'new_stop_date' => $product->renewal ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
                             'purchase_total' => $product->purchase_total . ' рублей',
                         ]);
-                    } catch (Exception $e) {
-                        // unset($e);
                     }
                     
                 }
@@ -218,20 +268,62 @@ class PurchaseNotificationController extends Controller
     
     protected function sendEmailToProvider($details, $provider_id, $partner_id, $date)
     {
-        try {
-            $provider = Provider::find()->where(['id' => $provider_id])->with('user')->one();
-            $partner = Partner::findOne($partner_id);
-            Yii::$app->mailer->compose('provider/order', [
-                    'details' => $details,
-                    'partner' => $partner,
-                    'date' => $date
-                ])
-                ->setFrom(Yii::$app->params['fromEmail'])
-                ->setTo($provider->user->email)
-                ->setSubject('Поступил заказ с сайта "' . Yii::$app->params['name'] . '"')
-                ->send();
-        } catch (Exception $e) {
-            unset($e);
+        $provider = Provider::find()->where(['id' => $provider_id])->with('user')->one();
+        $partner = Partner::findOne($partner_id);
+        // try {
+        //     Yii::$app->mailer->compose('provider/order', [
+        //             'details' => $details,
+        //             'partner' => $partner,
+        //             'date' => $date
+        //         ])
+        //         ->setFrom(Yii::$app->params['fromEmail'])
+        //         ->setTo($provider->user->email)
+        //         ->setSubject('Поступил заказ с сайта "' . Yii::$app->params['name'] . '"')
+        //         ->send();
+        // } catch (Exception $e) {
+        //     unset($e);
+        // }
+        
+        if ($provider->user->tg_id) {
+            $config = require(__DIR__ . '/../config/constants.php');
+            $web = $config['WEB'];
+            $token = $config['BOT_TOKEN'];
+            $master = Yii::$app->params['masterChatId'];         
+            // $admin = $master; 
+            $admin = Yii::$app->params['adminChatId'];
+            $bot = new Bot($token);
+
+            // $bot->sendMessage($master,"sendEmailToProvider");
+
+            $total_price = 0;
+            $send = "<h4>Поступил заказ от ". $partner->name . " для поставки товаров на ". date('d.m.Y', strtotime($date)) . "</h4>";
+            $send .= "<table border='1'>";
+            $send .= "<tr><th>Заказчик</th><th>№ п/п</th><th>Наименование товаров</th><th>Количество</th><th>На сумму</th></tr>";
+            $rowspan = count($details);
+            if ($rowspan == 1) {
+                $send .= "<tr><td>". $partner->name . "<br />" . $partner->address . "</td>";
+                $send .= "<td>1</td><td>". $details[0]['product_name'] . ", " . $details[0]['product_feature_name']. "</td>";                
+                $send .= "<td>". number_format($details[0]['quantity']) . "</td><td>". number_format($details[0]['total'], 2, ".", " ")."</td>";
+                $send .= "</tr>". $total_price += $details[0]['total'];
+            }else {
+                $send .= "<tr><td rowspan='". $rowspan. "'>". $partner->name . "<br />" . $partner->address . "</td><td>1</td>";
+                $send .= "<td>" . $details[0]['product_name'] . ", " . $details[0]['product_feature_name'] ."</td>";
+                $send .= "<td>" . number_format($details[0]['quantity']) ."</td>";
+                $send .= "<td>". number_format($details[0]['total'], 2, ".", " ") ."</td></tr>";
+                $total_price += $details[0]['total'];
+                foreach ($details as $k => $detail) {
+                    if ($k != 0) {
+                        $send .= "<tr><td>". ($k + 1)."</td><td>". $detail['product_name'] . ", " . $detail['product_feature_name']."</td>";
+                        $send .= "<td>". number_format($detail['quantity'])."</td><td>". number_format($detail['total'], 2, ".", " ")."</td>";
+                        $send .= "</tr>". $total_price += $detail['total'];
+                    }
+                }
+            }
+            $send .= "<tr><td colspan='5' align='right'><b>ИТОГО: ". number_format($total_price, 2, ".", ""). "</b></td></tr>";
+            $send .= "</table>";
+
+            // $bot->sendMessage($master, $send);
+            $bot->sendMessage($provider->user->tg_id, $send);
         }
     }
 }
