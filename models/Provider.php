@@ -21,6 +21,7 @@ use app\models\User;
  * @property string $ogrn
  * @property string $site
  * @property string $description
+ * @property integer $purchases_management 
  *
  * @property User $user
  * @property ProviderHasCategory[] $providerHasCategories
@@ -82,6 +83,7 @@ class Provider extends \yii\db\ActiveRecord
                 'ogrn' => 'ОГРН',
                 'site' => 'Сайт компании',
                 'description' => 'Описание предложений',
+                'purchases_management' => 'Ручное управление закупками',
             ],
             $user->attributeLabels()
         );

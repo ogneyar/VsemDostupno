@@ -122,7 +122,18 @@ class Email extends \yii\db\ActiveRecord
             // $send = preg_replace('/\\\r/', '\r', $send);
             // $send = preg_replace('/\\\n/', '\n', $send);
             
+            $send = str_replace("<br />", "\r\n", $send);
+            $send = str_replace("<br/>", "\r\n", $send);
+            $send = str_replace("<br>", "\r\n", $send);
+            $send = str_replace("&nbsp;", " ", $send);
+            $send = str_replace("&mdash;", "—", $send);
+            $send = str_replace("&ndash;", "-", $send);
+            $send = str_replace("&ldquo;", "“", $send);
+            $send = str_replace("&rdquo;", "”", $send);
+            $send = str_replace("&laquo;", "«", $send);
+            $send = str_replace("&raquo;", "»", $send);
             $send = preg_replace("(\<(/?[^>]+)>)", "", $send); // удаление HTML тегов
+            // $send = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $send); //  удаление пустых строк
 
             $toChatIds = is_array($to) ? $to : [$to];
             foreach ($toChatIds as $chat_id) {

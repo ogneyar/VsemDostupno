@@ -7,6 +7,12 @@ use app\models\Forgot;
 use app\models\Email;
 use app\models\Account;
 use app\models\TgCommunication;
+use app\models\Category;
+use app\models\CategoryHasProduct;
+use app\models\Product;
+use app\models\ProductFeature;
+use app\models\Provider;
+use app\modules\purchase\models\PurchaseProduct;
 
 require_once __DIR__ . '/../utils/formatPrice.php';
 require_once __DIR__ . '/../utils/getBalance.php';
@@ -48,13 +54,19 @@ function requestMessage($bot, $message, $master, $admin) {
     {    
         $send = "В голубом кружочке  с низу, в меню, Вы найдёте ссылки на всю необходимую информацию";
                
+        $keyboard = [
+            [
+                [ 'text' => 'Приветствие' ],
+                [ 'text' => 'О нас' ]
+            ]
+        ];
+
+        if ($chat_id == $master || $chat_id == $admin) {
+            array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
+        }
+
         $ReplyKeyboardMarkup = [
-            'keyboard' => [
-                [
-                    [ 'text' => 'Приветствие' ],
-                    [ 'text' => 'О нас' ]
-                ]
-            ],
+            'keyboard' => $keyboard,
             'resize_keyboard' => true,
             'selective' => true,
         ];        
@@ -594,6 +606,41 @@ function requestMessage($bot, $message, $master, $admin) {
     }
     
 
+    
+    
+    /******************************
+    
+        ДАТЫ ЗАКУПОК для админа
+
+    *******************************/
+    if ( ($text == "/purchase_date" || $text == "Даты закупок") && ($chat_id == $master || $chat_id == $admin) )
+    {    
+
+        $providers = Provider::find()->where(['purchases_management' => 1])->all();
+
+        $send = "Перечень поставщиков с ручным управлением датами закупок.";
+                   
+        $inline_keyboard = [];
+
+        foreach ($providers as $provider) {
+            array_push($inline_keyboard, [
+                [
+                    'text' => $provider->name,
+                    'callback_data' => 'providerpurchases_' . $provider->id
+                ]
+            ]);
+        }
+
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => $inline_keyboard
+        ];  
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }
+
+
+
 
     /******************************************
     
@@ -636,6 +683,119 @@ function requestMessage($bot, $message, $master, $admin) {
     if ($tgCom) { // если есть запись, отправляем переписку
         
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
+
+        // принятие новой даты заказа
+        if ( (strstr($tgCom->from_whom, '_', true) == 'newstopdate') ||
+            (strstr($tgCom->from_whom, '_', true) == 'editstopdate') ) {
+            $array = explode('_', $tgCom->from_whom);        
+            $purchase_id = $array[1];
+
+            $send = $text . "\r\nДата принята\r\n\r\nТеперь введите дату “Доставки” в формате: 15.11.2023";
+
+            $date_timestamp = strtotime($text);
+            if ( ! $date_timestamp ) {
+                $bot->sendMessage($chat_id, "Не верный формат даты");            
+                return;
+            }
+            
+            if (strstr($tgCom->from_whom, '_', true) == 'newstopdate') {
+                $tgCom->from_whom = "newpurchasedate_" . $purchase_id . "_" . $date_timestamp;
+            }else if (strstr($tgCom->from_whom, '_', true) == 'editstopdate') {
+                $tgCom->from_whom = "editpurchasedate_" . $purchase_id . "_" . $date_timestamp;
+            }
+            $tgCom->save();
+            $bot->sendMessage($chat_id, $send);
+            
+            return;
+        }
+        
+        // создание новой закупки или редактирование старой
+        if ( (strstr($tgCom->from_whom, '_', true) == 'newpurchasedate') || 
+             (strstr($tgCom->from_whom, '_', true) == 'editpurchasedate') ) {
+            
+            $array = explode('_', $tgCom->from_whom);
+            $purchase_id = $array[1];            
+            $stop_date = date('d.m.Y', $array[2]);
+            $purchase_date = $text;
+            
+            if ( ! strtotime($purchase_date)) {
+                $bot->sendMessage($chat_id, "Не верный формат даты");            
+                return;
+            }            
+            
+            if ( ! $purchase_id) {
+                $bot->sendMessage($chat_id, "Отсутсвуют данные: purchase_id = null");            
+                return;
+            }            
+
+            $product = PurchaseProduct::findOne($purchase_id);
+
+            $provider = Provider::findOne($product->provider_id);
+
+            $feature_id = $product->product_feature_id;
+            $product_feature = ProductFeature::findOne($feature_id);
+            $real_product_id = $product_feature->product_id;
+            $real_product = Product::findOne($real_product_id);
+            $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
+            $category_id = $categoryHasProduct->category_id;
+            $category = Category::findOne($category_id);
+
+            if (strstr($tgCom->from_whom, '_', true) == 'newpurchasedate') {
+                $new_product = new PurchaseProduct;
+                $new_product->created_date = date('Y-m-d');
+                $new_product->purchase_date = date('Y-m-d', strtotime($purchase_date));
+                $new_product->stop_date = date('Y-m-d', strtotime($stop_date));
+                $new_product->renewal = $product->renewal;
+                $new_product->purchase_total = $product->purchase_total;
+                $new_product->is_weights = $product->is_weights;
+                $new_product->tare = $product->tare;
+                $new_product->weight = $product->weight;
+                $new_product->measurement = $product->measurement;
+                $new_product->summ = $product->summ;
+                $new_product->product_feature_id = $product->product_feature_id;
+                $new_product->provider_id = $product->provider_id;
+                $new_product->comment = $product->comment;
+                $new_product->send_notification = $product->send_notification;
+                $new_product->status = 'advance';
+                $new_product->copy = $product->id;
+                $new_product->save();
+
+                $purchase_id = $new_product->id;
+            }else if (strstr($tgCom->from_whom, '_', true) == 'editpurchasedate') {
+                $product->purchase_date = date('Y-m-d', strtotime($purchase_date));
+                $product->stop_date = date('Y-m-d', strtotime($stop_date));
+                $product->save();
+
+                $purchase_id = $product->id;
+            }
+
+            $send = date('d.m.Y') . "г., внесено изменение в график закупки ".$category->name;
+            $send .= " (" . $real_product->name.") " . $provider->name . "\r\n";
+            $send .= "Стоп заказ ".$stop_date."г. в 21 час.\r\n";
+            $send .= "Доставка  ".$purchase_date."г."; 
+
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Изменить',
+                            'callback_data' => 'editdatepurchase_' . $purchase_id
+                        ],
+                    ],
+                    [
+                        [
+                            'text' => 'Уведомить поставщика',
+                            'callback_data' => 'notifyprovider_' . $purchase_id
+                        ],
+                    ],
+                ]
+            ];
+
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+            $tgCom->delete();
+            
+            return;
+        }
 
         if ( ! $tgCom->from_whom || $tgCom->from_whom == "client") {
             if ( ! $user || $user->lastname == "lastname") {

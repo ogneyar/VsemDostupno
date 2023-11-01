@@ -7,11 +7,17 @@ use app\models\User;
 use app\models\TgCommunication;
 use app\models\Service;
 use app\models\Category;
+use app\models\CategoryHasProduct;
 use app\models\CategoryHasService;
 use app\models\ServiceHasPhoto;
 use app\models\Photo;
 use app\models\Image;
 use app\models\Account;
+use app\models\Product;
+use app\models\ProductFeature;
+use app\models\Provider;
+use app\modules\purchase\models\PurchaseProduct;
+
 
 require_once __DIR__ . '/../utils/getBalance.php';
 
@@ -1653,6 +1659,134 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         
         return;
     }
+
+    /*****************************************
+    
+           РУЧНОЕ УПРАВЛЕНИЕ ЗАКУПКАМИ
+
+    ******************************************/
+    if ( (strstr($data, '_', true) == 'newdatepurchase') || 
+         (strstr($data, '_', true) == 'editdatepurchase') )
+    {
+        $array = explode('_', $data);        
+        $purchase_id = $array[1];
+
+        $tgCom = TgCommunication::findOne(['chat_id' => $from_id]);
+        if (!$tgCom) {
+            $tgCom = new TgCommunication();
+            $tgCom->chat_id = $from_id;
+            $tgCom->to_chat_id = $from_id;
+        }
+        if (strstr($data, '_', true) == 'newdatepurchase') {
+            $tgCom->from_whom = "newstopdate_".$purchase_id;
+        }
+        if (strstr($data, '_', true) == 'editdatepurchase') {
+            $tgCom->from_whom = "editstopdate_".$purchase_id;
+        }
+        // $tgCom->from_whom = "newpurchasedate_".$purchase_id;    
+        $tgCom->save();
+        
+        $send = "Укажите  Дату “Стоп заказа” в формате: 12.11.2023";
+        $bot->sendMessage($from_id, $send);
+        
+        return;
+    }
+
+    /**************************************************************
+    
+           УВЕДОМЛЕНИЕ ПОСТАВЩИКА об изменении даты закупки
+
+    ***************************************************************/
+    if (strstr($data, '_', true) == 'notifyprovider')
+    {
+        $array = explode('_', $data);        
+        $purchase_id = $array[1];
+
+        $product = PurchaseProduct::findOne($purchase_id);
+        $provider = Provider::findOne($product->provider_id);
+        $user = User::findOne($provider->user_id);
+
+        $feature_id = $product->product_feature_id;
+        $product_feature = ProductFeature::findOne($feature_id);
+        $real_product_id = $product_feature->product_id;
+        $real_product = Product::findOne($real_product_id);
+        $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
+        $category_id = $categoryHasProduct->category_id;
+        $category = Category::findOne($category_id);
+        
+        if ($user->tg_id) {
+            $send =  date('d.m.Y', strtotime($product->created_date)) . "г., внесено изменение в график закупки"; 
+            $send .= $category->name . " (". $real_product->name .") " . $provider->name . "\r\n";
+            $send .= "Стоп заказ ".date('d.m.Y', strtotime($product->stop_date))."г. в 21 час.\r\n";
+            $send .= "Доставка ".date('d.m.Y', strtotime($product->purchase_date))."г.";
+
+            $bot->sendMessage($user->tg_id, $send);            
+            
+            $send = "Сообщение поставщику доставлено.";
+            $bot->sendMessage($from_id, $send);
+        }else {
+            $send = "У поставщика отсутствует tg_id (телеграм-идентификатор).";
+            $bot->sendMessage($from_id, $send);
+        }
+
+        return;
+    }
+
+    /*******************************
+    
+           ЗАКУПКИ ПОСТАВЩИКА 
+
+    ********************************/
+    if (strstr($data, '_', true) == 'providerpurchases')
+    {
+        $array = explode('_', $data);        
+        $provider_id = $array[1];
+        
+        $provider = Provider::findOne($provider_id);
+        $purchase_products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => "advance"])->all();
+        
+        foreach ($purchase_products as $purchase_product) {
+            $purchase_id = $purchase_product->id;
+            $feature_id = $purchase_product->product_feature_id;
+            $product_feature = ProductFeature::findOne($feature_id);
+            $product_id = $product_feature->product_id;
+            $product = Product::findOne($product_id);
+            $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
+            $category_id = $categoryHasProduct->category_id;
+            $category = Category::findOne($category_id);
+            
+            $send =  date('d.m.Y', strtotime($purchase_product->created_date)) . "г., внесено изменение в график закупки"; 
+            $send .= $category->name . " (". $product->name .") " . $provider->name . "\r\n";
+            $send .= "Стоп заказ ".date('d.m.Y', strtotime($purchase_product->stop_date))."г. в 21 час.\r\n";
+            $send .= "Доставка ".date('d.m.Y', strtotime($purchase_product->purchase_date))."г.";
+
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Изменить',
+                            'callback_data' => 'editdatepurchase_' . $purchase_id
+                        ],
+                        [
+                            'text' => "Уведомить всех",
+                            'callback_data' => 'notify_everyone'
+                        ],
+                    ],                    
+                    [
+                        [
+                            'text' => "Уведомить поставщика",
+                            'callback_data' => 'notifyprovider_' . $purchase_id
+                        ],
+                    ],
+                ]
+            ];
+
+            $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);    
+        }
+
+        return;
+    }
+
 
     /************************************************
     

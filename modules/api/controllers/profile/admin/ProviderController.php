@@ -19,10 +19,32 @@ class ProviderController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
+                    'updatePurchasesManagement' => ['post'],
                     'search' => ['get'],
                 ],
             ],
         ]);
+    }
+    
+    public function actionUpdatePurchasesManagement()
+    {
+        $post = Yii::$app->request->post();
+        if (!(isset($post['provider_id']) && isset($post['purchases_management']))) {
+            throw new ForbiddenHttpException('Действие не разрешено.');
+        }
+
+        $model = Provider::findOne($post['provider_id']);
+        if (!$model) {
+            throw new NotFoundHttpException('Страница не найдена.');
+        }
+
+        $model->purchases_management = $post['purchases_management'] == "true" ? 1 : 0;
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        return [
+            'success' => $model->save(false),
+        ];
     }
 
     public function actionSearch($q = null, $id = null)

@@ -11,6 +11,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $updateVisibilityUrl = Url::to(['/api/profile/admin/product/update-visibility']);
 $updatePublishedUrl = Url::to(['/api/profile/admin/product/update-published']);
+$updatePurchasesManagementUrl = Url::to(['/api/profile/admin/provider/update-purchases-management']);
 $script = <<<JS
 $(function () {
     $('input[type="checkbox"][class="update-visibility"]').on('change', function () {
@@ -54,6 +55,31 @@ $(function () {
 
         return false;
     });
+
+    $("#purchases_management").on('click', function () {
+        let checkbox = document.getElementById("purchases_management_checkbox");
+
+        $.ajax({
+            url: '$updatePurchasesManagementUrl',
+            type: 'POST',
+            data: {
+                provider_id: '$provider->id',
+                purchases_management: ! checkbox.checked
+            },
+            success: function (data) {
+                if (!(data && data.success)) {
+                    alert('Ошибка обновления ручного управления закупками'); 
+                }else {
+                    checkbox.checked = ! checkbox.checked;
+                }
+            },
+            error: function () {
+                alert('Ошибка обновления ручного управления закупками');    
+            },
+        });
+
+        return false;
+    });
 })
 JS;
 $this->registerJs($script, $this::POS_END);
@@ -61,8 +87,23 @@ $this->registerJs($script, $this::POS_END);
 
 <div class="product-index">
     <h1><?= Html::encode($this->title) ?></h1>
-    <p>
-        <?= Html::a('Добавить товар', ['create?provider_id=' . $provider->id], ['class' => 'btn btn-success']) ?>
+    <p 
+        style="display: flex; align-items: center; justify-content: flex-start;" 
+    >
+        <?= Html::a('Добавить товар', ['create?provider_id=' . $provider->id], ['class' => 'btn btn-success']) ?>&nbsp;&nbsp;
+        <span
+            id="purchases_management"
+            style="cursor: pointer; padding: 10px;" 
+        >
+            <input 
+                id="purchases_management_checkbox"
+                style="cursor: pointer;" 
+                type="checkbox" 
+                <?php echo($provider->purchases_management ? 'checked' : ''); ?> 
+                class="update-purchases-management" 
+            />&nbsp;
+            Ручное управление закупками
+        </span>
     </p>
     
     <?= GridView::widget([
