@@ -618,7 +618,7 @@ function requestMessage($bot, $message, $master, $admin) {
 
         $providers = Provider::find()->where(['purchases_management' => 1])->all();
 
-        $send = "Перечень поставщиков с ручным управлением датами закупок.";
+        $send = "Перечень поставщиков с ручным управлением закупками.";
                    
         $inline_keyboard = [];
 

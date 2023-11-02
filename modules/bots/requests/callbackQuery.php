@@ -1715,7 +1715,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $category = Category::findOne($category_id);
         
         if ($user->tg_id) {
-            $send =  date('d.m.Y', strtotime($product->created_date)) . "г., внесено изменение в график закупки"; 
+            $send =  date('d.m.Y', strtotime($product->created_date)) . "г., внесено изменение в график закупки "; 
             $send .= $category->name . " (". $real_product->name .") " . $provider->name . "\r\n";
             $send .= "Стоп заказ ".date('d.m.Y', strtotime($product->stop_date))."г. в 21 час.\r\n";
             $send .= "Доставка ".date('d.m.Y', strtotime($product->purchase_date))."г.";
@@ -1745,6 +1745,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $provider = Provider::findOne($provider_id);
         $purchase_products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => "advance"])->all();
         
+        $quantity = 0;
         foreach ($purchase_products as $purchase_product) {
             $purchase_id = $purchase_product->id;
             $feature_id = $purchase_product->product_feature_id;
@@ -1755,7 +1756,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $category_id = $categoryHasProduct->category_id;
             $category = Category::findOne($category_id);
             
-            $send =  date('d.m.Y', strtotime($purchase_product->created_date)) . "г., внесено изменение в график закупки"; 
+            $send =  date('d.m.Y', strtotime($purchase_product->created_date)) . "г., внесено изменение в график закупки "; 
             $send .= $category->name . " (". $product->name .") " . $provider->name . "\r\n";
             $send .= "Стоп заказ ".date('d.m.Y', strtotime($purchase_product->stop_date))."г. в 21 час.\r\n";
             $send .= "Доставка ".date('d.m.Y', strtotime($purchase_product->purchase_date))."г.";
@@ -1782,6 +1783,11 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             ];
 
             $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);    
+            $quantity++;
+        }
+
+        if ( ! $quantity ) {
+            $bot->sendMessage($from_id, "Закупка приостановлена."); 
         }
 
         return;
