@@ -17,8 +17,8 @@ $this->title = 'Оформление коллективной закупки';
 $this->params['breadcrumbs'][] = ['label' => 'Поставщики', 'url' => ['/admin/provider']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$config = require(__DIR__ . '/../../../../../config/urlManager.php');
-$baseUrl = $config['baseUrl'];
+// $config = require(__DIR__ . '/../../../../../config/urlManager.php');
+// $baseUrl = $config['baseUrl'];
 
 
 $script = <<<JS
