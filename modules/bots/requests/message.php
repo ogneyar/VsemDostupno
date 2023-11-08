@@ -685,10 +685,10 @@ function requestMessage($bot, $message, $master, $admin) {
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
 
         // принятие новой даты заказа
-        if ( (strstr($tgCom->from_whom, '_', true) == 'newstopdate') ||
-            (strstr($tgCom->from_whom, '_', true) == 'editstopdate') ) {
+        if (strstr($tgCom->from_whom, '_', true) == 'editstopdate') 
+        {
             $array = explode('_', $tgCom->from_whom);        
-            $purchase_id = $array[1];
+            $provider_id = $array[1];
 
             $send = $text . "\r\nДата принята\r\n\r\nТеперь введите дату “Доставки” в формате: 15.11.2023";
 
@@ -698,11 +698,8 @@ function requestMessage($bot, $message, $master, $admin) {
                 return;
             }
             
-            if (strstr($tgCom->from_whom, '_', true) == 'newstopdate') {
-                $tgCom->from_whom = "newpurchasedate_" . $purchase_id . "_" . $date_timestamp;
-            }else if (strstr($tgCom->from_whom, '_', true) == 'editstopdate') {
-                $tgCom->from_whom = "editpurchasedate_" . $purchase_id . "_" . $date_timestamp;
-            }
+            $tgCom->from_whom = "editpurchasedate_" . $provider_id . "_" . $date_timestamp;
+                
             $tgCom->save();
             $bot->sendMessage($chat_id, $send);
             
@@ -710,11 +707,10 @@ function requestMessage($bot, $message, $master, $admin) {
         }
         
         // создание новой закупки или редактирование старой
-        if ( (strstr($tgCom->from_whom, '_', true) == 'newpurchasedate') || 
-             (strstr($tgCom->from_whom, '_', true) == 'editpurchasedate') ) {
-            
+        if (strstr($tgCom->from_whom, '_', true) == 'editpurchasedate') 
+        {            
             $array = explode('_', $tgCom->from_whom);
-            $purchase_id = $array[1];            
+            $provider_id = $array[1];            
             $stop_date = date('d.m.Y', $array[2]);
             $purchase_date = $text;
             
@@ -723,14 +719,23 @@ function requestMessage($bot, $message, $master, $admin) {
                 return;
             }            
             
-            if ( ! $purchase_id) {
-                $bot->sendMessage($chat_id, "Отсутсвуют данные: purchase_id = null");            
+            if ( ! $provider_id) {
+                $bot->sendMessage($chat_id, "Отсутсвуют данные: provider_id = null");            
                 return;
-            }            
+            }      
 
-            $product = PurchaseProduct::findOne($purchase_id);
+            $provider = Provider::findOne($provider_id);
+            $products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['!=', 'status', 'held'])->all();
+            
+            foreach($products as $product) {
+                $product->created_date = date('Y-m-d');
+                $product->purchase_date = date('Y-m-d', strtotime($purchase_date));
+                $product->stop_date = date('Y-m-d', strtotime($stop_date));
+                $product->status = 'advance';
+                $product->save();
+            }
 
-            $provider = Provider::findOne($product->provider_id);
+            $product = $products[0];
 
             $feature_id = $product->product_feature_id;
             $product_feature = ProductFeature::findOne($feature_id);
@@ -740,37 +745,8 @@ function requestMessage($bot, $message, $master, $admin) {
             $category_id = $categoryHasProduct->category_id;
             $category = Category::findOne($category_id);
 
-            if (strstr($tgCom->from_whom, '_', true) == 'newpurchasedate') {
-                $new_product = new PurchaseProduct;
-                $new_product->created_date = date('Y-m-d');
-                $new_product->purchase_date = date('Y-m-d', strtotime($purchase_date));
-                $new_product->stop_date = date('Y-m-d', strtotime($stop_date));
-                $new_product->renewal = $product->renewal;
-                $new_product->purchase_total = $product->purchase_total;
-                $new_product->is_weights = $product->is_weights;
-                $new_product->tare = $product->tare;
-                $new_product->weight = $product->weight;
-                $new_product->measurement = $product->measurement;
-                $new_product->summ = $product->summ;
-                $new_product->product_feature_id = $product->product_feature_id;
-                $new_product->provider_id = $product->provider_id;
-                $new_product->comment = $product->comment;
-                $new_product->send_notification = $product->send_notification;
-                $new_product->status = 'advance';
-                $new_product->copy = $product->id;
-                $new_product->save();
-
-                $purchase_id = $new_product->id;
-            }else if (strstr($tgCom->from_whom, '_', true) == 'editpurchasedate') {
-                $product->purchase_date = date('Y-m-d', strtotime($purchase_date));
-                $product->stop_date = date('Y-m-d', strtotime($stop_date));
-                $product->save();
-
-                $purchase_id = $product->id;
-            }
-
-            $send = date('d.m.Y') . "г., внесено изменение в график закупки ".$category->name;
-            $send .= " (" . $real_product->name.") " . $provider->name . "\r\n";
+            $send = date('d.m.Y') . "г., внесено изменение в график закупок ".$category->name;
+            $send .= " " . $provider->name . "\r\n";
             $send .= "Стоп заказ ".$stop_date."г. в 21 час.\r\n";
             $send .= "Доставка  ".$purchase_date."г."; 
 
@@ -778,14 +754,20 @@ function requestMessage($bot, $message, $master, $admin) {
                 'inline_keyboard' => [
                     [
                         [
-                            'text' => 'Изменить',
-                            'callback_data' => 'editdatepurchase_' . $purchase_id
+                            'text' => 'Уведомить поставщика',
+                            'callback_data' => 'notifyprovider_' . $provider_id
                         ],
                     ],
                     [
                         [
-                            'text' => 'Уведомить поставщика',
-                            'callback_data' => 'notifyprovider_' . $purchase_id
+                            'text' => "Уведомить пайщиков",
+                            'callback_data' => 'notify_shareholders'
+                        ],
+                    ],
+                    [
+                        [
+                            'text' => 'Изменить даты',
+                            'callback_data' => 'editdatepurchase_' . $provider_id
                         ],
                     ],
                 ]
@@ -793,7 +775,7 @@ function requestMessage($bot, $message, $master, $admin) {
 
             $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
             $tgCom->delete();
-            
+
             return;
         }
 

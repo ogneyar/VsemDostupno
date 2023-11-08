@@ -22,7 +22,8 @@ class DefaultController extends BaseController
     public function actionCreate()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => PurchaseProduct::find()->where('NOW() <= purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),
+            // 'query' => PurchaseProduct::find()->where('NOW() <= purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),
+            'query' => PurchaseProduct::find()->where('NOW() <= purchase_date')->andWhere(['!=', 'status', 'abortive'])->orderBy('purchase_date')->orderBy('stop_date'),
             'sort' => false,
         ]);
         
@@ -35,7 +36,8 @@ class DefaultController extends BaseController
     public function actionOldData()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => PurchaseProduct::find()->where('NOW() > purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),            
+            // 'query' => PurchaseProduct::find()->where('NOW() > purchase_date')->orderBy('purchase_date')->orderBy('stop_date'),            
+            'query' => PurchaseProduct::find()->where(['status' => 'abortive'])->orderBy('purchase_date')->orderBy('stop_date'),            
             'sort' => false,
         ]);
         

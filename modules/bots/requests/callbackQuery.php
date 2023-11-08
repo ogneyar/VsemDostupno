@@ -1665,11 +1665,10 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
            РУЧНОЕ УПРАВЛЕНИЕ ЗАКУПКАМИ
 
     ******************************************/
-    if ( (strstr($data, '_', true) == 'newdatepurchase') || 
-         (strstr($data, '_', true) == 'editdatepurchase') )
+    if (strstr($data, '_', true) == 'editdatepurchase')
     {
         $array = explode('_', $data);        
-        $purchase_id = $array[1];
+        $provider_id = $array[1];
 
         $tgCom = TgCommunication::findOne(['chat_id' => $from_id]);
         if (!$tgCom) {
@@ -1677,13 +1676,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $tgCom->chat_id = $from_id;
             $tgCom->to_chat_id = $from_id;
         }
-        if (strstr($data, '_', true) == 'newdatepurchase') {
-            $tgCom->from_whom = "newstopdate_".$purchase_id;
-        }
-        if (strstr($data, '_', true) == 'editdatepurchase') {
-            $tgCom->from_whom = "editstopdate_".$purchase_id;
-        }
-        // $tgCom->from_whom = "newpurchasedate_".$purchase_id;    
+        $tgCom->from_whom = "editstopdate_".$provider_id;
         $tgCom->save();
         
         $send = "Укажите  Дату “Стоп заказа” в формате: 12.11.2023";
@@ -1700,10 +1693,18 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     if (strstr($data, '_', true) == 'notifyprovider')
     {
         $array = explode('_', $data);        
-        $purchase_id = $array[1];
+        $provider_id = $array[1];
 
-        $product = PurchaseProduct::findOne($purchase_id);
-        $provider = Provider::findOne($product->provider_id);
+        $products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => 'advance'])->all();
+        $product = $products[0];
+
+        if ( ! $product ) {
+            $send = "У поставщика нет закупок со статусом 'advance'.";
+            $bot->sendMessage($from_id, $send);
+            return;
+        }
+
+        $provider = Provider::findOne($provider_id);
         $user = User::findOne($provider->user_id);
 
         $feature_id = $product->product_feature_id;
@@ -1716,7 +1717,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         
         if ($user->tg_id) {
             $send =  date('d.m.Y', strtotime($product->created_date)) . "г., внесено изменение в график закупки "; 
-            $send .= $category->name . " (". $real_product->name .") " . $provider->name . "\r\n";
+            $send .= $category->name . " " . $provider->name . "\r\n";
             $send .= "Стоп заказ ".date('d.m.Y', strtotime($product->stop_date))."г. в 21 час.\r\n";
             $send .= "Доставка ".date('d.m.Y', strtotime($product->purchase_date))."г.";
 
@@ -1746,7 +1747,9 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $purchase_products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => "advance"])->all();
         
         $quantity = 0;
-        foreach ($purchase_products as $purchase_product) {
+        // foreach ($purchase_products as $purchase_product) {
+        if ($purchase_products && $purchase_products[0]) {
+            $purchase_product = $purchase_products[0];
             $purchase_id = $purchase_product->id;
             $feature_id = $purchase_product->product_feature_id;
             $product_feature = ProductFeature::findOne($feature_id);
@@ -1757,26 +1760,28 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $category = Category::findOne($category_id);
             
             $send =  date('d.m.Y', strtotime($purchase_product->created_date)) . "г., внесено изменение в график закупки "; 
-            $send .= $category->name . " (". $product->name .") " . $provider->name . "\r\n";
+            $send .= $category->name . " " . $provider->name . "\r\n";
             $send .= "Стоп заказ ".date('d.m.Y', strtotime($purchase_product->stop_date))."г. в 21 час.\r\n";
             $send .= "Доставка ".date('d.m.Y', strtotime($purchase_product->purchase_date))."г.";
 
             $InlineKeyboardMarkup = [
-                'inline_keyboard' => [
-                    [
-                        [
-                            'text' => 'Изменить',
-                            'callback_data' => 'editdatepurchase_' . $purchase_id
-                        ],
-                        [
-                            'text' => "Уведомить всех",
-                            'callback_data' => 'notify_everyone'
-                        ],
-                    ],                    
+                'inline_keyboard' => [                   
                     [
                         [
                             'text' => "Уведомить поставщика",
-                            'callback_data' => 'notifyprovider_' . $purchase_id
+                            'callback_data' => 'notifyprovider_' . $provider_id
+                        ],
+                    ],
+                    [
+                        [
+                            'text' => "Уведомить пайщиков",
+                            'callback_data' => 'notify_shareholders'
+                        ],
+                    ],                  
+                    [
+                        [
+                            'text' => "Изменить дату закупок",
+                            'callback_data' => 'editdatepurchase_' . $provider_id
                         ],
                     ],
                 ]
@@ -1784,10 +1789,37 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
             $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);    
             $quantity++;
-        }
+        }else {
+            $purchase_products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => "abortive"])->all();
+            if ($purchase_products && $purchase_products[0]) {
+                
+                $InlineKeyboardMarkup = [
+                    'inline_keyboard' => [
+                        [
+                            [
+                                'text' => "Изменить цену закупки",
+                                'callback_data' => 'editpricepurchase_' . $provider->id
+                            ],
+                        ],                    
+                        [
+                            [
+                                'text' => "Ассортимент",
+                                'callback_data' => 'assortment_' . $provider->id
+                            ],
+                        ],
+                        [
+                            [
+                                'text' => 'Возобновить закупку',
+                                'callback_data' => 'editdatepurchase_' . $provider->id
+                            ],
+                        ],                    
+                    ]
+                ];
 
-        if ( ! $quantity ) {
-            $bot->sendMessage($from_id, "Закупка приостановлена."); 
+                $bot->sendMessage($from_id, "Закупка приостановлена.", null, $InlineKeyboardMarkup); 
+            }else {
+                $bot->sendMessage($from_id, "Закупок не найдено."); 
+            }
         }
 
         return;

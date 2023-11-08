@@ -36,8 +36,7 @@ class PurchaseNotificationController extends Controller
         $date = date('Y-m-d');
         // $date = '2021-11-01';
          $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();
-        // $products = PurchaseProduct::find()->where(['stop_date' => $date, 'status' => 'advance'])->all();
-        // $products = PurchaseProduct::find()->where(['stop_date' => $date])->andWhere(['status' => 'advance'])->all();
+         
         if ($products) {
             foreach ($products as $product) {
                 $orders_to_send = [];
@@ -79,18 +78,7 @@ class PurchaseNotificationController extends Controller
                     
                     foreach ($orders_to_send as $val) {
                         $order = PurchaseOrder::findOne($val);
-                        // try {
-                        //     Email::send('held_order_member', $order->email, [
-                        //         'fio' => $order->firstname . ' ' . $order->patronymic,
-                        //         'created_at' => date('d.m.Y', strtotime($order->created_at)),
-                        //         'order_number' => $order->order_number_copy,
-                        //         'order_id' => sprintf("%'.05d\n", $order->order_id),
-                        //         'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
-                        //         'purchase_date' => date('d.m.Y', strtotime($product->purchase_date))
-                        //     ]);
-                        // } catch (Exception $e) {
-                        //     unset($e);
-                        // }
+                        
                         $userOne = User::findOne(['email' => $order->email]);
                         if ($userOne->tg_id) {
                             Email::tg_send('held_order_member', $userOne->tg_id, [
@@ -103,49 +91,70 @@ class PurchaseNotificationController extends Controller
                             ]);
                         }
                     }
+
+                    // для ручного управления датами закупок
+                    $new_product = new PurchaseProduct;
+                    $new_product->created_date = $product->created_date;
+                    $new_product->purchase_date = $product->purchase_date;
+                    $new_product->stop_date = $product->stop_date;
+                    $new_product->renewal = $product->renewal;
+                    $new_product->purchase_total = $product->purchase_total;
+                    $new_product->is_weights = $product->is_weights;
+                    $new_product->tare = $product->tare;
+                    $new_product->weight = $product->weight;
+                    $new_product->measurement = $product->measurement;
+                    $new_product->summ = $product->summ;
+                    $new_product->product_feature_id = $product->product_feature_id;
+                    $new_product->provider_id = $product->provider_id;
+                    $new_product->comment = $product->comment;
+                    $new_product->send_notification = $product->send_notification;
+                    $new_product->status = 'abortive';
+                    $new_product->copy = $product->id;
+                    // $new_product->save();
                     
                     // если у провайдера включено ручное управление датами закупок
                     if ($provider->purchases_management) {  
-                        $date_timestamp = strtotime($date);
-                        $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " (" . $real_product->name. ") ";
-                        $date_timestamp = strtotime($product->purchase_date);
-                        $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
-                        $send .= "\r\n\r\nНазначить новую дату закупки?";    
-                        $InlineKeyboardMarkup = [
-                            'inline_keyboard' => [
-                                [
-                                    [
-                                        'text' => "Назначить новую дату закупки",
-                                        'callback_data' => 'newdatepurchase_' . $product->id
-                                    ],
-                                ],
-                            ]
-                        ];
-                        // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
-                        $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
+                        // $date_timestamp = strtotime($date);
+                        // $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " (" . $real_product->name. ") ";
+                        // $date_timestamp = strtotime($product->purchase_date);
+                        // $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
+                        // $send .= "\r\n\r\nНазначить новую дату закупки?";    
+                        // $InlineKeyboardMarkup = [
+                        //     'inline_keyboard' => [
+                        //         [
+                        //             [
+                        //                 'text' => "Назначить новую дату закупки",
+                        //                 'callback_data' => 'newdatepurchase_' . $product->id
+                        //             ],
+                        //         ],
+                        //     ]
+                        // ];
+                        // // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
+                        // $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
                     }else {
                         // если включено автопродление дат закупок
                         if ($product->renewal) {
-                            $new_product = new PurchaseProduct;
+                            // $new_product = new PurchaseProduct;
                             $new_product->created_date = $date;
                             $new_product->purchase_date = date('Y-m-d', strtotime($product->purchase_date) + (strtotime($product->stop_date) - strtotime($product->created_date)));
                             $new_product->stop_date = date('Y-m-d', (strtotime($product->stop_date) + (strtotime($product->stop_date) - strtotime($product->created_date))));
-                            $new_product->renewal = 1;
-                            $new_product->purchase_total = $product->purchase_total;
-                            $new_product->is_weights = $product->is_weights;
-                            $new_product->tare = $product->tare;
-                            $new_product->weight = $product->weight;
-                            $new_product->measurement = $product->measurement;
-                            $new_product->summ = $product->summ;
-                            $new_product->product_feature_id = $product->product_feature_id;
-                            $new_product->provider_id = $product->provider_id;
-                            $new_product->comment = $product->comment;
-                            $new_product->send_notification = $product->send_notification;
+                            // $new_product->renewal = 1;
+                            // $new_product->purchase_total = $product->purchase_total;
+                            // $new_product->is_weights = $product->is_weights;
+                            // $new_product->tare = $product->tare;
+                            // $new_product->weight = $product->weight;
+                            // $new_product->measurement = $product->measurement;
+                            // $new_product->summ = $product->summ;
+                            // $new_product->product_feature_id = $product->product_feature_id;
+                            // $new_product->provider_id = $product->provider_id;
+                            // $new_product->comment = $product->comment;
+                            // $new_product->send_notification = $product->send_notification;
                             $new_product->status = 'advance';
-                            $new_product->copy = $product->id;
-                            $new_product->save();
+                            // $new_product->copy = $product->id;
+                            // $new_product->save();
                         }
                     }
+                    $new_product->save();
                     
                     if ($product->send_notification) {
                         $partners = PurchaseOrder::getPartnerIdByProvider($product->purchase_date, $product->provider_id);
@@ -181,16 +190,6 @@ class PurchaseNotificationController extends Controller
                             $orders_to_send[] = $order_product->purchase_order_id;
                         }
 
-                        // try {
-                        //     Email::send('account-log', $provider_account->user->email, [
-                        //         'typeName' => $provider_account->typeName,
-                        //         'message' => 'Списан возврат от закупки',
-                        //         'amount' => -$provider_balance->total,
-                        //         'total' => $provider_account->total,
-                        //     ]);
-                        // } catch (Exception $e) {
-                        //     unset($e);
-                        // }
                         if ($provider_account->user->tg_id) { 
                             Email::tg_send('account-log', $provider_account->user->tg_id, [
                                 'typeName' => $provider_account->typeName,
@@ -200,16 +199,6 @@ class PurchaseNotificationController extends Controller
                             ]);
                         }
                         
-                        // try {
-                        //     Email::send('account-log', $deposit->user->email, [
-                        //         'typeName' => $deposit->typeName,
-                        //         'message' => 'Зачислен возврат от закупки',
-                        //         'amount' => $provider_balance->total + $fund_balance->total,
-                        //         'total' => $deposit->total,
-                        //     ]); 
-                        // } catch (Exception $e) {
-                        //     unset($e);
-                        // }
                         if ($deposit->user->tg_id) { 
                             Email::tg_send('account-log', $deposit->user->tg_id, [
                                 'typeName' => $deposit->typeName,
@@ -223,23 +212,23 @@ class PurchaseNotificationController extends Controller
                     
                     // если у провайдера включено ручное управление датами закупок
                     if ($provider->purchases_management) {
-                        $date_timestamp = strtotime($date);
-                        $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " (" . $real_product->name. ") ";
-                        $date_timestamp = strtotime($product->purchase_date);
-                        $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
-                        $send .= "\r\n\r\nНазначить новую дату закупки?";    
-                        $InlineKeyboardMarkup = [
-                            'inline_keyboard' => [
-                                [
-                                    [
-                                        'text' => "Назначить новую дату закупки",
-                                        'callback_data' => 'newdatepurchase_' . $product->id
-                                    ],
-                                ],
-                            ]
-                        ];
-                        // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
-                        $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
+                        // $date_timestamp = strtotime($date);
+                        // $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " (" . $real_product->name. ") ";
+                        // $date_timestamp = strtotime($product->purchase_date);
+                        // $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
+                        // $send .= "\r\n\r\nНазначить новую дату закупки?";    
+                        // $InlineKeyboardMarkup = [
+                        //     'inline_keyboard' => [
+                        //         [
+                        //             [
+                        //                 'text' => "Назначить новую дату закупки",
+                        //                 'callback_data' => 'newdatepurchase_' . $product->id
+                        //             ],
+                        //         ],
+                        //     ]
+                        // ];
+                        // // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
+                        // $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
                     }else {
                         // если включено автопродление дат закупок
                         if ($product->renewal) {
@@ -259,25 +248,17 @@ class PurchaseNotificationController extends Controller
                             $new_product->comment = $product->comment;
                             $new_product->send_notification = $product->send_notification;
                             $new_product->status = 'advance';
-                            $new_product->copy = $product->id;
+                            // $new_product->copy = $product->id;
                             $new_product->save();
+
+                            $product->delete();
                         }
                     }
 
                     
                     foreach ($orders_to_send as $val) {
                         $order = PurchaseOrder::findOne($val);
-                        // try {
-                        //     Email::send('abortive_order_member', $order->email, [
-                        //         'fio' => $order->firstname . ' ' . $order->patronymic,
-                        //         'created_at' => date('d.m.Y', strtotime($order->created_at)),
-                        //         'order_number' => $order->order_number,
-                        //         'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
-                        //         'new_purchase_date' => $product->renewal ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
-                        //     ]);
-                        // } catch (Exception $e) {
-                        //     unset($e);
-                        // }
+                        
                         $userOne = User::findOne(['email' => $order->email]);
                         if ($userOne->tg_id) {
                             Email::tg_send('abortive_order_member', $userOne->tg_id, [
@@ -293,17 +274,7 @@ class PurchaseNotificationController extends Controller
                     foreach ($order_products as $order_product) {
                         PurchaseOrder::setOrderStatus($order_product->purchase_order_id);
                     }
-                    // try {
-                    //     Email::send('abortive_order_provider', $product->provider->user->email, [
-                    //         'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
-                    //         'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
-                    //         'new_purchase_date' => $product->renewal ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
-                    //         'new_stop_date' => $product->renewal ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
-                    //         'purchase_total' => $product->purchase_total . ' рублей',
-                    //     ]);
-                    // } catch (Exception $e) {
-                    //     unset($e);
-                    // }
+                    
                     if ($product->provider->user->tg_id) {
                         Email::tg_send('abortive_order_provider', $product->provider->user->tg_id, [
                             'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
@@ -315,27 +286,76 @@ class PurchaseNotificationController extends Controller
                     }
                     
                 }
+            } // end foreach
+
+
+        } // end if ($products)
+        
+        $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'abortive'])->all();
+        if ($products) {
+            $id_providers = [];
+            foreach($products as $product) {
+
+                $provider = Provider::findOne($product->provider_id);
+                
+                // если у провайдера включено ручное управление датами закупок
+                if ($provider->purchases_management) {
+                    $yes = false; // есть ли в массиве?
+                    foreach($id_providers as $id_provider) {
+                        if ($id_provider == $provider->id) $yes = true;
+                    }
+                    if ( ! $yes ) {
+                        $id_providers[] = $provider->id;
+                        
+                        $feature_id = $product->product_feature_id;
+                        $product_feature = ProductFeature::findOne($feature_id);
+                        $real_product_id = $product_feature->product_id;
+                        $real_product = Product::findOne($real_product_id);
+                        $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
+                        $category_id = $categoryHasProduct->category_id;
+                        $category = Category::findOne($category_id);
+                        
+                        $date_timestamp = strtotime($date);
+                        $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " ";
+                        $date_timestamp = strtotime($product->purchase_date);
+                        $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
+                        // $send .= "\r\n\r\nНазначить новую дату закупки?";    
+                        $InlineKeyboardMarkup = [
+                            'inline_keyboard' => [
+                                [
+                                    [
+                                        'text' => "Назначить новую дату закупки",
+                                        'callback_data' => 'editdatepurchase_' . $provider->id
+                                    ],
+                                ],
+                                [
+                                    [
+                                        'text' => "Изменить цену закупки",
+                                        'callback_data' => 'editpricepurchase_' . $provider->id
+                                    ],
+                                ],
+                                [
+                                    [
+                                        'text' => "Ассортимент",
+                                        'callback_data' => 'assortment_' . $provider->id
+                                    ],
+                                ],
+                            ]
+                        ];
+                        $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
+                        // $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
+
+                    }
+                }
             }
         }
+         
     }
     
     protected function sendEmailToProvider($details, $provider_id, $partner_id, $date)
     {
         $provider = Provider::find()->where(['id' => $provider_id])->with('user')->one();
         $partner = Partner::findOne($partner_id);
-        // try {
-        //     Yii::$app->mailer->compose('provider/order', [
-        //             'details' => $details,
-        //             'partner' => $partner,
-        //             'date' => $date
-        //         ])
-        //         ->setFrom(Yii::$app->params['fromEmail'])
-        //         ->setTo($provider->user->email)
-        //         ->setSubject('Поступил заказ с сайта "' . Yii::$app->params['name'] . '"')
-        //         ->send();
-        // } catch (Exception $e) {
-        //     unset($e);
-        // }
         
         if ($provider->user->tg_id) {
             $config = require(__DIR__ . '/../config/constants.php');

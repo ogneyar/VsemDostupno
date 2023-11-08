@@ -56,7 +56,9 @@ $(function () {
         return false;
     });
 
-    $("#purchases_management").on('click', function () {
+    $("#purchases_management").on('click', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
         let checkbox = document.getElementById("purchases_management_checkbox");
 
         $.ajax({
@@ -79,6 +81,13 @@ $(function () {
         });
 
         return false;
+    });
+
+    $("#purchases_management_checkbox").on('click', function (e) {
+        // e.stopPropagation();
+        // e.preventDefault();
+        e.target.checked = ! e.target.checked;
+        // return false;
     });
 })
 JS;
