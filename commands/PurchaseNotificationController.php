@@ -110,50 +110,15 @@ class PurchaseNotificationController extends Controller
                     $new_product->send_notification = $product->send_notification;
                     $new_product->status = 'abortive';
                     $new_product->copy = $product->id;
-                    // $new_product->save();
-                    
-                    // если у провайдера включено ручное управление датами закупок
-                    if ($provider->purchases_management) {  
-                        // $date_timestamp = strtotime($date);
-                        // $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " (" . $real_product->name. ") ";
-                        // $date_timestamp = strtotime($product->purchase_date);
-                        // $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
-                        // $send .= "\r\n\r\nНазначить новую дату закупки?";    
-                        // $InlineKeyboardMarkup = [
-                        //     'inline_keyboard' => [
-                        //         [
-                        //             [
-                        //                 'text' => "Назначить новую дату закупки",
-                        //                 'callback_data' => 'newdatepurchase_' . $product->id
-                        //             ],
-                        //         ],
-                        //     ]
-                        // ];
-                        // // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
-                        // $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
-                    }else {
-                        // если включено автопродление дат закупок
-                        if ($product->renewal) {
-                            // $new_product = new PurchaseProduct;
-                            $new_product->created_date = $date;
-                            $new_product->purchase_date = date('Y-m-d', strtotime($product->purchase_date) + (strtotime($product->stop_date) - strtotime($product->created_date)));
-                            $new_product->stop_date = date('Y-m-d', (strtotime($product->stop_date) + (strtotime($product->stop_date) - strtotime($product->created_date))));
-                            // $new_product->renewal = 1;
-                            // $new_product->purchase_total = $product->purchase_total;
-                            // $new_product->is_weights = $product->is_weights;
-                            // $new_product->tare = $product->tare;
-                            // $new_product->weight = $product->weight;
-                            // $new_product->measurement = $product->measurement;
-                            // $new_product->summ = $product->summ;
-                            // $new_product->product_feature_id = $product->product_feature_id;
-                            // $new_product->provider_id = $product->provider_id;
-                            // $new_product->comment = $product->comment;
-                            // $new_product->send_notification = $product->send_notification;
-                            $new_product->status = 'advance';
-                            // $new_product->copy = $product->id;
-                            // $new_product->save();
-                        }
+                  
+                    // если у провайдера выключено ручное управление датами закупок и включено автопродление дат
+                    if ( ! $provider->purchases_management && $product->renewal) {
+                        $new_product->created_date = $date;
+                        $new_product->purchase_date = date('Y-m-d', strtotime($product->purchase_date) + (strtotime($product->stop_date) - strtotime($product->created_date)));
+                        $new_product->stop_date = date('Y-m-d', (strtotime($product->stop_date) + (strtotime($product->stop_date) - strtotime($product->created_date))));
+                        $new_product->status = 'advance';
                     }
+                        
                     $new_product->save();
                     
                     if ($product->send_notification) {
@@ -210,49 +175,28 @@ class PurchaseNotificationController extends Controller
                         
                     }
                     
-                    // если у провайдера включено ручное управление датами закупок
-                    if ($provider->purchases_management) {
-                        // $date_timestamp = strtotime($date);
-                        // $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " (" . $real_product->name. ") ";
-                        // $date_timestamp = strtotime($product->purchase_date);
-                        // $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
-                        // $send .= "\r\n\r\nНазначить новую дату закупки?";    
-                        // $InlineKeyboardMarkup = [
-                        //     'inline_keyboard' => [
-                        //         [
-                        //             [
-                        //                 'text' => "Назначить новую дату закупки",
-                        //                 'callback_data' => 'newdatepurchase_' . $product->id
-                        //             ],
-                        //         ],
-                        //     ]
-                        // ];
-                        // // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
-                        // $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
-                    }else {
-                        // если включено автопродление дат закупок
-                        if ($product->renewal) {
-                            $new_product = new PurchaseProduct;
-                            $new_product->created_date = $date;
-                            $new_product->purchase_date = date('Y-m-d', strtotime($product->purchase_date) + (strtotime($product->stop_date) - strtotime($product->created_date)));
-                            $new_product->stop_date = date('Y-m-d', (strtotime($product->stop_date) + (strtotime($product->stop_date) - strtotime($product->created_date))));
-                            $new_product->renewal = 1;
-                            $new_product->purchase_total = $product->purchase_total;
-                            $new_product->is_weights = $product->is_weights;
-                            $new_product->tare = $product->tare;
-                            $new_product->weight = $product->weight;
-                            $new_product->measurement = $product->measurement;
-                            $new_product->summ = $product->summ;
-                            $new_product->product_feature_id = $product->product_feature_id;
-                            $new_product->provider_id = $product->provider_id;
-                            $new_product->comment = $product->comment;
-                            $new_product->send_notification = $product->send_notification;
-                            $new_product->status = 'advance';
-                            // $new_product->copy = $product->id;
-                            $new_product->save();
+                    // если у провайдера выключено ручное управление датами закупок и включено автопродление дат
+                    if (! $provider->purchases_management && $product->renewal) {
+                        $new_product = new PurchaseProduct;
+                        $new_product->created_date = $date;
+                        $new_product->purchase_date = date('Y-m-d', strtotime($product->purchase_date) + (strtotime($product->stop_date) - strtotime($product->created_date)));
+                        $new_product->stop_date = date('Y-m-d', (strtotime($product->stop_date) + (strtotime($product->stop_date) - strtotime($product->created_date))));
+                        $new_product->renewal = 1;
+                        $new_product->purchase_total = $product->purchase_total;
+                        $new_product->is_weights = $product->is_weights;
+                        $new_product->tare = $product->tare;
+                        $new_product->weight = $product->weight;
+                        $new_product->measurement = $product->measurement;
+                        $new_product->summ = $product->summ;
+                        $new_product->product_feature_id = $product->product_feature_id;
+                        $new_product->provider_id = $product->provider_id;
+                        $new_product->comment = $product->comment;
+                        $new_product->send_notification = $product->send_notification;
+                        $new_product->status = 'advance';
+                        // $new_product->copy = $product->id;
+                        $new_product->save();
 
-                            $product->delete();
-                        }
+                        $product->delete();
                     }
 
                     
@@ -319,7 +263,7 @@ class PurchaseNotificationController extends Controller
                         $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " ";
                         $date_timestamp = strtotime($product->purchase_date);
                         $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
-                        // $send .= "\r\n\r\nНазначить новую дату закупки?";    
+                        
                         $InlineKeyboardMarkup = [
                             'inline_keyboard' => [
                                 [
@@ -342,8 +286,8 @@ class PurchaseNotificationController extends Controller
                                 ],
                             ]
                         ];
-                        $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
-                        // $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
+                        // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
+                        $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
 
                     }
                 }
