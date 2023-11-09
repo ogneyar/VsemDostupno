@@ -5,17 +5,21 @@ use DateTime;
 use app\models\User;
 use app\models\Forgot;
 use app\models\Email;
+use app\models\Fund;
 use app\models\Account;
 use app\models\TgCommunication;
 use app\models\Category;
 use app\models\CategoryHasProduct;
 use app\models\Product;
 use app\models\ProductFeature;
+use app\models\ProductPrice;
 use app\models\Provider;
+use app\models\ProviderHasProduct;
 use app\modules\purchase\models\PurchaseProduct;
 
 require_once __DIR__ . '/../utils/formatPrice.php';
 require_once __DIR__ . '/../utils/getBalance.php';
+require_once __DIR__ . '/../utils/editPricePurchase.php';
 
 
 
@@ -684,6 +688,68 @@ function requestMessage($bot, $message, $master, $admin) {
         
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
 
+        // редактирование цены товара и закупки
+        if (strstr($tgCom->from_whom, '_', true) == 'editpriceproduct') 
+        {
+            $array = explode('_', $tgCom->from_whom);        
+            $product_id = $array[1];
+
+            $price = $text;
+
+            if ( ! is_numeric($price)) {
+                $bot->sendMessage($chat_id, "Не верный формат числа");
+                return;
+            }
+
+            $product = Product::findOne($product_id);
+            $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
+            if ($productPrice)
+            {
+                $productPrice->purchase_price = $price;
+                $funds = Fund::find()->all();
+                $percents = 0;
+                foreach($funds as $fund) $percents = $percents + $fund->percent;
+                $member_price = $price + ($price/100*$percents);
+                $member_price = round($member_price, 2);
+                $productPrice->member_price = $member_price;
+                $price_all = $member_price + ($member_price/100*25);
+                $price_all = round($price_all, 2);
+                $productPrice->price = $price_all;
+                $productPrice->save();
+                
+                $productFeatures = ProductFeature::find()->where(['product_id' => $product_id])->all(); 
+                foreach($productFeatures as $productFeature) {
+                    $purchaseProduct = PurchaseProduct::find()->where(['product_feature_id' => $productFeature->id])->andWhere(['status' => 'abortive'])->one();
+                    if ($purchaseProduct)
+                    {
+                        $purchaseProduct->summ = $price;
+                        $purchaseProduct->save();
+                    }
+                }
+
+                $send = "Изменение цены на " . $product->name . ", произведено";
+                $bot->sendMessage($chat_id, $send);
+            }else {
+                $send = "Ошибка изменения цены " . $product->name;
+                $bot->sendMessage($chat_id, $send);
+            }
+            $tgCom->delete();
+
+              
+            $providerHasProduct = ProviderHasProduct::findOne(['product_id' => $product_id]);
+            $provider_id = $providerHasProduct->provider_id;            
+            $step = 1;
+
+/*
+            Эта часть из callbaqckQuery
+            УПРАВЛЕНИЕ ЦЕНАМИ ЗАКУПОК
+*/
+            editPricePurchase($bot, $chat_id, $provider_id, $step);
+            
+            return;
+        }
+        
+
         // принятие новой даты заказа
         if (strstr($tgCom->from_whom, '_', true) == 'editstopdate') 
         {
@@ -706,7 +772,7 @@ function requestMessage($bot, $message, $master, $admin) {
             return;
         }
         
-        // создание новой закупки или редактирование старой
+        // редактирование закупки
         if (strstr($tgCom->from_whom, '_', true) == 'editpurchasedate') 
         {            
             $array = explode('_', $tgCom->from_whom);
@@ -737,16 +803,16 @@ function requestMessage($bot, $message, $master, $admin) {
 
             $product = $products[0];
 
-            $feature_id = $product->product_feature_id;
-            $product_feature = ProductFeature::findOne($feature_id);
-            $real_product_id = $product_feature->product_id;
-            $real_product = Product::findOne($real_product_id);
-            $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
-            $category_id = $categoryHasProduct->category_id;
-            $category = Category::findOne($category_id);
+            // $feature_id = $product->product_feature_id;
+            // $product_feature = ProductFeature::findOne($feature_id);
+            // $real_product_id = $product_feature->product_id;
+            // $real_product = Product::findOne($real_product_id);
+            // $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
+            // $category_id = $categoryHasProduct->category_id;
+            // $category = Category::findOne($category_id);
 
-            $send = date('d.m.Y') . "г., внесено изменение в график закупок ".$category->name;
-            $send .= " " . $provider->name . "\r\n";
+            $send = date('d.m.Y') . "г., внесено изменение в график закупки товаров ";
+            $send .= $provider->name . "\r\n";
             $send .= "Стоп заказ ".$stop_date."г. в 21 час.\r\n";
             $send .= "Доставка  ".$purchase_date."г."; 
 

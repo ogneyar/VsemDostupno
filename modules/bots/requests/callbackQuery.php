@@ -15,11 +15,14 @@ use app\models\Image;
 use app\models\Account;
 use app\models\Product;
 use app\models\ProductFeature;
+use app\models\ProductPrice;
 use app\models\Provider;
+use app\models\ProviderHasProduct;
 use app\modules\purchase\models\PurchaseProduct;
 
 
 require_once __DIR__ . '/../utils/getBalance.php';
+require_once __DIR__ . '/../utils/editPricePurchase.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -1750,17 +1753,17 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         // foreach ($purchase_products as $purchase_product) {
         if ($purchase_products && $purchase_products[0]) {
             $purchase_product = $purchase_products[0];
-            $purchase_id = $purchase_product->id;
-            $feature_id = $purchase_product->product_feature_id;
-            $product_feature = ProductFeature::findOne($feature_id);
-            $product_id = $product_feature->product_id;
-            $product = Product::findOne($product_id);
-            $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
-            $category_id = $categoryHasProduct->category_id;
-            $category = Category::findOne($category_id);
+            // $purchase_id = $purchase_product->id;
+            // $feature_id = $purchase_product->product_feature_id;
+            // $product_feature = ProductFeature::findOne($feature_id);
+            // $product_id = $product_feature->product_id;
+            // $product = Product::findOne($product_id);
+            // $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
+            // $category_id = $categoryHasProduct->category_id;
+            // $category = Category::findOne($category_id);
             
-            $send =  date('d.m.Y', strtotime($purchase_product->created_date)) . "г., внесено изменение в график закупки "; 
-            $send .= $category->name . " " . $provider->name . "\r\n";
+            $send =  date('d.m.Y', strtotime($purchase_product->created_date)); 
+            $send .= "г., внесено изменение в график закупки товаров " . $provider->name . "\r\n";
             $send .= "Стоп заказ ".date('d.m.Y', strtotime($purchase_product->stop_date))."г. в 21 час.\r\n";
             $send .= "Доставка ".date('d.m.Y', strtotime($purchase_product->purchase_date))."г.";
 
@@ -1822,6 +1825,50 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             }
         }
 
+        return;
+    }
+
+
+    /*****************************************
+    
+           УПРАВЛЕНИЕ ЦЕНАМИ ЗАКУПОК
+
+    ******************************************/
+    if (strstr($data, '_', true) == 'editpricepurchase')
+    {
+        $array = explode('_', $data);        
+        $provider_id = $array[1];     
+        if ($array[2]) $step = $array[2]; // шаг по 4 штуки
+        else $step = 1;
+
+        editPricePurchase($bot, $from_id, $provider_id, $step);
+        
+        return;
+    }
+
+
+    /*****************************************
+    
+           ИЗМЕНЕНИЕ ЗАКУПОЧНЫХ ЦЕН 
+
+    ******************************************/
+    if (strstr($data, '_', true) == 'editpriceproduct')
+    {
+        $array = explode('_', $data);        
+        $product_id = $array[1];    
+        
+        $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);    
+        if (!$tgCom) {
+            $tgCom = new TgCommunication();
+            $tgCom->chat_id = $from_id;
+            $tgCom->to_chat_id = $from_id;
+        }
+        $tgCom->from_whom = "editpriceproduct_".$product_id;
+        $tgCom->save();
+
+        $send =  "Внесите в поле Сообщение новую сумму закупки в формате 1000.00";
+        $bot->sendMessage($from_id, $send);
+        
         return;
     }
 
