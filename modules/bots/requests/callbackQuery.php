@@ -23,6 +23,7 @@ use app\modules\purchase\models\PurchaseProduct;
 
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
+require_once __DIR__ . '/../utils/listOfProducts.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -1736,6 +1737,77 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         return;
     }
 
+    /***********************************
+    
+           УВЕДОМЛЕНИЕ ПАЙЩИКОВ
+
+    ************************************/
+    if (strstr($data, '_', true) == 'notifyShareholders')
+    {
+        $array = explode('_', $data);        
+        $provider_id = $array[1];
+
+        $users = User::find()->where(['role' => [ User::ROLE_MEMBER, User::ROLE_PARTNER]])->andWhere(['disabled' => 0])->all();
+        
+        $products = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => 'advance'])->all();
+        $product = $products[0];
+
+        if ( ! $product ) {
+            $send = "У поставщика нет закупок со статусом 'advance'.";
+            $bot->sendMessage($from_id, $send);
+            return;
+        }
+        
+        $provider = Provider::findOne($provider_id);
+
+        $allCategories = [];
+        foreach($products as $product) {
+            $feature_id = $product->product_feature_id;
+            $product_feature = ProductFeature::findOne($feature_id);
+            $real_product_id = $product_feature->product_id;
+            $real_product = Product::findOne($real_product_id);
+            $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
+            $category_id = $categoryHasProduct->category_id;
+            // $category = Category::findOne($category_id);
+            $yes = false;
+            foreach($allCategories as $allCategory) {
+                if ($allCategory == $category_id) $yes = true;
+            }
+            if ( ! $yes ) $allCategories[] = $category_id;
+        }
+        foreach($allCategories as $allCategory) {
+            $category = Category::findOne($allCategory);
+            foreach($users as $user) {
+                if ($user->tg_id) {
+                // if ($user->tg_id && $user->tg_id == $master) {
+                    $send =  date('d.m.Y', strtotime($product->created_date)) . "г., состоится закупка "; 
+                    $send .= $category->name . " от " . $provider->name . "\r\n";
+                    $send .= "Стоп заказ ".date('d.m.Y', strtotime($product->stop_date))."г. в 21 час.\r\n";
+                    $send .= "Доставка ".date('d.m.Y', strtotime($product->purchase_date))."г.";
+        
+                    $InlineKeyboardMarkup = [
+                        'inline_keyboard' => [                   
+                            [
+                                [
+                                    'text' => "Смотреть перечень товаров",
+                                    'callback_data' => 'listOfProducts_' . $provider_id . '_' . $category->id
+                                ],
+                            ],
+                        ]
+                    ];
+        
+                    $bot->sendMessage($user->tg_id, $send, null, $InlineKeyboardMarkup);                
+                }
+            }
+        }
+        
+        $send = "Сообщения пайщикам отправлены.";
+        $bot->sendMessage($from_id, $send);
+
+
+        return;
+    }
+
     /*******************************
     
            ЗАКУПКИ ПОСТАВЩИКА 
@@ -1778,7 +1850,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                     [
                         [
                             'text' => "Уведомить пайщиков",
-                            'callback_data' => 'notify_shareholders'
+                            'callback_data' => 'notifyShareholders_' . $provider_id
                         ],
                     ],                  
                     [
@@ -1871,6 +1943,26 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         
         return;
     }
+
+    
+    /*********************************
+    
+           ПЕРЕЧЕНЬ ТОВАРОВ
+
+    **********************************/
+    if (strstr($data, '_', true) == 'listOfProducts')
+    {
+        $array = explode('_', $data);        
+        $provider_id = $array[1];     
+        $category_id = $array[2]; 
+        if ($array[3]) $step = $array[3]; // шаг по 4 штуки
+        else $step = 1;
+
+        listOfProducts($bot, $from_id, $provider_id, $category_id, $step);
+        
+        return;
+    }
+
 
 
     /************************************************

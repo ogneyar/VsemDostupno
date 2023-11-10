@@ -56,7 +56,7 @@ function requestMessage($bot, $message, $master, $admin) {
     ********************/
     if ($text == "/start" || $text == "Старт" || $text == "/menu" || $text == "Главное меню" || $text == "Назад" ||  $text == "🌟Главное меню")
     {    
-        $send = "В голубом кружочке  с низу, в меню, Вы найдёте ссылки на всю необходимую информацию";
+        $send = "В голубом кружочке с низу, в меню, Вы найдёте ссылки на всю необходимую информацию";
                
         $keyboard = [
             [
@@ -66,8 +66,18 @@ function requestMessage($bot, $message, $master, $admin) {
         ];
 
         if ($chat_id == $master || $chat_id == $admin) {
+        // if ($chat_id == $admin) {
             array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
+        }else {
+            $users = User::find()->where(['role' => [User::ROLE_MEMBER,User::ROLE_PARTNER]])->all();
+            foreach($users as $user) {
+                if ($chat_id == $user->tg_id) {
+                    array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+                }
+            }
         }
+        
+        
 
         $ReplyKeyboardMarkup = [
             'keyboard' => $keyboard,
@@ -703,20 +713,33 @@ function requestMessage($bot, $message, $master, $admin) {
 
             $product = Product::findOne($product_id);
             $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
-            if ($productPrice)
+            if ( ! $productPrice )
             {
-                $productPrice->purchase_price = $price;
-                $funds = Fund::find()->all();
-                $percents = 0;
-                foreach($funds as $fund) $percents = $percents + $fund->percent;
-                $member_price = $price + ($price/100*$percents);
-                $member_price = round($member_price, 2);
-                $productPrice->member_price = $member_price;
-                $price_all = $member_price + ($member_price/100*25);
-                $price_all = round($price_all, 2);
-                $productPrice->price = $price_all;
-                $productPrice->save();
-                
+                $productPrice = new ProductPrice();
+                $productPrice->product_id = $product_id;
+                $productFeature = ProductFeature::findOne(['product_id' => $product_id]); 
+                if ( ! $productFeature ) {                    
+                    $send = "Осутствуют характеристики товара!!!";
+                    $bot->sendMessage($chat_id, $send);
+                }else $productPrice->product_feature_id = $productFeature->id;
+            }
+            $productPrice->purchase_price = $price;
+            $funds = Fund::find()->all();
+            $percents = 0;
+            foreach($funds as $fund) $percents = $percents + $fund->percent;
+            $member_price = $price + ($price/100*$percents);
+            $member_price = round($member_price, 2);
+            $productPrice->member_price = $member_price;
+            $price_all = $member_price + ($member_price/100*25);
+            $price_all = round($price_all, 2);
+            $productPrice->price = $price_all;
+            if ( ! $productPrice->save() ) {
+                $send = "Ошибка изменения цены " . $product->name;
+                $bot->sendMessage($chat_id, $send);
+            }else {
+                $send = "Изменение цены на " . $product->name . ", произведено";
+                $bot->sendMessage($chat_id, $send);
+
                 $productFeatures = ProductFeature::find()->where(['product_id' => $product_id])->all(); 
                 foreach($productFeatures as $productFeature) {
                     $purchaseProduct = PurchaseProduct::find()->where(['product_feature_id' => $productFeature->id])->andWhere(['status' => 'abortive'])->one();
@@ -726,15 +749,9 @@ function requestMessage($bot, $message, $master, $admin) {
                         $purchaseProduct->save();
                     }
                 }
-
-                $send = "Изменение цены на " . $product->name . ", произведено";
-                $bot->sendMessage($chat_id, $send);
-            }else {
-                $send = "Ошибка изменения цены " . $product->name;
-                $bot->sendMessage($chat_id, $send);
             }
+            
             $tgCom->delete();
-
               
             $providerHasProduct = ProviderHasProduct::findOne(['product_id' => $product_id]);
             $provider_id = $providerHasProduct->provider_id;            
@@ -827,7 +844,7 @@ function requestMessage($bot, $message, $master, $admin) {
                     [
                         [
                             'text' => "Уведомить пайщиков",
-                            'callback_data' => 'notify_shareholders'
+                            'callback_data' => 'notifyShareholders_' . $provider_id
                         ],
                     ],
                     [
