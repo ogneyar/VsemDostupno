@@ -13,10 +13,8 @@ use app\modules\purchase\models\PurchaseProduct;
 
 function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
     $purchaseProducts = PurchaseProduct::find()->where(['provider_id' => $provider_id])->andWhere(['status' => 'advance'])->all();
-    $iter = 0;
-    foreach($purchaseProducts as $purchaseProduct) {       
-        $iter++;
-        if ($iter <= (($step - 1)*4)) continue;
+    $quantity = 0;
+    foreach($purchaseProducts as $purchaseProduct) {   
         $productFeature = ProductFeature::findOne($purchaseProduct->product_feature_id);
         $product_id = $productFeature->product_id;
         $product = Product::findOne($product_id);
@@ -24,6 +22,9 @@ function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
         $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
         $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
         if ($categoryHasProduct->category_id == $category_id) {
+            $quantity++;
+            if ($quantity <= (($step - 1)*4)) continue;
+            if ($quantity > ($step*4)) continue;
             $send = $productName . " – " . $productPrice->price . " / " . $productPrice->member_price;
 
             $InlineKeyboardMarkup = [
@@ -39,9 +40,9 @@ function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
 
             $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
         }
-        if ($iter == ($step*4)) break;
     }
-    if (count($purchaseProducts) > ($step*4)) {        
+        
+    if ($quantity > ($step*4)) {        
         $step++;
         $send =  "Остальной перечень";
 
@@ -50,7 +51,7 @@ function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
                 [
                     [
                         'text' => "Смотреть",
-                        'callback_data' => 'listOfProducts_' . $provider_id . '_' . $category->id . "_" . $step
+                        'callback_data' => 'listOfProducts_' . $provider_id . '_' . $category_id . "_" . $step
                     ],
                 ],                
             ]
