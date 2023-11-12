@@ -24,6 +24,7 @@ use app\modules\purchase\models\PurchaseProduct;
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/listOfProducts.php';
+require_once __DIR__ . '/../utils/assortment.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -1960,6 +1961,96 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
         listOfProducts($bot, $from_id, $provider_id, $category_id, $step);
         
+        return;
+    }
+
+
+    /*********************************
+    
+                АССОРТИМЕНТ
+
+    **********************************/
+    if (strstr($data, '_', true) == 'assortment')
+    {
+        $array = explode('_', $data);        
+        $provider_id = $array[1]; 
+        if ($array[2]) $step = $array[2]; // шаг по 4 штуки
+        else $step = 1;
+
+        assortment($bot, $from_id, $provider_id, $step);
+
+        return;
+    }
+
+
+    /************************************
+    
+        включение ВИДИМОСТИ продукта
+
+    *************************************/
+    if (strstr($data, '_', true) == 'setVisibleProduct')
+    {
+        $array = explode('_', $data);        
+        $product_id = $array[1]; 
+        if ($array[2]) $step = $array[2]; // шаг по 4 штуки
+        else $step = 1;
+
+        $product = Product::findOne($product_id);
+        $product->visibility = 1;
+        $product->scenario = 'apply_product';
+        
+        if ( ! $product->save() ) {
+            $bot->sendMessage($from_id, "Произошла ошибка!");
+        }else {
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' =>  [
+                    [
+                        [
+                            'text' => "Исключить",
+                            'callback_data' => 'resetVisibleProduct_' . $product_id
+                        ],
+                    ]
+                ]
+            ];
+            $bot->sendMessage($from_id, $product->name . ", включено в общий ассортимент", null, $InlineKeyboardMarkup);
+        }
+
+        return;
+    }
+
+
+    /************************************
+    
+        отключение ВИДИМОСТИ продукта
+
+    *************************************/
+    if (strstr($data, '_', true) == 'resetVisibleProduct')
+    {
+        $array = explode('_', $data);        
+        $product_id = $array[1]; 
+        if ($array[2]) $step = $array[2]; // шаг по 4 штуки
+        else $step = 1;
+
+        $product = Product::findOne($product_id);
+        $product->visibility = 0;
+        $product->scenario = 'apply_product';
+
+        if ( ! $product->save() ) {
+            $bot->sendMessage($from_id, "Произошла ошибка!");
+        }else {
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' =>  [
+                    [
+                        [
+                            'text' => "Добавить",
+                            'callback_data' => 'setVisibleProduct_' . $product_id
+                        ],
+                    ]
+                ]
+            ];
+            $bot->sendMessage($from_id, $product->name . ", временно исключено из общего ассортимента", null, $InlineKeyboardMarkup);
+        }
+
         return;
     }
 

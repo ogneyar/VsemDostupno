@@ -21,7 +21,7 @@ function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
         $productName = $product->name;
         $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
         $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
-        if ($categoryHasProduct->category_id == $category_id) {
+        if ($categoryHasProduct->category_id == $category_id && $product->visibility) {
             $quantity++;
             if ($quantity <= (($step - 1)*4)) continue;
             if ($quantity > ($step*4)) continue;

@@ -62,22 +62,22 @@ function requestMessage($bot, $message, $master, $admin) {
             [
                 [ 'text' => 'Приветствие' ],
                 [ 'text' => 'О нас' ]
+            ],
+            [
+                [ 'text' => 'Закупки' ]
             ]
         ];
 
-        if ($chat_id == $master || $chat_id == $admin) {
-        // if ($chat_id == $admin) {
-            array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
-        }else {
-            $users = User::find()->where(['role' => [User::ROLE_MEMBER,User::ROLE_PARTNER]])->all();
-            foreach($users as $user) {
-                if ($chat_id == $user->tg_id) {
-                    array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
-                }
-            }
-        }
-        
-        
+        // if ($chat_id == $master || $chat_id == $admin) {
+        //     array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
+        // }else {
+        //     $users = User::find()->where(['role' => [User::ROLE_MEMBER,User::ROLE_PARTNER]])->all();
+        //     foreach($users as $user) {
+        //         if ($chat_id == $user->tg_id) {
+        //             array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+        //         }
+        //     }
+        // }
 
         $ReplyKeyboardMarkup = [
             'keyboard' => $keyboard,
@@ -624,32 +624,43 @@ function requestMessage($bot, $message, $master, $admin) {
     
     /******************************
     
-        ДАТЫ ЗАКУПОК для админа
+        ЗАКУПКИ, управление ими
 
     *******************************/
-    if ( ($text == "/purchase_date" || $text == "Даты закупок") && ($chat_id == $master || $chat_id == $admin) )
+    if ($text == "/purchase_date" || $text == "Даты закупок" || $text == "Закупки")
     {    
+        $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
+        
+        if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $master || $chat_id == $admin) {
 
-        $providers = Provider::find()->where(['purchases_management' => 1])->all();
+            $providers = Provider::find()->where(['purchases_management' => 1])->all();
 
-        $send = "Перечень поставщиков с ручным управлением закупками.";
-                   
-        $inline_keyboard = [];
+            $send = "Перечень поставщиков с ручным управлением закупками.";
+                    
+            $inline_keyboard = [];
 
-        foreach ($providers as $provider) {
-            array_push($inline_keyboard, [
-                [
-                    'text' => $provider->name,
-                    'callback_data' => 'providerpurchases_' . $provider->id
-                ]
-            ]);
-        }
+            foreach ($providers as $provider) {
+                array_push($inline_keyboard, [
+                    [
+                        'text' => $provider->name,
+                        'callback_data' => 'providerpurchases_' . $provider->id
+                    ]
+                ]);
+            }
 
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' => $inline_keyboard
-        ];  
-        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => $inline_keyboard
+            ];  
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+            
+        }else if ($user->role == User::ROLE_MEMBER || $user->role == User::ROLE_PARTNER) {
 
+            // будет в отдельном ТЗ
+
+            $bot->sendMessage($chat_id, "Не реализовано!");
+
+        } 
+        
         return;
     }
 
