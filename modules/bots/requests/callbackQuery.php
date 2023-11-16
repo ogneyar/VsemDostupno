@@ -1767,6 +1767,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $product_feature = ProductFeature::findOne($feature_id);
             $real_product_id = $product_feature->product_id;
             $real_product = Product::findOne($real_product_id);
+            if ($real_product->visibility == 0) continue;
             $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
             $category_id = $categoryHasProduct->category_id;
             // $category = Category::findOne($category_id);
