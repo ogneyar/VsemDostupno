@@ -631,8 +631,8 @@ function requestMessage($bot, $message, $master, $admin) {
     {    
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
         
-        if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $master || $chat_id == $admin) {
-
+        if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
+        {
             $providers = Provider::find()->where(['purchases_management' => 1])->all();
 
             $send = "Перечень поставщиков с ручным управлением закупками.";
@@ -653,12 +653,77 @@ function requestMessage($bot, $message, $master, $admin) {
             ];  
             $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
             
-        }else if ($user->role == User::ROLE_MEMBER || $user->role == User::ROLE_PARTNER) {
+        }else if ($user->role != User::ROLE_PROVIDER || $chat_id == "351009636") 
+        {            
+            $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
 
-            // будет в отдельном ТЗ
+            if ( ! $products[0] ) {
+                $send = "Нет действующих закупок.";
+                $bot->sendMessage($chat_id, $send);
+                return;
+            }
+            
+            // $provider = Provider::findOne($provider_id);
 
-            $bot->sendMessage($chat_id, "Не реализовано!");
+            $allCategories = [];
+            foreach($products as $product) {
+                $feature_id = $product->product_feature_id;
+                $product_feature = ProductFeature::findOne($feature_id);
+                $real_product_id = $product_feature->product_id;
+                $real_product = Product::findOne($real_product_id);
+                if ($real_product->visibility == 0) continue;
+                $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
+                $category_id = $categoryHasProduct->category_id;
+                $category = Category::findOne($category_id);
+                $yes = false;
+                foreach($allCategories as $oneCategory) {
+                    if ($oneCategory['category_id'] == $category_id) $yes = true;
+                }
+                if ( ! $yes ) $allCategories[] = [
+                    'category_id' => $category_id, 
+                    'category_name' => $category->name,
+                    'purchase_id' => $product->id, 
+                    'purchase_date' => strtotime($product->purchase_date), 
+                ];
+            }
 
+            usort($allCategories, function($a, $b) {
+                if ($a['category_name'] > $b['category_name']) {
+                    return 1;
+                } elseif ($a['category_name'] < $b['category_name']) {
+                    return -1;
+                }
+                return 0;
+            });
+
+            usort($allCategories, function($a, $b) {
+                if ($a['purchase_date'] > $b['purchase_date']) {
+                    return 1;
+                } elseif ($a['purchase_date'] < $b['purchase_date']) {
+                    return -1;
+                }
+                return 0;
+            });
+
+            $send = "Общий список Закупок.";
+            
+            $inline_keyboard = [];
+            foreach($allCategories as $oneCategory) {
+                $text =  $oneCategory['category_name'] . " " . date('d.m.Y', $oneCategory['purchase_date']); 
+            
+                $inline_keyboard[] = [
+                    [
+                        'text' => $text,
+                        'callback_data' => 'listOfPurchases_' . $oneCategory['purchase_id']
+                    ],
+                ];
+            }
+            
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => $inline_keyboard
+            ];
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);    
+        
         } 
         
         return;

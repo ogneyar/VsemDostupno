@@ -24,6 +24,7 @@ use app\modules\purchase\models\PurchaseProduct;
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/listOfProducts.php';
+require_once __DIR__ . '/../utils/listOfPurchases.php';
 require_once __DIR__ . '/../utils/assortment.php';
 
 
@@ -1964,7 +1965,23 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         
         return;
     }
+    
+    /*********************************
+    
+           ПЕРЕЧЕНЬ ЗАКУПОК
 
+    **********************************/
+    if (strstr($data, '_', true) == 'listOfPurchases')
+    {
+        $array = explode('_', $data); 
+        $purchase_id = $array[1]; 
+        if ($array[2]) $step = $array[2]; // шаг по 4 штуки
+        else $step = 1;
+
+        listOfPurchases($bot, $from_id, $purchase_id, $step);
+        
+        return;
+    }
 
     /*********************************
     
