@@ -677,7 +677,7 @@ function requestMessage($bot, $message, $master, $admin) {
                 $category = Category::findOne($category_id);
                 $yes = false;
                 foreach($allCategories as $oneCategory) {
-                    if ($oneCategory['category_id'] == $category_id) $yes = true;
+                    if ($oneCategory['category_id'] == $category_id && $oneCategory['purchase_date'] == strtotime($product->purchase_date)) $yes = true;
                 }
                 if ( ! $yes ) $allCategories[] = [
                     'category_id' => $category_id, 
