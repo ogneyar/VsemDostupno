@@ -24,8 +24,10 @@ use app\modules\purchase\models\PurchaseProduct;
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/listOfProducts.php';
+require_once __DIR__ . '/../utils/productWithAPhoto.php';
 require_once __DIR__ . '/../utils/listOfPurchases.php';
 require_once __DIR__ . '/../utils/assortment.php';
+require_once __DIR__ . '/../utils/putInTheBasket.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -1966,6 +1968,21 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         return;
     }
     
+    /**************************
+    
+           ТОВАР с фото
+
+    ***************************/
+    if (strstr($data, '_', true) == 'productWithAPhoto')
+    {
+        $array = explode('_', $data); 
+        $product_id = $array[1]; 
+
+        productWithAPhoto($bot, $from_id, $product_id);
+        
+        return;
+    }
+
     /*********************************
     
            ПЕРЕЧЕНЬ ЗАКУПОК
@@ -1982,6 +1999,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         
         return;
     }
+    
 
     /*********************************
     
@@ -2071,7 +2089,59 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
         return;
     }
+    
 
+    /****************************************
+    
+           ПОЛОЖИТЬ ТОВАР В КОРЗИНУ
+
+    *****************************************/
+    if (strstr($data, '_', true) == 'putInTheBasket')
+    {
+        $array = explode('_', $data); 
+        $product_id = $array[1]; 
+        if ($array[2]) $quantity = $array[2]; // количество
+        else $quantity = 0;
+
+        putInTheBasket($bot, $from_id, $product_id, $quantity);
+        
+        return;
+    }
+    
+
+    /*******************
+    
+           РАСЧЁТ
+
+    ********************/
+    if (strstr($data, '_', true) == 'calculation')
+    {
+        $array = explode('_', $data); 
+        $summa = $array[1]; 
+        
+        $send = "При нажатии кнопки “Далее”, c Вашего лицевого счёта будет списана сумма ". $summa ."р., как обмен паями";
+        
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' =>  [
+                [
+                    [
+                        'text' => "Далее",
+                        'callback_data' => 'calculationThen_' . $summa // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Отменить",
+                        'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                    ],
+                ],
+            ]
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+        
+        return;
+    }
 
 
     /************************************************

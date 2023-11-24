@@ -20,6 +20,7 @@ use app\modules\purchase\models\PurchaseProduct;
 require_once __DIR__ . '/../utils/formatPrice.php';
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
+require_once __DIR__ . '/../utils/putInTheBasket.php';
 
 
 
@@ -938,6 +939,25 @@ function requestMessage($bot, $message, $master, $admin) {
             return;
         }
 
+        
+        // запрос количество товара, необходимого положить в корзину
+        if (strstr($tgCom->from_whom, '_', true) == 'putInTheBasket') 
+        {            
+            $array = explode('_', $tgCom->from_whom);
+            $product_id = $array[1];
+            $quantity = $text;
+            if ( ! is_numeric($quantity) || $quantity < 1){
+                $bot->sendMessage($chat_id, "Необходимо ввести положительное число!");            
+                return;
+            }            
+
+            putInTheBasket($bot, $chat_id, $product_id, $quantity);
+            $tgCom->delete();
+
+            return;
+        }
+
+        
         if ( ! $tgCom->from_whom || $tgCom->from_whom == "client") {
             if ( ! $user || $user->lastname == "lastname") {
                 $send = "Не зарегистрированный пользователь". "\r\n\r\n" . $text;
