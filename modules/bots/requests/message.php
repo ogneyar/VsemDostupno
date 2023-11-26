@@ -632,8 +632,11 @@ function requestMessage($bot, $message, $master, $admin) {
     {    
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
         
+        
         if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
         {
+            // для администраторов
+
             $providers = Provider::find()->where(['purchases_management' => 1])->all();
 
             $send = "Перечень поставщиков с ручным управлением закупками.";
@@ -656,6 +659,8 @@ function requestMessage($bot, $message, $master, $admin) {
             
         }else if ($user->role != User::ROLE_PROVIDER || $chat_id == "351009636") 
         {            
+            // для пайщиков
+
             $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
 
             if ( ! $products[0] ) {

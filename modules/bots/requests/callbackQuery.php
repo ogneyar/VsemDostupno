@@ -28,6 +28,7 @@ require_once __DIR__ . '/../utils/productWithAPhoto.php';
 require_once __DIR__ . '/../utils/listOfPurchases.php';
 require_once __DIR__ . '/../utils/assortment.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
+require_once __DIR__ . '/../utils/purchaseOrderCreate.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2109,11 +2110,11 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     }
     
 
-    /*******************
+    /********************************
     
-           РАСЧЁТ
+           предложение РАСЧЁТа
 
-    ********************/
+    ********************************/
     if (strstr($data, '_', true) == 'calculation')
     {
         $array = explode('_', $data); 
@@ -2126,7 +2127,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 [
                     [
                         'text' => "Далее",
-                        'callback_data' => 'calculationThen_' . $summa // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                        'callback_data' => 'calculationThen_' . $summa
                     ],
                 ],
                 [
@@ -2139,6 +2140,22 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         ];
 
         $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+        
+        return;
+    }
+
+
+    /*******************
+    
+           РАСЧЁТ
+
+    ********************/
+    if (strstr($data, '_', true) == 'calculationThen')
+    {
+        $array = explode('_', $data); 
+        $summa = $array[1]; 
+        
+        purchaseOrderCreate($bot, $from_id, $summa);
         
         return;
     }
