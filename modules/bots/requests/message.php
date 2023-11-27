@@ -21,6 +21,7 @@ require_once __DIR__ . '/../utils/formatPrice.php';
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
+require_once __DIR__ . '/../utils/cart/getCart.php';
 
 
 
@@ -66,7 +67,10 @@ function requestMessage($bot, $message, $master, $admin) {
             ],
             [
                 [ 'text' => 'Закупки' ]
-            ]
+            ],
+            [
+                [ 'text' => 'Корзина' ]
+            ],
         ];
 
         // if ($chat_id == $master || $chat_id == $admin) {
@@ -555,11 +559,11 @@ function requestMessage($bot, $message, $master, $admin) {
         return;
     }
 
-    /************
+    /***************************
     
-     ПРИВЕТСТВИЕ
+            ПРИВЕТСТВИЕ 
 
-    *************/
+    ****************************/
     if ($text == "/hello" || $text == "Приветствие")
     {    
         $file_id = "BAACAgIAAxkBAAIHGWTm_pIWtP7sItX4-diNDV-tgVGZAAL1MgACxgQ5S7UZOXKYTDdCMAQ";
@@ -735,6 +739,18 @@ function requestMessage($bot, $message, $master, $admin) {
         return;
     }
 
+
+    /**********************
+    
+            КОРЗИНА 
+
+    ***********************/
+    if ($text == "/cart" || $text == "Корзина" || $text == "корзина")
+    {    
+        getCart($bot, $chat_id);
+
+        return;
+    }
 
 
 

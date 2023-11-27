@@ -7,13 +7,15 @@ use app\models\ProductPrice;
 // use app\models\ProductHasPhoto;
 // use app\models\Photo;
 use app\models\TgCommunication;
-use app\models\User;
+// use app\models\User;
+
+require_once __DIR__ . '/cart/getCart.php';
 
 
 function putInTheBasket($bot, $from_id, $product_id, $quantity = 0) 
 {
     
-    $user = User::findOne(['tg_id' => $from_id]);
+    // $user = User::findOne(['tg_id' => $from_id]);
 
     // if ( ! $user ) {
     //     $send = "Для совершения покупок Вам необходимо пройти регистрацию!";
@@ -52,48 +54,6 @@ function putInTheBasket($bot, $from_id, $product_id, $quantity = 0)
     $cart_tg->save();
     
     $allPrices = 0;
-    $send = "У Вас в корзине:\r\n\r\n";
-    $carts_tg = CartTg::find()->where(['tg_id' => $from_id])->all();
-    foreach($carts_tg as $cart) {
-        $product_id = $cart->product_id;
-        $product = Product::findOne($product_id);
-        $productName = $product->name;
-        $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
-        if (! $user || $user->lastname == "lastname") {
-            $price = $productPrice->price;
-        }else {
-            $price = $productPrice->member_price;
-        }
-        $allPrices += $price * $cart->quantity;
 
-        $send .= $cart->quantity . " еденицы " . $productName . " - " . $price . " за 1 шт.\r\n\r\n";
-    }
-
-    $send .= "На общую сумму " . $allPrices . "р. \r\n\r\n";
-    // $send .= "Доставка товара состоится 12.11.23г.";
-    
-    $InlineKeyboardMarkup = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => "Расчёт",
-                    'callback_data' => 'calculation_' . $allPrices
-                ],
-            ],
-            [
-                [
-                    'text' => "Продолжить выбор",
-                    'callback_data' => 'continueSelection_' . $product_id // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
-                ],
-            ],
-            [
-                [
-                    'text' => "Отменить",
-                    'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
-                ],
-            ],
-        ],
-    ];
-
-    $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+    getCart($bot, $from_id);
 }
