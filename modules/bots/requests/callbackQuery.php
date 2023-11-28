@@ -2238,7 +2238,8 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
            ОТМЕНА заказа
 
     ****************************************/
-    if (strstr($data, '_', true) == 'cancelAPurchase')
+    // if (strstr($data, '_', true) == 'cancelAPurchase')
+    if ($data == 'cancelAPurchase')
     {
         // $array = explode('_', $data); 
         // $product_id = $array[1]; 
