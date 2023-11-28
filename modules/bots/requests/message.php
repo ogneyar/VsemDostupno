@@ -800,7 +800,7 @@ function requestMessage($bot, $message, $master, $admin) {
         if (strstr($tgCom->from_whom, '_', true) == 'editpriceproduct') 
         {
             $array = explode('_', $tgCom->from_whom);        
-            $product_id = $array[1];
+            $product_feature_id = $array[1];
 
             $price = $text;
 
@@ -809,17 +809,17 @@ function requestMessage($bot, $message, $master, $admin) {
                 return;
             }
 
-            $product = Product::findOne($product_id);
-            $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
+            $productFeature = ProductFeature::findOne($product_feature_id); 
+
+            $product = Product::findOne($productFeature->product_id);
+            $product_id = $product->id;
+            $productPrice = ProductPrice::findOne(['product_feature_id' => $product_feature_id]);
             if ( ! $productPrice )
             {
                 $productPrice = new ProductPrice();
                 $productPrice->product_id = $product_id;
-                $productFeature = ProductFeature::findOne(['product_id' => $product_id]); 
-                if ( ! $productFeature ) {                    
-                    $send = "Осутствуют характеристики товара!!!";
-                    $bot->sendMessage($chat_id, $send);
-                }else $productPrice->product_feature_id = $productFeature->id;
+                // $productFeature = ProductFeature::findOne(['product_id' => $product_id]); 
+                $productPrice->product_feature_id = $productFeature->id;
             }
             $productPrice->purchase_price = $price;
             $funds = Fund::find()->all();

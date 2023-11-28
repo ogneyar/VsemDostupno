@@ -1933,7 +1933,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     if (strstr($data, '_', true) == 'editpriceproduct')
     {
         $array = explode('_', $data);        
-        $product_id = $array[1];    
+        $product_feature_id = $array[1];    
         
         $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);    
         if (!$tgCom) {
@@ -1941,7 +1941,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
             $tgCom->chat_id = $from_id;
             $tgCom->to_chat_id = $from_id;
         }
-        $tgCom->from_whom = "editpriceproduct_".$product_id;
+        $tgCom->from_whom = "editpriceproduct_".$product_feature_id;
         $tgCom->save();
 
         $send =  "Внесите в поле Сообщение новую сумму закупки в формате 1000.00";

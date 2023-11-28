@@ -33,7 +33,7 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1) {
         $product_id = $productFeature->product_id;
         $product = Product::findOne($product_id);
         $productName = $product->name;
-        $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
+        $productPrice = ProductPrice::findOne(['product_feature_id' => $productFeature->id]);
         $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
 
         if ($categoryHasProduct->category_id == $category_id && $product->visibility) {
@@ -47,7 +47,7 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1) {
                     [
                         [
                             'text' => "Выбрать",
-                            'callback_data' => 'productWithAPhoto_' . $product_id
+                            'callback_data' => 'productWithAPhoto_' . $productFeature->id
                         ],
                     ],
                 ],

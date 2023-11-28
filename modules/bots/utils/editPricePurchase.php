@@ -29,7 +29,7 @@ function editPricePurchase($bot, $from_id, $provider_id, $step) {
         $product_id = $productFeature->product_id;
 
         $product = Product::findOne($product_id);
-        $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
+        $productPrice = ProductPrice::findOne(['product_feature_id' => $productFeature->id]);
 
         $send =  $product->name . "\r\n";
         if ($productPrice->purchase_price) $send .= $productPrice->purchase_price . "р.";
@@ -40,7 +40,7 @@ function editPricePurchase($bot, $from_id, $provider_id, $step) {
                 [
                     [
                         'text' => "Изменить цену",
-                        'callback_data' => 'editpriceproduct_' . $product_id
+                        'callback_data' => 'editpriceproduct_' . $productFeature->id
                     ],
                 ],                
             ]

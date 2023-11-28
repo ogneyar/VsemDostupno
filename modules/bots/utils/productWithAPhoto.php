@@ -11,11 +11,13 @@ use app\models\User;
 use app\modules\purchase\models\PurchaseProduct;
 
 
-function productWithAPhoto($bot, $from_id, $product_id) 
+function productWithAPhoto($bot, $from_id, $product_feature_id) 
 {
     $user = User::findOne(['tg_id' => $from_id]);
-
-    $productPrice = ProductPrice::findOne(['product_id' => $product_id]);
+    
+    $productPrice = ProductPrice::findOne(['product_feature_id' => $product_feature_id]);
+    $productFeature = ProductFeature::findOne($product_feature_id);
+    $product_id = $productFeature->product_id;
     $productHasPhoto = ProductHasPhoto::findOne(['product_id' => $product_id]);
     $photoId = $productHasPhoto->photo_id;
     $photo = Photo::findOne($photoId);

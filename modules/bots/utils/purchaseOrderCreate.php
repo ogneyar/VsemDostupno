@@ -136,6 +136,9 @@ function purchaseOrderCreate($bot, $from_id, $summa)
     $transaction = Yii::$app->db->beginTransaction();
 
     try {
+
+        throw new Exception('Test!');
+
         $order = new PurchaseOrder;
         
         $order->email = $user->email;
@@ -271,10 +274,9 @@ function purchaseOrderCreate($bot, $from_id, $summa)
         $bot->sendMessage($from_id, "Transaction ERROR! (purchaseOrderCreate)");
         $bot->sendMessage($from_id, "Error message: " . $e->getMessage());
 
-        return;
+        // return;
     }
 
-    clearCart($from_id);
 
 
 
@@ -283,19 +285,46 @@ function purchaseOrderCreate($bot, $from_id, $summa)
 
 // ПЕРЕдеЛАть уведомление!!!!!!
 
-    $userOne = User::findOne(['email' => $order->email]);                       
-    if ($userOne->tg_id) {
-        Email::tg_send('add_advance_order', $userOne->tg_id, [
-            'fio' => $user->respectedName,
-            'order_products' => $order->htmlEmailFormattedInformation,
-            'order_number' => $order->order_number,
-        ]);       
-    }
+    // $userOne = User::findOne(['email' => $order->email]);                       
+    // if ($userOne->tg_id) {
+    //     Email::tg_send('add_advance_order', $userOne->tg_id, [
+    //         'fio' => $user->respectedName,
+    //         'order_products' => $order->htmlEmailFormattedInformation,
+    //         'order_number' => $order->order_number,
+    //     ]);       
+    // }
 
 
+    
 
+    $send = "10.11.23г. (Текущая дата ) Вами произведён обмен паями на общую сумму 740.60.””
+    2 ед. Масло льна 0.5л. -190.30 за 1 шт.
+    3 ед. Варенц с запечёной корочкой 0.5л. – 120.00 за 1шт.
+    На общую сумму 740.60”
+    Доставка товара состоится 12.11.23г.";
+
+    $InlineKeyboardMarkup = [
+        'inline_keyboard' => [
+            [
+                [
+                    'text' => "Распечатать акт",
+                    'callback_data' => 'printTheAct_' //. $product_id
+                ],
+            ],                
+            [
+                [
+                    'text' => "Заказать доставку на дом",
+                    'callback_data' => 'homeDelivery_' //. $product_id
+                ],
+            ],                
+        ]
+    ];
+
+    $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+    // $bot->sendMessage($from_id, $send);
 
         
+    // clearCart($from_id);
    
     // $bot->sendMessage($from_id, "конец!");
     // return;
