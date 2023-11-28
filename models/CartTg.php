@@ -16,6 +16,7 @@ use kgladkiy\behaviors\NestedSetQuery;
  * @property integer $id
  * @property integer $tg_id
  * @property integer $product_id
+ * @property integer $product_feature_id
  * @property integer $quantity
  *
  */
@@ -27,7 +28,7 @@ class CartTg extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'cart_tg'
+        return 'cart_tg';
     }
 
     /**
@@ -36,8 +37,8 @@ class CartTg extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tg_id', 'product_id', 'quantity'], 'integer'],
-            [['tg_id', 'product_id'], 'required'],
+            [['tg_id', 'product_id', 'product_feature_id', 'quantity'], 'integer'],
+            [['tg_id', 'product_id', 'product_feature_id'], 'required'],
         ];
     }
 
@@ -50,6 +51,7 @@ class CartTg extends \yii\db\ActiveRecord
             'id' => 'Идентификатор',
             'tg_id' => 'Идентификатор телеграм',
             'product_id' => 'Номер товара',
+            'product_feature_id' => 'Номер особенности товара',
             'quantity' => 'Количество'
         ];
     }

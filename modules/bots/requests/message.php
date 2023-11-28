@@ -965,14 +965,14 @@ function requestMessage($bot, $message, $master, $admin) {
         if (strstr($tgCom->from_whom, '_', true) == 'putInTheBasket') 
         {            
             $array = explode('_', $tgCom->from_whom);
-            $product_id = $array[1];
+            $product_feature_id = $array[1];
             $quantity = $text;
             if ( ! is_numeric($quantity) || $quantity < 1){
                 $bot->sendMessage($chat_id, "Необходимо ввести положительное число!");            
                 return;
             }            
 
-            putInTheBasket($bot, $chat_id, $product_id, $quantity);
+            putInTheBasket($bot, $chat_id, $product_feature_id, $quantity);
             $tgCom->delete();
 
             return;

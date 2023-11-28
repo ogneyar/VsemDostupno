@@ -22,25 +22,18 @@ function getCart($bot, $tg_id)
         $product = Product::findOne($product_id);
         $productName = $product->name;
         
-        $feature = "";
-        $productFeatures = ProductFeature::find()->where(['product_id' => $product_id])->all();
-        foreach($productFeatures as $productFeature) {
-            $purchaseProduct = PurchaseProduct::find()
-                ->where(['product_feature_id' => $productFeature->id])
-                ->andWhere(['status' => 'advance'])
-                ->one();
-            
-            if ($purchaseProduct) $feature = $productFeature;
-        }
-
-        if ( ! $feature ) {
-            $cart->delete();
-            continue;
-        }
+        // $purchaseProduct = PurchaseProduct::find()
+        //         ->where(['product_feature_id' => $cart->product_feature_id])
+        //         ->andWhere(['status' => 'advance'])
+        //         ->one();            
+        // if ( ! $purchaseProduct ) {
+        //     $cart->delete();
+        //     continue;
+        // }
 
         $item++;
 
-        $productPrice = ProductPrice::findOne(['product_feature_id' => $feature->id]);
+        $productPrice = ProductPrice::findOne(['product_feature_id' => $cart->product_feature_id]);
         if (! $user || $user->lastname == "lastname") {
             $price = $productPrice->price;
         }else {

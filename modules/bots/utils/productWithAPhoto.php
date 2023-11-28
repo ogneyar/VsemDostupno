@@ -17,6 +17,7 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
     
     $productPrice = ProductPrice::findOne(['product_feature_id' => $product_feature_id]);
     $productFeature = ProductFeature::findOne($product_feature_id);
+
     $product_id = $productFeature->product_id;
     $productHasPhoto = ProductHasPhoto::findOne(['product_id' => $product_id]);
     $photoId = $productHasPhoto->photo_id;
@@ -25,18 +26,18 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
     $image = Image::findOne($image_id);
     $file = $image->file;
 
-    $feature = "";
-    $productFeatures = ProductFeature::find()->where(['product_id' => $product_id])->all();
-    foreach($productFeatures as $productFeature) {
+    // $feature = "";
+    // $productFeatures = ProductFeature::find()->where(['product_id' => $product_id])->all();
+    // foreach($productFeatures as $productFeature) {
         $purchaseProduct = PurchaseProduct::find()
             ->where(['product_feature_id' => $productFeature->id])
             ->andWhere(['status' => 'advance'])
             ->one();
         
-        if ($purchaseProduct) $feature = $productFeature;
-    }
+    //     if ($purchaseProduct) $feature = $productFeature;
+    // }
 
-    if ( ! $feature ) {
+    if ( ! $purchaseProduct ) {
         $send = "Товар не найден!";
         $bot->sendMessage($from_id, $send);
         return;
@@ -59,7 +60,7 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
             [
                 [
                     'text' => "Положить в корзину",
-                    'callback_data' => 'putInTheBasket_' . $product_id
+                    'callback_data' => 'putInTheBasket_' . $product_feature_id
                 ],
             ],                
             [

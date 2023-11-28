@@ -2,23 +2,6 @@
 
 use Yii;
 use yii\base\Exception;
-// use yii\data\ActiveDataProvider;
-// use yii\web\Controller;
-// use yii\web\NotFoundHttpException;
-// use yii\web\ForbiddenHttpException;
-// use yii\helpers\ArrayHelper;
-// use yii\helpers\Json;
-// use yii\filters\VerbFilter;
-// use app\models\Order;
-// use app\models\OrderHasProduct;
-// use app\models\Template;
-// use app\models\OrderStatus;
-// use app\models\StockBody;
-// use app\models\Fund;
-// use app\models\OView;
-// use app\models\NoticeEmail;
-// use app\modules\admin\models\OrderForm;
-// use app\helpers\Sum;
 use app\models\Account;
 use app\models\CartTg;
 use app\models\Email;
@@ -52,21 +35,12 @@ function purchaseOrderCreate($bot, $from_id, $summa)
     $arrayProducts = [];
     $error = false;
     foreach($cartTg as $cart) {        
-        $feature = "";
-        $purchase = "";
-        $productFeatures = ProductFeature::find()->where(['product_id' => $cart->product_id])->all();
-        foreach($productFeatures as $productFeature) {
-            $purchaseProduct = PurchaseProduct::find()
-                ->where(['product_feature_id' => $productFeature->id])
-                ->andWhere(['status' => 'advance'])
-                ->one();
+        $feature = ProductFeature::findOne($cart->product_feature_id);
+        $purchase = PurchaseProduct::find()
+            ->where(['product_feature_id' => $cart->product_feature_id])
+            ->andWhere(['status' => 'advance'])
+            ->one();
             
-            if ($purchaseProduct) {
-                $feature = $productFeature;
-                $purchase = $purchaseProduct;
-            }
-        }
-
         $product = Product::findOne($cart->product_id);
         $productPrice = ProductPrice::findOne(['product_feature_id' => $feature->id]);
 
@@ -128,8 +102,21 @@ function purchaseOrderCreate($bot, $from_id, $summa)
     }
 
     if ($total > $user->deposit->total) {
-        $send = "Недостаточно средств на счете для совершения покупки!";
-        $bot->sendMessage($from_id, $send);
+        $send = "На Вашем счёте не достаточно средств!";
+        
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => "Отменить",
+                        'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                    ],
+                ],
+            ]
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+
         return;
     }
 
@@ -137,7 +124,7 @@ function purchaseOrderCreate($bot, $from_id, $summa)
 
     try {
 
-        throw new Exception('Test!');
+        // throw new Exception('Test!');
 
         $order = new PurchaseOrder;
         
@@ -274,57 +261,83 @@ function purchaseOrderCreate($bot, $from_id, $summa)
         $bot->sendMessage($from_id, "Transaction ERROR! (purchaseOrderCreate)");
         $bot->sendMessage($from_id, "Error message: " . $e->getMessage());
 
-        // return;
+        return;
     }
 
 
+    $arrayPurchases = [];
 
+    foreach ($arrayProducts as $product) {
 
+        $purchase_date = strtotime($product['purchase']->purchase_date);
 
+        $yes = false;
+        foreach ($arrayPurchases as $purchase) {
+            if ($purchase['purchase_date'] == $purchase_date)
+            {
+                $yes = true;
+                $purchase['data'][] = $product;
+            }
+        }
 
+        if (!$yes) {
+            $arrayPurchases[] = [
+                'purchase_date' => $purchase_date,
+                'data' => [
+                    $product
+                ]
+            ];
+        }
 
-// ПЕРЕдеЛАть уведомление!!!!!!
+    }
 
-    // $userOne = User::findOne(['email' => $order->email]);                       
-    // if ($userOne->tg_id) {
-    //     Email::tg_send('add_advance_order', $userOne->tg_id, [
-    //         'fio' => $user->respectedName,
-    //         'order_products' => $order->htmlEmailFormattedInformation,
-    //         'order_number' => $order->order_number,
-    //     ]);       
-    // }
+    foreach ($arrayPurchases as $purchase) {
+        $total = 0;
+        $text = "";
+        foreach ($purchase['data'] as $product) {          
+            if ($user->lastname == "lastname") $price = $product['price']->price;
+            else $price = $product['price']->member_price;
 
+            $text .= $product['cart']->quantity . " ед. " . $product['product']->name . " - " . $price ."р. ";  
 
+            if ($product['feature']->is_weights == 1) {
+                $total += $product['cart']->quantity * $product['feature']->volume * $price;
+                $text .= "за кг.\r\n";
+            } else {
+                $total += $product['cart']->quantity * $price;
+                $text .= "за шт.\r\n";
+            }
+        }
+        
+        // $send = date('d.m.Y') . " Вами произведён обмен паями на общую сумму " . $total . "р.\r\n";
+        $send = date('d.m.Y') . " Вами произведён обмен паями\r\n";
+        $send .= $text;
+        $send .= "На общую сумму " . $total . "р.\r\n";
+        $send .= "Доставка товара состоится " . date('d.m.Y', $purchase['purchase_date']);
+
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => "Распечатать акт",
+                        'callback_data' => 'printTheAct_' //. $product_id
+                    ],
+                ],                
+                [
+                    [
+                        'text' => "Заказать доставку на дом",
+                        'callback_data' => 'homeDelivery_' //. $product_id
+                    ],
+                ],                
+            ]
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+    }
     
 
-    $send = "10.11.23г. (Текущая дата ) Вами произведён обмен паями на общую сумму 740.60.””
-    2 ед. Масло льна 0.5л. -190.30 за 1 шт.
-    3 ед. Варенц с запечёной корочкой 0.5л. – 120.00 за 1шт.
-    На общую сумму 740.60”
-    Доставка товара состоится 12.11.23г.";
-
-    $InlineKeyboardMarkup = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => "Распечатать акт",
-                    'callback_data' => 'printTheAct_' //. $product_id
-                ],
-            ],                
-            [
-                [
-                    'text' => "Заказать доставку на дом",
-                    'callback_data' => 'homeDelivery_' //. $product_id
-                ],
-            ],                
-        ]
-    ];
-
-    $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
-    // $bot->sendMessage($from_id, $send);
-
         
-    // clearCart($from_id);
+    clearCart($from_id);
    
     // $bot->sendMessage($from_id, "конец!");
     // return;
