@@ -1,29 +1,14 @@
 <?php
 
 use app\models\CartTg;
-// use app\models\Image;
-// use app\models\Product;
 use app\models\ProductFeature;
-// use app\models\ProductPrice;
-// use app\models\ProductHasPhoto;
-// use app\models\Photo;
 use app\models\TgCommunication;
-// use app\models\User;
 
 require_once __DIR__ . '/cart/getCart.php';
 
 
 function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0) 
 {
-    
-    // $user = User::findOne(['tg_id' => $from_id]);
-
-    // if ( ! $user ) {
-    //     $send = "Для совершения покупок Вам необходимо пройти регистрацию!";
-    //     $bot->sendMessage($from_id, $send);
-    //     return;
-    // }
-
     if ($quantity == 0) {
         $tg_com = TgCommunication::findOne(['chat_id' => $from_id]);
         if ( ! $tg_com ) {

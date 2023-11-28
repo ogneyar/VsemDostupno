@@ -21,15 +21,6 @@ function getCart($bot, $tg_id)
         $product_id = $cart->product_id;
         $product = Product::findOne($product_id);
         $productName = $product->name;
-        
-        // $purchaseProduct = PurchaseProduct::find()
-        //         ->where(['product_feature_id' => $cart->product_feature_id])
-        //         ->andWhere(['status' => 'advance'])
-        //         ->one();            
-        // if ( ! $purchaseProduct ) {
-        //     $cart->delete();
-        //     continue;
-        // }
 
         $item++;
 
@@ -69,7 +60,7 @@ function getCart($bot, $tg_id)
             [
                 [
                     'text' => "Отменить",
-                    'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                    'callback_data' => 'cancelAPurchase'
                 ],
             ],
         ],

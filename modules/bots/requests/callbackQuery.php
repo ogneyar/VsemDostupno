@@ -29,6 +29,7 @@ require_once __DIR__ . '/../utils/listOfPurchases.php';
 require_once __DIR__ . '/../utils/assortment.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/purchaseOrderCreate.php';
+require_once __DIR__ . '/../utils/getDescription.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2156,6 +2157,93 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $summa = $array[1]; 
         
         purchaseOrderCreate($bot, $from_id, $summa);
+        
+        return;
+    }
+
+
+    /*****************************
+    
+           кнопка ОПИСАНИЕ
+
+    ******************************/
+    if (strstr($data, '_', true) == 'productDescription')
+    {
+        $array = explode('_', $data); 
+        $product_id = $array[1]; 
+        
+        $providerHasProduct = ProviderHasProduct::findOne(['product_id' => $product_id]);
+        $provider_id = $providerHasProduct->provider_id;
+        
+        $send = "Ознакомьтесь с краткой информацией";
+        
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [               
+                [
+                    [
+                        'text' => "Фото поставщика",
+                        'callback_data' => 'photoProvider_' . $provider_id
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Свойства товара",
+                        'callback_data' => 'getDescription_' . $product_id
+                    ],
+                ],
+            ]
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+
+        return;
+    }
+
+
+    /****************************
+    
+           ФОТО ПОСТАВЩИКА
+
+    *****************************/
+    if (strstr($data, '_', true) == 'photoProvider')
+    {
+        $array = explode('_', $data); 
+        $provider_id = $array[1]; 
+
+        $bot->sendMessage($from_id, "Не реализовано!");
+        // $bot->sendPhoto($from_id, $photo, $caption);
+        
+        return;
+    }
+
+
+    /***************************************
+    
+           ОПИСАНИЕ ТОВАРА, его свойства
+
+    ****************************************/
+    if (strstr($data, '_', true) == 'getDescription')
+    {
+        $array = explode('_', $data); 
+        $product_id = $array[1]; 
+        
+        getDescription($bot, $from_id, $product_id);
+        
+        return;
+    }
+
+    
+    /***************************************
+    
+           ОТМЕНА заказа
+
+    ****************************************/
+    if (strstr($data, '_', true) == 'cancelAPurchase')
+    {
+        // $array = explode('_', $data); 
+        // $product_id = $array[1]; 
+        
+        $bot->sendMessage($from_id, "Не реализовано!");
         
         return;
     }

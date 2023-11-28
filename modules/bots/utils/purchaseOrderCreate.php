@@ -109,7 +109,7 @@ function purchaseOrderCreate($bot, $from_id, $summa)
                 [
                     [
                         'text' => "Отменить",
-                        'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                        'callback_data' => 'cancelAPurchase'
                     ],
                 ],
             ]

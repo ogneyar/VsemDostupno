@@ -26,16 +26,10 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
     $image = Image::findOne($image_id);
     $file = $image->file;
 
-    // $feature = "";
-    // $productFeatures = ProductFeature::find()->where(['product_id' => $product_id])->all();
-    // foreach($productFeatures as $productFeature) {
-        $purchaseProduct = PurchaseProduct::find()
-            ->where(['product_feature_id' => $productFeature->id])
-            ->andWhere(['status' => 'advance'])
-            ->one();
-        
-    //     if ($purchaseProduct) $feature = $productFeature;
-    // }
+    $purchaseProduct = PurchaseProduct::find()
+        ->where(['product_feature_id' => $productFeature->id])
+        ->andWhere(['status' => 'advance'])
+        ->one();
 
     if ( ! $purchaseProduct ) {
         $send = "Товар не найден!";
@@ -66,13 +60,13 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
             [
                 [
                     'text' => "Описание",
-                    'callback_data' => 'productDescription_' . $product_id // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!! 
+                    'callback_data' => 'productDescription_' . $product_id
                 ],
             ],                
             [
                 [
                     'text' => "Отменить",
-                    'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                    'callback_data' => 'cancelAPurchase'
                 ],
             ],                
         ]
