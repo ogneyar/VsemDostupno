@@ -54,7 +54,7 @@ function getCart($bot, $tg_id)
             [
                 [
                     'text' => "Продолжить выбор",
-                    'callback_data' => 'continueSelection_' . $product_id // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                    'callback_data' => 'continueSelection_' . $product_id
                 ],
             ],
             [

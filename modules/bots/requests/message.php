@@ -23,6 +23,7 @@ require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/cart/getCart.php';
+require_once __DIR__ . '/../utils/continueSelection.php';
 
 
 
@@ -636,7 +637,7 @@ function requestMessage($bot, $message, $master, $admin) {
         ЗАКУПКИ, управление ими
 
     *******************************/
-    if ($text == "/purchase_date" || $text == "Даты закупок" || $text == "Закупки")
+    if ($text == "/purchase_date" || $text == "Даты закупок" || $text == "Закупки" || $text == "Показать все даты закупок")
     {    
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
         
@@ -740,6 +741,19 @@ function requestMessage($bot, $message, $master, $admin) {
         
         } 
         
+        return;
+    }
+
+
+    /***********************************
+    
+           ЗАКУПКИ по начатой дате 
+
+    ************************************/
+    if ($text == "/purchases_by_the_started_date" || $text == "Все закупки по начатой дате")
+    {    
+        continueSelection($bot, $chat_id, /*purchases_by_the_started_date=*/true);
+
         return;
     }
 

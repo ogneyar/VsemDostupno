@@ -257,9 +257,11 @@ function purchaseOrderCreate($bot, $from_id, $summa)
         $transaction->commit();
     } catch (Exception $e) {
         $transaction->rollBack();
-        // throw new ForbiddenHttpException($e->getMessage());
-        $bot->sendMessage($from_id, "Transaction ERROR! (purchaseOrderCreate)");
-        $bot->sendMessage($from_id, "Error message: " . $e->getMessage());
+        
+        $send = "Transaction ERROR! (purchaseOrderCreate)\r\n";
+        $send .= "Error message: " . $e->getMessage();
+        
+        $bot->sendMessage($from_id, $send);
 
         return;
     }

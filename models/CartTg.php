@@ -52,7 +52,8 @@ class CartTg extends \yii\db\ActiveRecord
             'tg_id' => 'Идентификатор телеграм',
             'product_id' => 'Номер товара',
             'product_feature_id' => 'Номер особенности товара',
-            'quantity' => 'Количество'
+            'quantity' => 'Количество',
+            'last_choice' => 'Последний выбор',
         ];
     }
 

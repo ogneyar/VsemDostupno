@@ -30,6 +30,7 @@ require_once __DIR__ . '/../utils/assortment.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/purchaseOrderCreate.php';
 require_once __DIR__ . '/../utils/getDescription.php';
+require_once __DIR__ . '/../utils/continueSelection.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2233,11 +2234,28 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     }
 
     
-    /***************************************
+    /*******************************
+    
+           ПРОДОЛЖИТЬ ВЫБОР
+
+    ********************************/
+    if (strstr($data, '_', true) == 'continueSelection')
+    {
+        $array = explode('_', $data); 
+        $product_id = $array[1]; 
+        
+        continueSelection($bot, $from_id);
+        // $bot->sendMessage($from_id, "Не реализовано!");
+        
+        return;
+    }
+
+    
+    /****************************
     
            ОТМЕНА заказа
 
-    ****************************************/
+    *****************************/
     if ($data == 'cancelAPurchase')
     {
         // $array = explode('_', $data); 

@@ -1,5 +1,7 @@
 <?php
 
+use Yii;
+use yii\base\Exception;
 use app\models\CartTg;
 use app\models\ProductFeature;
 use app\models\TgCommunication;
@@ -30,19 +32,45 @@ function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0)
 
     $cart_tg = null;
     $carts_tg = CartTg::find()->where(['tg_id' => $from_id])->all();
-    foreach($carts_tg as $cart) {
-        if ($cart->product_feature_id == $product_feature_id) {
-            $cart_tg = $cart;
+    
+    $transaction = Yii::$app->db->beginTransaction();
+    try {
+
+        foreach($carts_tg as $cart) {
+            if ($cart->product_feature_id == $product_feature_id) {
+                $cart_tg = $cart;
+            }else if ($cart->last_choice) {
+                $cart->last_choice = 0;                
+                if ( ! $cart->save() ) {
+                    throw new Exception("Не смог изменить корзину!");
+                }
+            }
         }
+        if ( ! $cart_tg ) {
+            $cart_tg = new CartTg();
+        }
+        $cart_tg->tg_id = $from_id;
+        $cart_tg->product_id = $product_id;
+        $cart_tg->product_feature_id = $product_feature_id;
+        $cart_tg->quantity = $quantity;
+        $cart_tg->last_choice = 1;
+        if ( ! $cart_tg->save() ) {
+            throw new Exception("Не смог сохранить корзину!");
+        }
+        
+        $transaction->commit();
+
+    } catch (Exception $e) {
+        
+        $transaction->rollBack();
+        
+        $send = "Transaction ERROR! (purchaseOrderCreate)\r\n";
+        $send .= "Error message: " . $e->getMessage();
+        
+        $bot->sendMessage($from_id, $send);
+
+        return;
     }
-    if ( ! $cart_tg ) {
-        $cart_tg = new CartTg();
-    }
-    $cart_tg->tg_id = $from_id;
-    $cart_tg->product_id = $product_id;
-    $cart_tg->product_feature_id = $product_feature_id;
-    $cart_tg->quantity = $quantity;
-    $cart_tg->save();
     
     $allPrices = 0;
 

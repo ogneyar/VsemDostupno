@@ -9,7 +9,7 @@ use app\models\Provider;
 use app\modules\purchase\models\PurchaseProduct;
 
 
-function listOfPurchases($bot, $from_id, $purchase_id, $step = 1) {
+function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = false) {
     
     $purchaseProduct = PurchaseProduct::findOne($purchase_id);
     $provider_id = $purchaseProduct->provider_id;
@@ -24,7 +24,23 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1) {
 
     $send = date('d.m.Y', strtotime($purchaseProduct->purchase_date)) . "г., состоится закупка " . $categoryName . " от " . $providerName;
 
-    $bot->sendMessage($from_id, $send);    
+    if ($show_menu) {
+        $KeyboardMarkup = [
+            'keyboard' => [
+                [
+                    [ 'text' => 'Показать все даты закупок' ],
+                ],
+                [
+                    [ 'text' => 'Все закупки по начатой дате' ], // all purchases by the started date
+                ],
+            ],
+            'resize_keyboard' => true,
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $KeyboardMarkup);
+    }else {
+        $bot->sendMessage($from_id, $send);
+    }
 
     $purchaseProducts = PurchaseProduct::find()->where(['purchase_date' => $purchaseProduct->purchase_date])->andWhere(['status' => 'advance'])->all();
     $quantity = 0;
