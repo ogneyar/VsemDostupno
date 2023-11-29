@@ -28,6 +28,7 @@ use yii\data\ActiveDataProvider;
  * @property integer $min_inventory
  * @property integer $auto_send
  * @property integer $manufacturer_photo_id
+ * @property string $tgraph_path
  *
  * @property CategoryHasProduct[] $categoryHasProduct
  * @property ProductHasPhoto[] $productHasPhoto
@@ -110,6 +111,7 @@ class Product extends \yii\db\ActiveRecord
             'manufacturer_photo_id' => 'Фото производителя',
             'photo' => 'Фото производителя',
             'thumbUrlManufacturer' => 'Фото производителя',
+            'tgraph_path' => 'Путь к Телеграф',
         ];
     }
 

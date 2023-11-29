@@ -2171,27 +2171,30 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     {
         $array = explode('_', $data); 
         $product_id = $array[1]; 
-        
-        $providerHasProduct = ProviderHasProduct::findOne(['product_id' => $product_id]);
-        $provider_id = $providerHasProduct->provider_id;
-        
+                
         $send = "Ознакомьтесь с краткой информацией";
         
+        $inline_keyboard = [                         
+            [
+                [
+                    'text' => "Фото поставщика",
+                    'callback_data' => 'photoProvider_' . $product_id
+                ],
+            ],
+        ];
+
+        $tGraphUrl = getDescription($product_id);
+        if ($tGraphUrl) {
+            $inline_keyboard[] = [
+                [
+                    'text' => "Свойства товара",
+                    'url' => $tGraphUrl
+                ],
+            ];
+        }
+
         $InlineKeyboardMarkup = [
-            'inline_keyboard' => [               
-                [
-                    [
-                        'text' => "Фото поставщика",
-                        'callback_data' => 'photoProvider_' . $provider_id
-                    ],
-                ],
-                [
-                    [
-                        'text' => "Свойства товара",
-                        'callback_data' => 'getDescription_' . $product_id
-                    ],
-                ],
-            ]
+            'inline_keyboard' => $inline_keyboard
         ];
 
         $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
@@ -2208,26 +2211,23 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     if (strstr($data, '_', true) == 'photoProvider')
     {
         $array = explode('_', $data); 
-        $provider_id = $array[1]; 
-
-        $bot->sendMessage($from_id, "Не реализовано!");
-        // $bot->sendPhoto($from_id, $photo, $caption);
-        
-        return;
-    }
-
-
-    /***************************************
-    
-           ОПИСАНИЕ ТОВАРА, его свойства
-
-    ****************************************/
-    if (strstr($data, '_', true) == 'getDescription')
-    {
-        $array = explode('_', $data); 
         $product_id = $array[1]; 
-        
-        getDescription($bot, $from_id, $product_id);
+
+        $product = Product::findOne($product_id);
+        $photo_id = $product->manufacturer_photo_id;
+
+        if ( ! $photo_id ) {
+            $bot->sendMessage($from_id, "Фото производителя отсутствует!");
+            return;
+        }
+
+        $photo = Photo::findOne($photo_id);
+        $image_id = $photo->image_id;
+
+        $image = Image::findOne($image_id);
+        $file = $image->file;
+
+        $bot->sendPhoto($from_id, "https://будь-здоров.рус/web".$file);
         
         return;
     }
@@ -2238,7 +2238,6 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
            ОТМЕНА заказа
 
     ****************************************/
-    // if (strstr($data, '_', true) == 'cancelAPurchase')
     if ($data == 'cancelAPurchase')
     {
         // $array = explode('_', $data); 

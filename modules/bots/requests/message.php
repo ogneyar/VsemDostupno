@@ -8,6 +8,7 @@ use app\models\Email;
 use app\models\Fund;
 use app\models\Account;
 use app\models\TgCommunication;
+use app\models\CartTg;
 use app\models\Category;
 use app\models\CategoryHasProduct;
 use app\models\Product;
@@ -58,6 +59,7 @@ function requestMessage($bot, $message, $master, $admin) {
     ********************/
     if ($text == "/start" || $text == "Старт" || $text == "/menu" || $text == "Главное меню" || $text == "Назад" ||  $text == "🌟Главное меню")
     {    
+
         $send = "В голубом кружочке с низу, в меню, Вы найдёте ссылки на всю необходимую информацию";
                
         $keyboard = [
@@ -68,10 +70,12 @@ function requestMessage($bot, $message, $master, $admin) {
             [
                 [ 'text' => 'Закупки' ]
             ],
-            [
-                [ 'text' => 'Корзина' ]
-            ],
         ];
+
+        $cart = CartTg::findOne(['tg_id' => $chat_id]);
+        if ($cart) {
+            array_push($keyboard, [ [ 'text' => 'Корзина' ] ]);
+        }
 
         // if ($chat_id == $master || $chat_id == $admin) {
         //     array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
