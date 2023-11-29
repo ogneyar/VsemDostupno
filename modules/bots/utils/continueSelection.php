@@ -15,7 +15,7 @@ function continueSelection($bot, $tg_id, $purchases_by_the_started_date = false)
 {
     $cart = CartTg::findOne(['tg_id' => $tg_id, 'last_choice' => 1]);
 
-    $purchaseProduct = PurchaseProduct::findOne(['product_feature_id' => $cart->product_feature_id]);
+    $purchaseProduct = PurchaseProduct::findOne(['product_feature_id' => $cart->product_feature_id,'status' => 'advance']);
     $purchase_id = $purchaseProduct->id;
 
     if ( ! $purchase_id ) {        

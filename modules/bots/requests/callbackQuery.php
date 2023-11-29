@@ -2239,13 +2239,9 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
            ПРОДОЛЖИТЬ ВЫБОР
 
     ********************************/
-    if (strstr($data, '_', true) == 'continueSelection')
-    {
-        $array = explode('_', $data); 
-        $product_id = $array[1]; 
-        
+    if ($data == 'continueSelection')
+    {        
         continueSelection($bot, $from_id);
-        // $bot->sendMessage($from_id, "Не реализовано!");
         
         return;
     }
@@ -2257,11 +2253,79 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
     *****************************/
     if ($data == 'cancelAPurchase')
-    {
-        // $array = explode('_', $data); 
-        // $product_id = $array[1]; 
+    {                
+        $send = "Расформировать корзину";
         
-        $bot->sendMessage($from_id, "Не реализовано!");
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' =>  [
+                [
+                    [
+                        'text' => "Полностью",
+                        'callback_data' => 'clearCartFull'
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Частично",
+                        'callback_data' => 'clearCartPartly'
+                    ],
+                ],
+            ]
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+        
+        return;
+    }
+    
+
+    /***********************************
+    
+           ОЧИСТКА КОРЗИНЫ полная
+
+    ************************************/
+    if ($data == 'clearCartFull')
+    {                
+        clearCart($from_id, $bot, /*send_info=*/true);
+
+        $HideKeyboard = [
+            'hide_keyboard' => true
+        ];
+
+        $bot->sendMessage($from_id, "В кнопке Меню выберите необходимое действие", null, $HideKeyboard);
+        
+        return;
+    }
+
+
+    /*************************************
+    
+           ОЧИСТКА КОРЗИНЫ частичная
+
+    **************************************/
+    if ($data == 'clearCartPartly')
+    {                
+             
+        $send = "Расформировать корзину";
+        
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' =>  [
+                [
+                    [
+                        'text' => "Полностью",
+                        'callback_data' => 'clearCartFull'
+                    ],
+                ],
+                [
+                    [
+                        'text' => "Частично",
+                        'callback_data' => 'clearCartPartly'
+                    ],
+                ],
+            ]
+        ];
+
+        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
         
         return;
     }

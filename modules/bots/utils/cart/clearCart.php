@@ -4,7 +4,7 @@ use app\models\CartTg;
 use app\models\Product;
 
 
-function clearCart($tg_id, $bot = null) 
+function clearCart($tg_id, $bot = null, $send_info = false) 
 {    
     $carts_tg = CartTg::find()->where(['tg_id' => $tg_id])->all();
     $error = 0;
@@ -21,7 +21,8 @@ function clearCart($tg_id, $bot = null)
             if (count($carts_tg) == $error) $bot->sendMessage($tg_id, "Не смог очистить корзину!");
             else $bot->sendMessage($tg_id, "Корзина очищенна частично!");
         }else {
-            $bot->sendMessage($tg_id, "Ваша корзина пуста!");
+            if ($send_info) $bot->sendMessage($tg_id, "Все товары вернулись на полку магазина, ваша корзина пуста!");
+            else $bot->sendMessage($tg_id, "Ваша корзина пуста!");
         }
     }
 }
