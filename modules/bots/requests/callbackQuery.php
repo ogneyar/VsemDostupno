@@ -20,7 +20,6 @@ use app\models\Provider;
 use app\models\ProviderHasProduct;
 use app\modules\purchase\models\PurchaseProduct;
 
-
 require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/listOfProducts.php';
@@ -31,6 +30,9 @@ require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/purchaseOrderCreate.php';
 require_once __DIR__ . '/../utils/getDescription.php';
 require_once __DIR__ . '/../utils/continueSelection.php';
+require_once __DIR__ . '/../utils/cart/clearCartPartly.php';
+require_once __DIR__ . '/../utils/cart/deleteOneProduct.php';
+require_once __DIR__ . '/../utils/cart/deleteOneProductPartly.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2305,27 +2307,39 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     **************************************/
     if ($data == 'clearCartPartly')
     {                
-             
-        $send = "Расформировать корзину";
+        clearCartPartly($bot, $from_id);
         
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' =>  [
-                [
-                    [
-                        'text' => "Полностью",
-                        'callback_data' => 'clearCartFull'
-                    ],
-                ],
-                [
-                    [
-                        'text' => "Частично",
-                        'callback_data' => 'clearCartPartly'
-                    ],
-                ],
-            ]
-        ];
+        return;
+    }
 
-        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
+
+    /*************************************
+    
+           УДАЛЕНИЕ ОДНОГО ТОВАРА
+
+    **************************************/
+    if (strstr($data, '_', true) == 'deleteOneProduct')
+    {
+        $array = explode('_', $data); 
+        $product_feature_id = $array[1]; 
+
+        deleteOneProduct($bot, $from_id, $product_feature_id);
+        
+        return;
+    }
+
+
+    /*********************************************
+    
+        УДАЛЕНИЕ некоторого количества ТОВАРА
+
+    **********************************************/
+    if (strstr($data, '_', true) == 'deleteOneProductPartly')
+    {
+        $array = explode('_', $data); 
+        $product_feature_id = $array[1]; 
+
+        deleteOneProductPartly($bot, $from_id, $product_feature_id);
         
         return;
     }
