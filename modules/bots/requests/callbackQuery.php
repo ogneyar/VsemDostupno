@@ -33,6 +33,7 @@ require_once __DIR__ . '/../utils/continueSelection.php';
 require_once __DIR__ . '/../utils/cart/clearCartPartly.php';
 require_once __DIR__ . '/../utils/cart/deleteOneProduct.php';
 require_once __DIR__ . '/../utils/cart/deleteOneProductPartly.php';
+require_once __DIR__ . '/../utils/homeDelivery.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2340,6 +2341,40 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $product_feature_id = $array[1]; 
 
         deleteOneProductPartly($bot, $from_id, $product_feature_id);
+        
+        return;
+    }
+
+
+
+    /*************************
+    
+          ДОСТАВКА НА ДОМ
+
+    **************************/
+    if (strstr($data, '_', true) == 'homeDelivery')
+    {
+        $array = explode('_', $data); 
+        $purchase_order_id = $array[1]; 
+
+        homeDelivery($bot, $from_id, $purchase_order_id);
+        
+        return;
+    }
+
+
+    /**************************
+    
+          РАСПЕЧАТАТЬ АКТ
+
+    ***************************/
+    if (strstr($data, '_', true) == 'printTheAct')
+    {
+        $array = explode('_', $data); 
+        $purchase_order_id = $array[1]; 
+
+        // printTheAct($bot, $from_id, $purchase_order_id);
+        $bot->sendMessage($from_id, "Не реализовано!");
         
         return;
     }

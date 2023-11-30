@@ -66,7 +66,7 @@ $this->registerJs($script, $this::POS_END);
 <div class="product-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
+    
     <p>
         <?= Html::a('Добавить товар', ['create'], ['class' => 'btn btn-success']) ?>
     </p>

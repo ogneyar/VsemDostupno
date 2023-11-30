@@ -24,6 +24,7 @@ require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/cart/getCart.php';
 require_once __DIR__ . '/../utils/continueSelection.php';
+require_once __DIR__ . '/../utils/homeDelivery.php';
 
 
 
@@ -1008,6 +1009,19 @@ function requestMessage($bot, $message, $master, $admin) {
             }            
 
             deleteOneProductPartly($bot, $chat_id, $product_feature_id, $quantity);
+            $tgCom->delete();
+
+            return;
+        }
+        
+        // запрос адреса для доставки товаров
+        if (strstr($tgCom->from_whom, '_', true) == 'homeDelivery') 
+        {            
+            $array = explode('_', $tgCom->from_whom);
+            $purchase_order_id = $array[1];
+            $address = $text;
+
+            homeDelivery($bot, $chat_id, $purchase_order_id, $address);
             $tgCom->delete();
 
             return;
