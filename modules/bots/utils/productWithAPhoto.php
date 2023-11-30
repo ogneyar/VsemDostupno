@@ -50,25 +50,23 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
     }
 
     $InlineKeyboardMarkup = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => "Положить в корзину",
-                    'callback_data' => 'putInTheBasket_' . $product_feature_id
-                ],
-            ],                
+        'inline_keyboard' => [                            
             [
                 [
                     'text' => "Описание",
                     'callback_data' => 'productDescription_' . $product_id
                 ],
-            ],                
-            [
                 [
                     'text' => "Отменить",
                     'callback_data' => 'cancelAPurchase'
                 ],
-            ],                
+            ],      
+            [
+                [
+                    'text' => "Положить в корзину",
+                    'callback_data' => 'putInTheBasket_' . $product_feature_id
+                ],
+            ],          
         ]
     ];
 
