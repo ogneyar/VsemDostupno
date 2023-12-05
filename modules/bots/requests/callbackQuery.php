@@ -1789,8 +1789,8 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         foreach($allCategories as $allCategory) {
             $category = Category::findOne($allCategory);
             foreach($users as $user) {
-                if ($user->tg_id) {
-                // if ($user->tg_id && $user->tg_id == $master) {
+                // if ($user->tg_id) {
+                if ($user->tg_id && $user->tg_id != $master && $user->tg_id != $admin) {
                     $send =  date('d.m.Y', strtotime($product->created_date)) . "г., состоится закупка "; 
                     $send .= $category->name . " от " . $provider->name . "\r\n";
                     $send .= "Стоп заказ ".date('d.m.Y', strtotime($product->stop_date))."г. в 21 час.\r\n";

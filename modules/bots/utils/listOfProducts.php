@@ -32,7 +32,7 @@ function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
                     [
                         [
                             'text' => "Положить в корзину",
-                            'callback_data' => 'putInTheBasket_' . $product_id
+                            'callback_data' => 'putInTheBasket_' . $purchaseProduct->product_feature_id
                         ],
                     ],                
                 ]

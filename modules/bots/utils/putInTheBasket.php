@@ -64,7 +64,7 @@ function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0)
         
         $transaction->rollBack();
         
-        $send = "Transaction ERROR! (purchaseOrderCreate)\r\n";
+        $send = "Transaction ERROR! (putInTheBasket)\r\n";
         $send .= "Error message: " . $e->getMessage();
         
         $bot->sendMessage($from_id, $send);
