@@ -76,7 +76,7 @@ function requestMessage($bot, $message, $master, $admin) {
 
         $cart = CartTg::findOne(['tg_id' => $chat_id]);
         if ($cart) {
-            array_push($keyboard, [ [ 'text' => 'Корзина' ] ]);
+            array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
         }
 
         // if ($chat_id == $master || $chat_id == $admin) {
@@ -764,7 +764,7 @@ function requestMessage($bot, $message, $master, $admin) {
             КОРЗИНА 
 
     ***********************/
-    if ($text == "/cart" || $text == "Корзина" || $text == "корзина")
+    if ($text == "/cart" || $text == "Корзина" || $text == "В корзине товар")
     {    
         getCart($bot, $chat_id);
 

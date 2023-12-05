@@ -32,7 +32,7 @@ function getCart($bot, $tg_id)
         }
         $allPrices += $price * $cart->quantity;
 
-        $send .= $cart->quantity . " еденицы " . $productName . " - " . $price . " за 1 шт.\r\n";
+        $send .= $cart->quantity . " ед. " . $productName . " - " . $price . " за 1 шт.\r\n";
 
         $purchase = PurchaseProduct::findOne(['product_feature_id' => $cart->product_feature_id]);
         $purchase_date = $purchase->purchase_date;
