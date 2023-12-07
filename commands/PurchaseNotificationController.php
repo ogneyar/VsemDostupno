@@ -59,6 +59,7 @@ class PurchaseNotificationController extends Controller
                     
                     $order_products = PurchaseOrderProduct::find()->where(['purchase_product_id' => $product->id])->all();
                     foreach ($order_products as $order_product) {
+                        if ($order_product->status == 'held') continue;
                         $order_product->status = 'held';
                         $order_product->save();
                         $fund_balance = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id, 'paid' => 0])->one();
