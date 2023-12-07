@@ -22,6 +22,15 @@ function getCart($bot, $tg_id)
         $product = Product::findOne($product_id);
         $productName = $product->name;
 
+        $purchase = PurchaseProduct::findOne(['product_feature_id' => $cart->product_feature_id, 'status' => 'advance']);
+        if ( ! $purchase ) {
+            $send_two = "Товар " . $productName . " - удалён из корзины, т.к. его уже нет в наличии.\r\n";
+            $bot->sendMessage($tg_id, $send_two);
+            $cart->delete();
+            continue;
+        }
+        $purchase_date = $purchase->purchase_date;
+        
         $item++;
 
         $productPrice = ProductPrice::findOne(['product_feature_id' => $cart->product_feature_id]);
@@ -33,9 +42,7 @@ function getCart($bot, $tg_id)
         $allPrices += $price * $cart->quantity;
 
         $send .= $cart->quantity . " ед. " . $productName . " - " . $price . " за 1 шт.\r\n";
-
-        $purchase = PurchaseProduct::findOne(['product_feature_id' => $cart->product_feature_id]);
-        $purchase_date = $purchase->purchase_date;
+        
         
         $send .= " (доставка: ".date('d.m.Y', strtotime($purchase_date)).")\r\n\r\n";
     }

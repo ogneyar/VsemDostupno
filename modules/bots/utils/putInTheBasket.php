@@ -52,10 +52,11 @@ function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0)
         $cart_tg->tg_id = $from_id;
         $cart_tg->product_id = $product_id;
         $cart_tg->product_feature_id = $product_feature_id;
-        $cart_tg->quantity = $quantity;
+        if ($cart_tg->quantity) $cart_tg->quantity += $quantity;
+        else $cart_tg->quantity = $quantity;
         $cart_tg->last_choice = 1;
         if ( ! $cart_tg->save() ) {
-            throw new Exception("Не смог сохранить корзину!");
+            throw new Exception("Не смог сохранить корзину!!");
         }
         
         $transaction->commit();
