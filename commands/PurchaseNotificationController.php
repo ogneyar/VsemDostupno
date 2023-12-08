@@ -38,8 +38,8 @@ class PurchaseNotificationController extends Controller
          $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();
          
         if ($products) {
+            $orders_to_send = [];
             foreach ($products as $product) {
-                $orders_to_send = [];
                 $product_total = PurchaseOrderProduct::getProductTotal($product->id);
                 
                 $provider = Provider::findOne($product->provider_id);
@@ -68,7 +68,7 @@ class PurchaseNotificationController extends Controller
                             $fund_common->deduction_total += $fund_balance->total;
                             $fund_common->save();
                         }
-                        if (!in_array($order_product->purchase_order_id, $orders_to_send)) {
+                        if (!in_array($order_product->purchase_order_id, $orders_to_send) && !in_array("_".$order_product->purchase_order_id, $orders_to_send)) {
                             $orders_to_send[] = $order_product->purchase_order_id;
                         } 
                     }
@@ -77,11 +77,14 @@ class PurchaseNotificationController extends Controller
                         PurchaseOrder::setOrderStatus($order_product->purchase_order_id);
                     }
                     
-                    foreach ($orders_to_send as $val) {
-                        $order = PurchaseOrder::findOne($val);
+                    // foreach ($orders_to_send as $purchase_order_id) {
+                    for($i = 0; $i < count($orders_to_send); $i++) {
+                        // $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
+                        $order = PurchaseOrder::findOne($orders_to_send[$i]);
                         
                         $userOne = User::findOne(['email' => $order->email]);
-                        if ($userOne->tg_id) {
+                        if ($userOne->tg_id && $orders_to_send[$i][0] != "_") {
+                            $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
                             Email::tg_send('held_order_member', $userOne->tg_id, [
                                 'fio' => $order->firstname . ' ' . $order->patronymic,
                                 'created_at' => date('d.m.Y', strtotime($order->created_at)),
@@ -90,6 +93,7 @@ class PurchaseNotificationController extends Controller
                                 'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
                                 'purchase_date' => date('d.m.Y', strtotime($product->purchase_date))
                             ]);
+                            $orders_to_send[$i] = "_".$orders_to_send[$i];
                         }
                     }
 
