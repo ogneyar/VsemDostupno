@@ -122,7 +122,8 @@ class PurchaseNotificationController extends Controller
                         
                     $new_product->save();
                     
-                    if ($product->send_notification) {
+                    // если у провайдера выключено ручное управление датами закупок и установлен флаг оповещения провайдера
+                    if ( ! $provider->purchases_management && $product->send_notification) {
                         $partners = PurchaseOrder::getPartnerIdByProvider($product->purchase_date, $product->provider_id);
                         if ($partners) {
                             foreach ($partners as $partner) {
@@ -236,12 +237,13 @@ class PurchaseNotificationController extends Controller
 
         } // end if ($products)
         
-        $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'abortive'])->all();
-        if ($products) {
+        // оповещение админа о завершившихся закупках
+        $purchaseProducts = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'abortive'])->all();
+        if ($purchaseProducts) {
             $id_providers = [];
-            foreach($products as $product) {
+            foreach($purchaseProducts as $purchase) {
 
-                $provider = Provider::findOne($product->provider_id);
+                $provider = Provider::findOne($purchase->provider_id);
                 
                 // если у провайдера включено ручное управление датами закупок
                 if ($provider->purchases_management) {
@@ -252,7 +254,7 @@ class PurchaseNotificationController extends Controller
                     if ( ! $yes ) {
                         $id_providers[] = $provider->id;
                         
-                        $feature_id = $product->product_feature_id;
+                        $feature_id = $purchase->product_feature_id;
                         $product_feature = ProductFeature::findOne($feature_id);
                         $real_product_id = $product_feature->product_id;
                         $real_product = Product::findOne($real_product_id);
@@ -262,7 +264,7 @@ class PurchaseNotificationController extends Controller
                         
                         $date_timestamp = strtotime($date);
                         $send = date('d.m.Y', $date_timestamp) . "г. окончен срок сбора заявок на " . $category->name . " ";
-                        $date_timestamp = strtotime($product->purchase_date);
+                        $date_timestamp = strtotime($purchase->purchase_date);
                         $send .= $provider->name . " доставка продукции состоится " . date('d.m.Y', $date_timestamp) . "г."; 
                         
                         $InlineKeyboardMarkup = [
@@ -290,6 +292,81 @@ class PurchaseNotificationController extends Controller
                         // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
                         $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
 
+                    }
+                }
+            }
+        }
+
+        
+        // оповещение админа о завершившихся закупках
+        $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => $date])->andWhere(['status' => 'held'])->all();
+        if ($purchaseProducts) {
+
+            $id_providers = [];
+            foreach($purchaseProducts as $purchase) {
+
+                $provider = Provider::findOne($purchase->provider_id);
+                
+                // если у провайдера включено ручное управление датами закупок
+                if ($provider->purchases_management) {
+                    $yes = false; // есть ли в массиве?
+                    foreach($id_providers as $id_provider) {
+                        if ($id_provider == $provider->id) $yes = true;
+                    }
+                    if ( ! $yes ) {
+                        $id_providers[] = $provider->id;
+
+                        $date_timestamp = strtotime($purchase->purchase_date);
+                        $send = "Сформирована заявка по товарам ".$provider->name." на ".date('d.m.Y', $date_timestamp)."\r\n";
+                        
+                        $order_product = PurchaseOrderProduct::findOne(['purchase_product_id' => $purchase->id]);
+                        $purchase_order_id = $order_product->purchase_order_id;
+
+                        $order_products = PurchaseOrderProduct::find()
+                            ->where(['purchase_order_id' => $purchase_order_id])
+                            ->andWhere(['provider_id' => $provider->id])
+                            ->all();
+
+                        $purchase_total_all = 0;
+                        // $total_all = 0;
+                        $item = 0;
+                        foreach($order_products as $order_product) {
+                            $item++;
+                            // $product_feature_id = $order_product->product_feature_id;
+                            $product_name = $order_product->name;
+                            $quantity = $order_product->quantity;
+                            if ( fmod($quantity, 1) == 0 ) { // если дробная часть равна нулю
+                                $quantity = floor($quantity);
+                            }
+                            $price = $order_product->price; // цена за штуку (с процентами)
+                            $total = $order_product->total; // итого (с процентами)
+                            // $total_all += $total;
+
+                            $purchase_price = $order_product->purchase_price; // цена закупки
+                            $purchase_total = $purchase_price * $quantity; // итого закупки
+                            $purchase_total_all += $purchase_total;
+
+                            $send .= $item.". ".$product_name."–".$quantity."шт. ".$purchase_total."\r\n";
+                        }
+                        if ( fmod($purchase_total_all, 1) == 0 ) {
+                            $send .= "                       Итого: ".$purchase_total_all.".00";
+                        }else {
+                            $send .= "                       Итого: ".$purchase_total_all;
+                        }
+
+                        $InlineKeyboardMarkup = [
+                            'inline_keyboard' => [
+                                [
+                                    [
+                                        'text' => "Отправить поставщику",
+                                        'callback_data' => 'sendThisTextToTheSupplier_' . $provider->id . '_' . $purchase_total_all . '_' .date('d.m.Y', $date_timestamp)
+                                    ],
+                                ],
+                            ]
+                        ];          
+
+                        // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
+                        $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
                     }
                 }
             }

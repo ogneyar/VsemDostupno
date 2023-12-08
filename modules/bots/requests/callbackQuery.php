@@ -1747,6 +1747,48 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         return;
     }
 
+
+    /*****************************************
+    
+            ОТПРАВИТЬ ПОСТАВЩИКУ 
+        кнопка у админа после стоп заказа
+
+    ******************************************/
+    if (strstr($data, '_', true) == 'sendThisTextToTheSupplier')
+    {
+        $array = explode('_', $data);        
+        $provider_id = $array[1];
+        $total = $array[2];
+        $date = $array[3];
+
+        $provider = Provider::findOne($provider_id);
+        $user_id = $provider->user_id;
+        $user = User::findOne($user_id);
+
+        if ( ! $user->tg_id ) {            
+            $bot->sendMessage($from_id, "У данного поставщика нет id телеграма!");
+            return;
+        }
+
+        $provider_model = Provider::findOne($provider_id);
+        $provider_account = Account::findOne(['user_id' => $provider_model->user_id]);
+
+        $message = "Для закупки товаров на ".$date;
+        if ( ! Account::transfer($provider_account, null, $provider_account->user, $total, $message, false) ) {            
+            $bot->sendMessage($from_id, "Ошибка! Не смог перечислить средства поставщику.");
+            return;
+        }
+        
+        $bot->sendMessage($user->tg_id, $text);
+        $bot->sendMessage($user->tg_id, "На Ваш расчётный счёт зачислены средства в сумме ".$total." для закупки товаров на ".$date);
+        
+        $bot->editMessageText($from_id, $message_id, $text);
+        $bot->sendMessage($from_id, "Сообщение отправлено.");
+
+        return;
+    }
+
+
     /***********************************
     
            УВЕДОМЛЕНИЕ ПАЙЩИКОВ
