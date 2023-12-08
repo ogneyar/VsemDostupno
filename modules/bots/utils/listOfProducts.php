@@ -30,9 +30,13 @@ function listOfProducts($bot, $from_id, $provider_id, $category_id, $step = 1) {
             $InlineKeyboardMarkup = [
                 'inline_keyboard' => [
                     [
+                        // [
+                        //     'text' => "Положить в корзину",
+                        //     'callback_data' => 'putInTheBasket_' . $purchaseProduct->product_feature_id
+                        // ],
                         [
-                            'text' => "Положить в корзину",
-                            'callback_data' => 'putInTheBasket_' . $purchaseProduct->product_feature_id
+                            'text' => "Выбрать", // 
+                            'callback_data' => 'productWithAPhoto_' . $purchaseProduct->product_feature_id
                         ],
                     ],                
                 ]
