@@ -83,8 +83,8 @@ class PurchaseNotificationController extends Controller
                         $order = PurchaseOrder::findOne($orders_to_send[$i]);
                         
                         $userOne = User::findOne(['email' => $order->email]);
-                        if ($userOne->tg_id && $orders_to_send[$i][0] != "_") {
-                            $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
+                        if ($userOne->tg_id && $orders_to_send[$i][0] != "_" && $product_total > 0) {
+                            // $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
                             Email::tg_send('held_order_member', $userOne->tg_id, [
                                 'fio' => $order->firstname . ' ' . $order->patronymic,
                                 'created_at' => date('d.m.Y', strtotime($order->created_at)),
@@ -127,7 +127,7 @@ class PurchaseNotificationController extends Controller
                     $new_product->save();
                     
                     // если у провайдера выключено ручное управление датами закупок и установлен флаг оповещения провайдера
-                    if ( ! $provider->purchases_management && $product->send_notification) {
+                    if ( ! $provider->purchases_management && $product->send_notification && $product_total > 0) {
                         $partners = PurchaseOrder::getPartnerIdByProvider($product->purchase_date, $product->provider_id);
                         if ($partners) {
                             foreach ($partners as $partner) {
@@ -205,19 +205,20 @@ class PurchaseNotificationController extends Controller
                         $product->delete();
                     }
 
-                    
-                    foreach ($orders_to_send as $val) {
-                        $order = PurchaseOrder::findOne($val);
-                        
-                        $userOne = User::findOne(['email' => $order->email]);
-                        if ($userOne->tg_id) {
-                            Email::tg_send('abortive_order_member', $userOne->tg_id, [
-                                'fio' => $order->firstname . ' ' . $order->patronymic,
-                                'created_at' => date('d.m.Y', strtotime($order->created_at)),
-                                'order_number' => $order->order_number,
-                                'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
-                                'new_purchase_date' => ($product->renewal && ! $provider->purchases_management) ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
-                            ]);
+                    if ($product_total > 0) {
+                        foreach ($orders_to_send as $val) {
+                            $order = PurchaseOrder::findOne($val);
+                            
+                            $userOne = User::findOne(['email' => $order->email]);
+                            if ($userOne->tg_id) {
+                                Email::tg_send('abortive_order_member', $userOne->tg_id, [
+                                    'fio' => $order->firstname . ' ' . $order->patronymic,
+                                    'created_at' => date('d.m.Y', strtotime($order->created_at)),
+                                    'order_number' => $order->order_number,
+                                    'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
+                                    'new_purchase_date' => ($product->renewal && ! $provider->purchases_management) ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
+                                ]);
+                            }
                         }
                     }
                     
@@ -225,7 +226,7 @@ class PurchaseNotificationController extends Controller
                         PurchaseOrder::setOrderStatus($order_product->purchase_order_id);
                     }
                     
-                    if ($product->provider->user->tg_id) {
+                    if ($product->provider->user->tg_id && $product_total > 0) {
                         Email::tg_send('abortive_order_provider', $product->provider->user->tg_id, [
                             'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
                             'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
