@@ -289,29 +289,6 @@ function purchaseOrderCreate($bot, $from_id, $summa)
                     
             } /* foreach ($purchase['data'] as $product)  */
 
-
-            if ($order->paid_total > 0) {            
-                $message = 'Членский взнос';
-
-                if (!Account::swap($user->deposit, null, $order->paid_total - $total_paid_for_provider, $message, false)) {
-                    throw new Exception('Ошибка модификации счета пользователя!');
-                }
-                if ($user->role == User::ROLE_PROVIDER) {
-                    ProviderStock::setStockSum($user->id, $order->paid_total);
-                }
-                
-                $deposit = $user->deposit;
-                $message = 'Списание на закупку';
-                
-                if ($user->tg_id) {
-                    Email::tg_send('account-log', $user->tg_id, [
-                        'typeName' => $deposit->typeName,
-                        'message' => $message,
-                        'amount' => -$order->paid_total,
-                        'total' => $deposit->total,
-                    ]);       
-                }            
-            }
             
             $send = date('d.m.Y') . " Вами произведён обмен паями\r\n";
             $send .= $text;
@@ -335,7 +312,32 @@ function purchaseOrderCreate($bot, $from_id, $summa)
                 ]
             ];
 
-            $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);            
+            $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);      
+            
+
+            if ($order->paid_total > 0) {            
+                $message = 'Членский взнос';
+
+                if (!Account::swap($user->deposit, null, $order->paid_total - $total_paid_for_provider, $message, false)) {
+                    throw new Exception('Ошибка модификации счета пользователя!');
+                }
+                if ($user->role == User::ROLE_PROVIDER) {
+                    ProviderStock::setStockSum($user->id, $order->paid_total);
+                }
+                
+                $deposit = $user->deposit;
+                // $message = 'Списание на закупку';
+                $message = 'Обмен паями';
+                
+                if ($user->tg_id) {
+                    Email::tg_send('account-log-tg', $user->tg_id, [
+                        'typeName' => $deposit->typeName,
+                        'message' => $message,
+                        'amount' => -$order->paid_total,
+                        'total' => $deposit->total,
+                    ]);       
+                }            
+            }      
                 
         } /* foreach ($arrayPurchases as $purchase)  */
 
