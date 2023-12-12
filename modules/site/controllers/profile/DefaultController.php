@@ -713,21 +713,21 @@ class DefaultController extends BaseController
         }
 
         $model = new RegisterSmallForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) { 
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
         // if ($model->load(Yii::$app->request->post())) {
 
             $transaction = Yii::$app->db->beginTransaction();
 
             try {
                 $user = new User();
-                $user->role = User::ROLE_MEMBER;
+                $user->role = $get["role"] == "provider" ? User::ROLE_PROVIDER : User::ROLE_MEMBER;
                 $user->password = $model->password;
                 $user->password_repeat = $model->password_repeat;
                 $user->email = "tg".$get['tg']."@mail.ru";
-                $user->phone = '+' . preg_replace('/\D+/', '', $model->phone);
+                $user->phone = $model->phone;
                 $user->ext_phones = "";
                 $user->firstname = $model->firstname;
-                $user->lastname = "lastname";
+                $user->lastname = $get["role"] == "provider" ? $model->lastname : "lastname";
                 $user->patronymic = $model->patronymic;
                 $user->created_ip = Yii::$app->getRequest()->getUserIP();
 
@@ -763,41 +763,33 @@ class DefaultController extends BaseController
                     throw new Exception('Ошибка создания пользователя!');
                 }
 
-                $member = new Member();
-                $member->partner_id = $model->partner;
-                $member->user_id = $user->id;
-                if (!$member->save()) {
-
-                    // Email::tg_send('entity-request-tg', $get['tg'], [
-                    //     'fio' => 'Ошибка создания участника!',
-                    //     'u_role' => 'Участника'
-                    // ]);
-
-                    throw new Exception('Ошибка создания участника!');
+                if ($get["role"] == "provider") {
+                    $provider = new Provider();
+                    $provider->user_id = $user->id;
+                    $provider->name = $user->firstname;
+                    $provider->description = $model->description;
+                    if (!$provider->save()) {
+                        throw new Exception('Ошибка создания поставщика!');
+                    }
+                }else { 
+                    $member = new Member();
+                    $member->partner_id = $model->partner;
+                    $member->user_id = $user->id;
+                    if (!$member->save()) {
+                        throw new Exception('Ошибка создания участника!');
+                    }
                 }
 
                 $register = new Register();
                 $register->user_id = $user->id;
                 if (!$register->save()) {
-
-                    // Email::tg_send('entity-request-tg', $get['tg'], [
-                    //     'fio' => 'Ошибка при регистрации пользователя!',
-                    //     'u_role' => 'Участника'
-                    // ]);
-
                     throw new Exception('Ошибка при регистрации пользователя!');
                 }
 
                 $types = [Account::TYPE_DEPOSIT, Account::TYPE_BONUS, Account::TYPE_SUBSCRIPTION];
                 foreach ($types as $type) {
                     $account = new Account(['user_id' => $user->id, 'type' => $type, 'total' => 0]);
-                    if (!$account->save()) {
-
-                        // Email::tg_send('entity-request-tg', $get['tg'], [
-                        //     'fio' => 'Ошибка создания счета пользователя!',
-                        //     'u_role' => 'Участника'
-                        // ]);
-    
+                    if (!$account->save()) {    
                         throw new Exception('Ошибка создания счета пользователя!');
                     }
                 }
@@ -806,14 +798,9 @@ class DefaultController extends BaseController
             } catch (Exception $e) {
                 $transaction->rollBack();
 
-                // Email::tg_send('entity-request-tg', $get['tg'], [
-                //     'fio' => 'Exception!',
-                //     'u_role' => 'Участника'
-                // ]);
-
-                Yii::$app->session->setFlash('profile-message', 'profile-register-fail');
-                return $this->redirect($baseUrl . 'profile/message');
-                //throw new ForbiddenHttpException($e->getMessage());
+                // Yii::$app->session->setFlash('profile-message', 'profile-register-fail');
+                // return $this->redirect($baseUrl . 'profile/message');
+                throw new ForbiddenHttpException($e->getMessage());
             }
 
             $c_params = [
@@ -822,30 +809,54 @@ class DefaultController extends BaseController
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
                 
-                Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
-                    'link' => $candidate
-                ]);
+                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                //     'link' => $candidate
+                // ]);
 
-                Email::tg_send('register-candidate-tg', Yii::$app->params['superadminChatId'], [
-                    'link' => $candidate
-                ]);
+                if ($get["role"] != "provider") {
+                    Email::tg_send('register-candidate-provider-tg', Yii::$app->params['superadminChatId'], [
+                        'link' => $candidate
+                    ]);   
+                }else {
+                    Email::tg_send('register-candidate-tg', Yii::$app->params['superadminChatId'], [
+                        'link' => $candidate
+                    ]);                    
+                }
 
             }            
-            
-            Email::tg_send('entity-request-tg', $user->tg_id, [
-                'fio' => $user->respectedName,
-                'u_role' => 'Участника'
-            ]);
+            if ($get["role"] != "provider") {
+                Email::tg_send('entity-request-tg', $user->tg_id, [
+                    'fio' => $user->respectedName,
+                    'u_role' => 'Поставщика'
+                ]);
+            }else {
+                Email::tg_send('entity-request-tg', $user->tg_id, [
+                    'fio' => $user->respectedName,
+                    'u_role' => 'Участника'
+                ]);
+            }
 
             Yii::$app->session->setFlash('profile-message', 'profile-entity-request-tg');
             return $this->redirect($baseUrl . 'profile/message');              
 
 
         } else {
-            
             $model->password =
             $model->password_repeat = '';
             $menu_first_level = Category::find()->where(['parent' => 0, 'visibility' => 1])->all();
+
+            if ($get["role"] && $get["role"] == "provider") {
+                $array = explode('|', $get["fio"]);
+                
+                $lastname = $array[0]; // фамилия
+                $model->lastname = $lastname;
+                $firstname = $array[1]; // имя
+                $model->firstname = $firstname;
+                $patronymic = $array[2]; // отчество
+                $model->patronymic = $patronymic;
+
+                $model->phone = $get["phone"];
+            }
 
             return $this->render('register-small', [
                 'model' => $model,

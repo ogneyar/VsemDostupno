@@ -50,8 +50,8 @@ class Provider extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'name'], 'required'],
-            [['categoryIds'], 'required', 'except' => ['self_reg', 'become_provider']],
-            [['field_of_activity', 'legal_address', 'snils', 'ogrn'], 'required', 'except' => 'become_provider'],
+            // [['categoryIds'], 'required', 'except' => ['self_reg', 'become_provider']],
+            // [['field_of_activity', 'legal_address', 'snils', 'ogrn'], 'required', 'except' => 'become_provider'],
             [['user_id'], 'integer'],
             [['field_of_activity', 'description'], 'string'],
             [['name', 'legal_address'], 'string', 'max' => 255],

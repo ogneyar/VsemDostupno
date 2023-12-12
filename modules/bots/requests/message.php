@@ -53,6 +53,8 @@ function requestMessage($bot, $message, $master, $admin) {
         $file_id = $voice['file_id'];
     }
 
+    $user = User::findOne(['tg_id' => $chat_id]);
+
 
     /*******************
     
@@ -442,7 +444,7 @@ function requestMessage($bot, $message, $master, $admin) {
                     [ 'text' => 'Полная' ],
                 ],
                 [
-                    [ 'text' => 'Главное меню' ],
+                    [ 'text' => 'Регистрация поставщика товаров/услуг' ],
                 ]
             ],
             'resize_keyboard' => true
@@ -453,14 +455,49 @@ function requestMessage($bot, $message, $master, $admin) {
         return;
     }
 
-
-    /***********************
     
-     УПРОЩЁННАЯ регистрация
+    /*****************************
+    
+        РЕГИСТРАЦИЯ ПОСТАВЩИКА
 
-    ************************/
+    ******************************/
+    if ($text == "/regist_provider" || $text == "Регистрация поставщика товаров/услуг" || $text == "Регистрация поставщика")
+    {
+        if ($user) {
+            $send = "Вы уже зарегестрированы.";
+            $bot->sendMessage($chat_id, $send);    
+            return;
+        }
+
+        $tg_com = TgCommunication::findOne(['chat_id' => $chat_id]);
+        if ( ! $tg_com ) {
+            $tg_com = new TgCommunication();
+        }
+        $tg_com->chat_id = $chat_id;
+        $tg_com->to_chat_id = $chat_id;
+        $tg_com->from_whom = "registProviderFIO";
+        $tg_com->save();
+
+        $send = "В строке сообщение, укажите своё Ф.И.О.";
+        $bot->sendMessage($chat_id, $send);
+
+        return;
+    }
+
+
+    /******************************
+    
+        УПРОЩЁННАЯ регистрация
+
+    *******************************/
     if ($text == "Упрощённая")
     {
+        if ($user) {
+            $send = "Вы уже зарегестрированы.";
+            $bot->sendMessage($chat_id, $send);    
+            return;
+        }
+
         $send = "Уважаемый пользователь.";
 
         $KeyboardMarkup = [
@@ -488,13 +525,19 @@ function requestMessage($bot, $message, $master, $admin) {
     }
 
     
-    /*******************
+    /*************************
     
-     ПОЛНАЯ регистрация
+        ПОЛНАЯ регистрация
 
-    ********************/
+    **************************/
     if ($text == "Полная")
     {
+        if ($user) {
+            $send = "Вы уже зарегестрированы.";
+            $bot->sendMessage($chat_id, $send);    
+            return;
+        }
+        
         $send = "Уважаемый пользователь.";
 
         $KeyboardMarkup = [
@@ -1026,7 +1069,40 @@ function requestMessage($bot, $message, $master, $admin) {
 
             return;
         }
+        
+        // запрос ФИО поставщика
+        if ($tgCom->from_whom == 'registProviderFIO') 
+        {
+            $tgCom->from_whom = "registProviderPhone_" . trim(preg_replace('/ /', "|", $text));
+            $tgCom->save();
 
+            $send = "Часть регистрации прошло успешно.\r\nУкажите для связи, свой номер телефона, в формате 8 963 555 3311 и отправьте сообщение.";
+            $bot->sendMessage($chat_id, $send);
+
+            return;
+        }
+
+        // запрос телефона поставщика
+        if (strstr($tgCom->from_whom, '_', true) == 'registProviderPhone') 
+        {            
+            $array = explode('_', $tgCom->from_whom);
+            $fio = $array[1];
+            $phone = preg_replace('/ /', "", $text);
+            
+            $send = "Перейдя к дальнейшей регистрации, расскажите коротко о своей услуге или предлагаемом товаре, а также укажите пароль и повторите его.";
+            
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [[[
+                    'text' => 'Перейти к дальнейшей регистрации',
+                    'url' => "https://Будь-здоров.рус/web/profile/register-small?role=provider&fio=".$fio."&phone=".$phone."&tg=".$chat_id
+                ]]]
+            ];
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+            
+            $tgCom->delete();
+
+            return;
+        }
         
         if ( ! $tgCom->from_whom || $tgCom->from_whom == "client") {
             if ( ! $user || $user->lastname == "lastname") {

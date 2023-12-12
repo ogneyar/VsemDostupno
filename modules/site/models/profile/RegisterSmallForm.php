@@ -13,8 +13,10 @@ use himiklab\yii2\recaptcha\ReCaptchaValidator;
 class RegisterSmallForm extends Model
 {
     public $partner;
+    public $description;
     public $phone;
     public $firstname;
+    public $lastname;
     public $patronymic;
     public $password;
     public $password_repeat;
@@ -26,9 +28,9 @@ class RegisterSmallForm extends Model
     public function rules()
     {
         return [
-            [['partner',  'phone', 'firstname', 'patronymic', 'password', 'password_repeat', 're_captcha'], 'required'],
+            [['phone', 'firstname', 'patronymic', 'password', 'password_repeat', 're_captcha'], 'required'],
             [['partner'], 'integer'],
-            [['phone', 'firstname', 'patronymic'], 'string', 'max' => 255],
+            [['description', 'phone', 'firstname', 'patronymic', 'lastname'], 'string', 'max' => 255],
             [['password', 'password_repeat'], 'string', 'min' => 8, 'max' => 255],
             ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Не совпадает с паролем.'],
             [['re_captcha'], ReCaptchaValidator::className()],
@@ -39,8 +41,10 @@ class RegisterSmallForm extends Model
     {
         return [
             'partner' => 'Партнер',
+            'description' => 'Описание',
             'phone' => 'Телефон',
             'firstname' => 'Имя',
+            'lastname' => 'Фамилия',
             'patronymic' => 'Отчество',
             'password' => 'Пароль',
             'password_repeat' => 'Повтор пароля',

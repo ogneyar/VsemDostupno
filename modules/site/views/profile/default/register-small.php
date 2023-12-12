@@ -39,7 +39,7 @@ $this->registerJs($script, $this::POS_END);
 
 <?php
 if ($get['tg']) {
-    $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
+    $user = User::findOne(['tg_id' => $get['tg'], 'disabled' => 0]);
     if ($user) header("Location: https://".$_SERVER['SERVER_NAME'].$web."/profile/login");    
 }
 ?>
@@ -56,7 +56,7 @@ if ($get['tg']) {
 <?php $form = ActiveForm::begin([
     'id' => 'register-small-form',
     'method' => 'post',
-    'action' => $web.'/profile/register-small?tg='.$get['tg'],
+    'action' => $web.'/profile/register-small?tg='.$get['tg']."&role=".$get['role'],
     'options' => ['class' => 'form-horizontal'],
     'fieldConfig' => [
         'template' => "{label}\n<div class=\"col-md-6\">{input}</div>\n<div class=\"col-md-4\">{error}</div>",
@@ -64,13 +64,14 @@ if ($get['tg']) {
     ],
 ]); ?>
 
-    <div class="row">
-        <div class="col-md-offset-2 col-md-6">
-            <p>Выберите удобный адрес обслуживания.</p>
-        </div>
-    </div>
+<?php
+    if ($get['role'] && $get['role'] != "provider") {
+        echo("<div class='row'>");
+            echo("<div class='col-md-offset-2 col-md-6'>");
+                echo("<p>Выберите удобный адрес обслуживания.</p>");
+            echo("</div>");
+        echo("</div>");
 
-    <?php
         $data = [];
         foreach (City::find()->each() as $city) {
             $partners = Partner::find()
@@ -95,13 +96,25 @@ if ($get['tg']) {
                 'allowClear' => true,
             ],
         ]);
-    ?>
+    }
+?>
 
+    <?php
+    if ($get['role'] && $get['role'] == "provider") {
+        echo $form->field($model, 'lastname');
+    }
+    ?>
     <?= $form->field($model, 'firstname') ?>
 
     <?= $form->field($model, 'patronymic') ?>
 
     <?= $form->field($model, 'phone') ?>
+
+    <?php
+    if ($get['role'] && $get['role'] == "provider") {
+        echo $form->field($model, 'description')->textArea(['rows' => 3, 'style' => 'resize: none;']);
+    }
+    ?>
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
