@@ -66,6 +66,7 @@ class EntryRequestController extends BaseController
                 'isNewRecord' => false,
                 'id' => $id,
                 'user_id' => $member->user->id,
+                'tg_id' => $member->user->tg_id,
                 'partner' => $member->partner_id,
                 'email' => $member->user->email,
                 'phone' => $member->user->phone,
@@ -89,6 +90,7 @@ class EntryRequestController extends BaseController
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $member = Member::findOne($user->member->id);
                 $member->user->scenario = 'admin_creation';
+                $member->user->tg_id = $model->tg_id;
                 $member->user->phone = $model->phone;
                 $member->user->ext_phones = $model->ext_phones;
                 $member->user->firstname = $model->firstname;
@@ -122,6 +124,7 @@ class EntryRequestController extends BaseController
                 'isNewRecord' => false,
                 'id' => $id,
                 'user_id' => $provider->user->id,
+                'tg_id' => $provider->user->tg_id,
                 'name' => $provider->name,
                 'disabled' => $provider->user->disabled,
                 'email' => $provider->user->email,
@@ -155,6 +158,7 @@ class EntryRequestController extends BaseController
                 $provider = Provider::findOne($user->provider->id);
                 $provider->user->disabled = $model->disabled;
                 $provider->user->phone = $model->phone;
+                $provider->user->tg_id = $model->tg_id;
                 $provider->user->ext_phones = $model->ext_phones;
                 $provider->user->firstname = $model->firstname;
                 $provider->user->lastname = $model->lastname;

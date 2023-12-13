@@ -111,7 +111,8 @@ class ProviderController extends BaseController
                 $model->itn = preg_replace('/\D+/', '', $model->itn);
                 $user->itn = $model->itn ? $model->itn : null;
                 $user->skills = $model->skills ? $model->skills : null;
-                $user->number = $model->number ? $model->number : (int) User::find()->max('number') + 1;
+                // $user->number = $model->number ? $model->number : (int) User::find()->max('number') + 1;
+                $user->number = (int) User::find()->max('number') + 1;
                 $user->recommender_id = $model->recommender_id ? $model->recommender_id : 95;
                 $user->scenario = 'admin_creation';
 

@@ -44,7 +44,7 @@ class MemberForm extends Model
     {
         return [
             [['recommender_id', 'partner', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
-            [['partner', 'disabled', 'recommender_id'], 'integer'],
+            [['passport', 'partner', 'disabled', 'recommender_id'], 'integer'],
             [['tg_id', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['citizen'], 'string', 'max' => 50],

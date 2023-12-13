@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
-use yii\widgets\MaskedInput;
+// use yii\widgets\MaskedInput;
 use yii\web\JsExpression;
 use kartik\date\DatePicker;
 use kartik\editable\Editable;
@@ -92,6 +92,8 @@ use app\models\City;
     </div>
 
     <?= $form->field($model, 'name') ?>
+
+    <?= $form->field($model, 'tg_id') ?>
     
     <?= $form->field($model, 'field_of_activity') ?>
 
@@ -111,10 +113,12 @@ use app\models\City;
         <?= $form->field($model, 'email') ?>
     <?php endif ?>
 
-    <?= $form->field($model, 'phone')->widget(
+    <?= $form->field($model, 'phone') ?>
+
+    <?/*= $form->field($model, 'phone')->widget(
         MaskedInput::className(), [
         'mask' => '+7 (999)-999-9999',
-    ]) ?>
+    ]) */?>
 
     <?= $form->field($model, 'ext_phones') ?>
 

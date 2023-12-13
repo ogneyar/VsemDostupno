@@ -8,7 +8,7 @@ use kartik\select2\Select2;
 use kartik\date\DatePicker;
 use kartik\editable\Editable;
 use app\models\City;
-use yii\widgets\MaskedInput;
+// use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Member */
@@ -57,14 +57,17 @@ use yii\widgets\MaskedInput;
         ]);
     ?>
 
+    <?= $form->field($model, 'tg_id') ?>
+
     <?php if ($model->isNewRecord): ?>
         <?= $form->field($model, 'email') ?>
     <?php endif ?>
 
-    <?= $form->field($model, 'phone')->widget(
+    <?= $form->field($model, 'phone') ?>    
+    <?/*= $form->field($model, 'phone')->widget(
         MaskedInput::className(), [
         'mask' => '+7 (999)-999-9999',
-    ]) ?>
+    ]) */?>
 
     <?= $form->field($model, 'ext_phones') ?>
 

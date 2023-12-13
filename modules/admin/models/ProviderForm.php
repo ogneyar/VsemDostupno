@@ -52,8 +52,9 @@ class ProviderForm extends Model
     public function rules()
     {
         return [
-            [['recommender_id', 'partner', 'name', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department', 'field_of_activity', 'legal_address', 'snils', 'ogrn'], 'required'],
-            [['disabled', 'recommender_id'], 'integer'],
+            // [['recommender_id', 'partner', 'name', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department', 'field_of_activity', 'legal_address', 'snils', 'ogrn'], 'required'],
+            [['email', 'phone', 'firstname', 'lastname', 'patronymic'], 'required'],
+            [['passport', 'disabled', 'recommender_id'], 'integer'],
             [['tg_id', 'name', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['citizen'], 'string', 'max' => 50],

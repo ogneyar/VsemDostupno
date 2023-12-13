@@ -107,7 +107,8 @@ class MemberController extends BaseController
                 $user->itn = $model->itn ? $model->itn : null;
                 $user->skills = $model->skills ? $model->skills : null;
                 $user->recommender_info = $model->recommender_info ? $model->recommender_info : null;
-                $user->number = $model->number ? $model->number : (int) User::find()->max('number') + 1;
+                // $user->number = $model->number ? $model->number : (int) User::find()->max('number') + 1;
+                $user->number = (int) User::find()->max('number') + 1;
                 $user->recommender_id = $model->recommender_id ? $model->recommender_id : 95;
 
                 if (!$user->save()) {

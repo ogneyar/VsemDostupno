@@ -44,7 +44,7 @@ class PartnerForm extends Model
     {
         return [
             [['recommender_id', 'name', 'city', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
-            [['city', 'disabled', 'recommender_id'], 'integer'],
+            [['passport', 'city', 'disabled', 'recommender_id'], 'integer'],
             [['tg_id', 'name', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['citizen'], 'string', 'max' => 50],

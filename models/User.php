@@ -94,7 +94,7 @@ class User extends \yii\db\ActiveRecord
             [['citizen', 'registration', 'passport', 'passport_department'], 'required', 'when' => function ($model) {return $model->role != self::ROLE_ADMIN && $model->role != self::ROLE_PROVIDER && $model->role != self::ROLE_SUPERADMIN;}],
             [['re_captcha'], 'required', 'except' => ['admin_creation', 'user_login']], 
             [['role', 'skills'], 'string'],
-            [['disabled', 'number', 'recommender_id', 'request'], 'integer'],
+            [['disabled', 'number', 'recommender_id', 'request', 'passport'], 'integer'],
             [['created_at', 'logged_in_at', 'birthdate', 'passport_date'], 'safe'],
             [['phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'created_ip', 'logged_in_ip', 'password', 'auth_key', 'access_token', 'registration', 'residence', 'passport_department', 'recommender_info'], 'string', 'max' => 255],
             [['citizen'], 'string', 'max' => 50],
