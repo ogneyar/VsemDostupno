@@ -749,10 +749,10 @@ class DefaultController extends BaseController
                 else $user->tg_id = "";
                 
                 if (!$user->save()) { 
-                    Email::tg_send('entity-request-tg', Yii::$app->params['master'], [
-                        'fio' => 'name',
-                        'u_role' => 'хз password: '.$model->password
-                    ]);
+                    // Email::tg_send('entity-request-tg', Yii::$app->params['master'], [
+                    //     'fio' => 'name',
+                    //     'u_role' => 'хз password: '.$model->password
+                    // ]);
                     throw new Exception('Ошибка создания пользователя!');
                 }
 
