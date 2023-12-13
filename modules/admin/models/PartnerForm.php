@@ -15,6 +15,7 @@ class PartnerForm extends Model
     public $isNewRecord = true;
     public $id;
     public $user_id;
+    public $tg_id;
     public $name;
     public $disabled;
     public $email;
@@ -44,7 +45,7 @@ class PartnerForm extends Model
         return [
             [['recommender_id', 'name', 'city', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
             [['city', 'disabled', 'recommender_id'], 'integer'],
-            [['name', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
+            [['tg_id', 'name', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['citizen'], 'string', 'max' => 50],
             [['passport', 'itn'], 'string', 'max' => 30],
@@ -62,6 +63,7 @@ class PartnerForm extends Model
             'name' => 'Название',
             'disabled' => 'Отключен',
             'city' => 'Город',
+            'tg_id' => 'Id телеграма',
             'email' => 'Емайл',
             'phone' => 'Телефон',
             'ext_phones' => 'Дополнительные телефоны',

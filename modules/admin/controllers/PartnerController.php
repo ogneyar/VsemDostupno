@@ -12,6 +12,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use app\models\Account;
 use app\models\AccountLog;
+use app\models\Candidate;
 use app\models\Email;
 use app\models\Forgot;
 use app\models\Partner;
@@ -81,8 +82,9 @@ class PartnerController extends BaseController
                 $user = new User();
                 $user->role = User::ROLE_PARTNER;
                 $user->disabled = $model->disabled;
+                $user->tg_id = $model->tg_id;
                 $user->email = $model->email;
-                $user->phone = $model->phone;
+                $user->phone = str_replace('+', '', $model->phone);
                 $user->ext_phones = $model->ext_phones;
                 $user->firstname = $model->firstname;
                 $user->lastname = $model->lastname;
@@ -142,10 +144,22 @@ class PartnerController extends BaseController
                 $transaction->rollBack();
                 throw new ForbiddenHttpException($e->getMessage());
             }
+            
+            $c_params = [
+                'email' => $user->email,
+            ];
+            $candidate = Candidate::isCandidate($c_params);
+            if ($candidate) {
+                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                //     'link' => $candidate
+                // ]);
+                Email::tg_send('register-candidate', Yii::$app->params['superadminChatId'], [
+                    'link' => $candidate
+                ]);
+            }
 
-            try {
-                Email::send('forgot', $user->email, ['url' => $forgot->url]);
-            } catch(Exception $e) {}
+            // Email::send('forgot', $user->email, ['url' => $forgot->url]);
+            if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]);
 
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
@@ -168,6 +182,7 @@ class PartnerController extends BaseController
             'isNewRecord' => false,
             'id' => $id,
             'user_id' => $partner->user->id,
+            'tg_id' => $partner->user->tg_id,
             'city' => $partner->city_id,
             'name' => $partner->name,
             'disabled' => $partner->user->disabled,
@@ -208,6 +223,7 @@ class PartnerController extends BaseController
             
             $partner->user->scenario = 'admin_creation';
             $partner->user->disabled = $model->disabled;
+            $partner->user->tg_id = $model->tg_id;
             $partner->user->phone = $model->phone;
             $partner->user->ext_phones = $model->ext_phones;
             $partner->user->firstname = $model->firstname;

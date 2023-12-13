@@ -93,6 +93,7 @@ class ProviderController extends BaseController
                 $user = new User();
                 $user->role = User::ROLE_PROVIDER;
                 $user->disabled = $model->disabled;
+                $user->tg_id = $model->tg_id;
                 $user->email = $model->email;
                 $user->phone = $model->phone;
                 $user->ext_phones = $model->ext_phones;
@@ -168,12 +169,12 @@ class ProviderController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                Email::tg_send('register-candidate', Yii::$app->params['superadminChatId'], [
                     'link' => $candidate
                 ]);
             }
             
-            Email::send('forgot', $user->email, ['url' => $forgot->url]);
+            if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]);
 
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
@@ -196,6 +197,7 @@ class ProviderController extends BaseController
             'isNewRecord' => false,
             'id' => $id,
             'user_id' => $provider->user->id,
+            'tg_id' => $provider->user->tg_id,
             'name' => $provider->name,
             'disabled' => $provider->user->disabled,
             'email' => $provider->user->email,
@@ -231,6 +233,7 @@ class ProviderController extends BaseController
             $provider = Provider::findOne($id);
             $provider->user->scenario = 'admin_creation';
             $provider->user->disabled = $model->disabled;
+            $provider->user->tg_id = $model->tg_id;
             $provider->user->phone = $model->phone;
             $provider->user->ext_phones = $model->ext_phones;
             $provider->user->firstname = $model->firstname;

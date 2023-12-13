@@ -118,7 +118,9 @@ use app\models\City;
         ]) ?>
     </div>
 
-    <?= $form->field($model, 'number') ?>
+    <?//= $form->field($model, 'number') ?>
+
+    <?= $form->field($model, 'tg_id') ?>
 
     <?= $form->field($model, 'name') ?>
     
