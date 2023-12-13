@@ -44,7 +44,9 @@ use app\models\City;
 
     <?= $form->field($model, 'disabled')->checkbox() ?>
 
-    <?= $form->field($model, 'number') ?>
+    <?= $form->field($model, 'tg_id') ?>
+
+    <?//= $form->field($model, 'number') ?>
 
     <?php
         $data = [];

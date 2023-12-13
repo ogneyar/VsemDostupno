@@ -14,6 +14,7 @@ class MemberForm extends Model
     public $isNewRecord = true;
     public $id;
     public $user_id;
+    public $tg_id;
     public $disabled;
     public $email;
     public $phone;
@@ -44,7 +45,7 @@ class MemberForm extends Model
         return [
             [['recommender_id', 'partner', 'email', 'phone', 'firstname', 'lastname', 'patronymic', 'birthdate', 'citizen', 'registration', 'passport', 'passport_date', 'passport_department'], 'required'],
             [['partner', 'disabled', 'recommender_id'], 'integer'],
-            [['phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
+            [['tg_id', 'phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'registration', 'residence', 'passport_department'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['citizen'], 'string', 'max' => 50],
             [['passport', 'itn'], 'string', 'max' => 30],
@@ -60,6 +61,7 @@ class MemberForm extends Model
         return [
             'recommender_id' => 'Номер рекомендателя',
             'disabled' => 'Отключен',
+            'tg_id' => 'Id телеграма',
             'partner' => 'Партнер',
             'email' => 'Емайл',
             'phone' => 'Телефон',

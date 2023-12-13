@@ -88,8 +88,9 @@ class MemberController extends BaseController
                 $user->scenario = 'admin_creation';
                 $user->role = User::ROLE_MEMBER;
                 $user->disabled = $model->disabled;
+                $user->tg_id = $model->tg_id;
                 $user->email = $model->email;
-                $user->phone = $model->phone;
+                $user->phone = str_replace('+', '', $model->phone);
                 $user->ext_phones = $model->ext_phones;
                 $user->firstname = $model->firstname;
                 $user->lastname = $model->lastname;
@@ -156,12 +157,16 @@ class MemberController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
+                //     'link' => $candidate
+                // ]);
+                Email::tg_send('register-candidate', Yii::$app->params['superadminChatId'], [
                     'link' => $candidate
                 ]);
             }
             
-            Email::send('forgot', $user->email, ['url' => $forgot->url]);
+            // Email::send('forgot', $user->email, ['url' => $forgot->url]);
+            if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]);
 
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
@@ -184,6 +189,7 @@ class MemberController extends BaseController
             'isNewRecord' => false,
             'id' => $id,
             'user_id' => $member->user->id,
+            'tg_id' => $member->user->tg_id,
             'disabled' => $member->user->disabled,
             'partner' => $member->partner_id,
             'email' => $member->user->email,
@@ -212,6 +218,7 @@ class MemberController extends BaseController
             $member = Member::findOne($id);
             $member->user->scenario = 'admin_creation';
             $member->user->disabled = $model->disabled;
+            $member->user->tg_id = $model->tg_id;
             $member->user->phone = $model->phone;
             $member->user->ext_phones = $model->ext_phones;
             $member->user->firstname = $model->firstname;
@@ -220,8 +227,8 @@ class MemberController extends BaseController
             $member->user->birthdate = $model->birthdate;
             $member->user->citizen = $model->citizen;
             $member->user->registration = $model->registration;
-            $member->user->residence = $model->residence && $model->residence != $model->registration ? $model->residence : null;
-            $member->user->passport = preg_replace('/\D+/', '', $model->passport);
+            $member->user->residence = $model->residence && $model->residence != $model->registration ? $model->residence : null;            
+            $member->user->passport = is_numeric($model->passport) ? preg_replace('/\D+/', '', $model->passport) : null;
             $member->user->passport_date = $model->passport_date;
             $member->user->passport_department = $model->passport_department;
             $model->itn = preg_replace('/\D+/', '', $model->itn);
