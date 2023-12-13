@@ -91,7 +91,7 @@ class User extends \yii\db\ActiveRecord
     {
         return [
             [['role', 'phone', 'firstname', 'lastname', 'patronymic', 'created_ip', 'auth_key', 'access_token', 'password', 'email'], 'required'],
-            [['citizen', 'registration', 'passport', 'passport_department'], 'required', 'when' => function ($model) {return $model->role != self::ROLE_ADMIN && $model->role != self::ROLE_PROVIDER && $model->role != self::ROLE_SUPERADMIN;}],
+            // [['citizen', 'registration', 'passport', 'passport_department'], 'required', 'when' => function ($model) {return $model->role != self::ROLE_ADMIN && $model->role != self::ROLE_PROVIDER && $model->role != self::ROLE_SUPERADMIN;}],
             [['re_captcha'], 'required', 'except' => ['admin_creation', 'user_login']], 
             [['role', 'skills'], 'string'],
             [['disabled', 'number', 'recommender_id', 'request', 'passport'], 'integer'],
@@ -116,6 +116,7 @@ class User extends \yii\db\ActiveRecord
             'id' => 'Идентификатор',
             'role' => 'Роль',
             'disabled' => 'Отключен',
+            'tg_id' => 'Id телеграма',
             'email' => 'Емайл',
             'phone' => 'Телефон',
             'ext_phones' => 'Дополнительные телефоны',
@@ -147,7 +148,6 @@ class User extends \yii\db\ActiveRecord
             'fullName' => 'ФИО',
             'shortName' => 'ФИО',
             're_captcha' => 'Проверка',
-            'tg_id' => 'user_id в телеграм',
         ];
     }
 
@@ -328,9 +328,9 @@ class User extends \yii\db\ActiveRecord
             }
 
             $this->phone = preg_replace('/\D+/', '', $this->phone);
-            if ($this->phone) {
-                $this->phone = '+' . $this->phone;
-            }
+            // if ($this->phone) {
+            //     $this->phone = '+' . $this->phone;
+            // }
 
             return true;
         }

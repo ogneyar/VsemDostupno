@@ -730,36 +730,29 @@ class DefaultController extends BaseController
                 $user->lastname = $get["role"] == "provider" ? $model->lastname : "lastname";
                 $user->patronymic = $model->patronymic;
                 $user->created_ip = Yii::$app->getRequest()->getUserIP();
-
                 $user->citizen = "citizen";
                 $user->registration = "registration";
-                $user->passport = "passport";
+                $user->passport = null;
                 $user->passport_department = "passport_department";
-
                 $user->passport_date = null;
                 $user->birthdate = null;
-
                 $user->residence = null;
                 $user->itn = null;
                 $user->skills = null;
-
                 $recommender = User::findOne(['number' => 40]); 
                 $user->recommender_id = $recommender->id ? $recommender->id : 3;
-
                 $user->recommender_info = null;
-
-                $user->re_captcha = $model->re_captcha;
+                $user->re_captcha = $model->re_captcha;                
+                // $user->scenario = 'admin_creation';
 
                 if (isset($get['tg']) && $get['tg'] != "false") $user->tg_id = $get['tg'];
                 else $user->tg_id = "";
                 
                 if (!$user->save()) { 
-                    
-                    // Email::tg_send('entity-request-tg', $get['tg'], [
-                    //     'fio' => 'Ошибка создания пользователя!',
-                    //     'u_role' => 'Участника'
-                    // ]);
-
+                    Email::tg_send('entity-request-tg', Yii::$app->params['master'], [
+                        'fio' => 'name',
+                        'u_role' => 'хз password: '.$model->password
+                    ]);
                     throw new Exception('Ошибка создания пользователя!');
                 }
 
@@ -808,12 +801,7 @@ class DefaultController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                
-                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
-                //     'link' => $candidate
-                // ]);
-
-                if ($get["role"] != "provider") {
+                if ($get["role"] == "provider") {
                     Email::tg_send('register-candidate-provider-tg', Yii::$app->params['superadminChatId'], [
                         'link' => $candidate
                     ]);   
@@ -824,6 +812,13 @@ class DefaultController extends BaseController
                 }
 
             }            
+            
+            Email::tg_send('registr-small', Yii::$app->params['superadminChatId'], [
+                'tg_id' => $user->tg_id,
+                'name' => $user->getRespectedName(),
+                'phone' => $user->phone,
+            ]);
+
             if ($get["role"] != "provider") {
                 Email::tg_send('entity-request-tg', $user->tg_id, [
                     'fio' => $user->respectedName,

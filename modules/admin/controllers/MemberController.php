@@ -158,16 +158,19 @@ class MemberController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                // Email::send('register-candidate', Yii::$app->params['superadminEmail'], [
-                //     'link' => $candidate
-                // ]);
                 Email::tg_send('register-candidate', Yii::$app->params['superadminChatId'], [
                     'link' => $candidate
                 ]);
             }
-            
-            // Email::send('forgot', $user->email, ['url' => $forgot->url]);
-            if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]);
+
+            Email::tg_send('registr-small', Yii::$app->params['superadminChatId'], [
+                'tg_id' => $user->tg_id,
+                'name' => $user->getRespectedName(),
+                'phone' => $user->phone,
+            ]);
+
+     
+            // if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]); // при смене пароля
 
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
