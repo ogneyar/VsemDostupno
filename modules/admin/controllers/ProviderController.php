@@ -175,13 +175,13 @@ class ProviderController extends BaseController
                 ]);
             }
             
-            Email::tg_send('registr-small', Yii::$app->params['superadminChatId'], [
-                'tg_id' => $user->tg_id,
-                'name' => $user->getRespectedName(),
-                'phone' => $user->phone,
-            ]);
+            // Email::tg_send('registr-small', Yii::$app->params['superadminChatId'], [
+            //     'tg_id' => $user->tg_id,
+            //     'name' => $user->getRespectedName(),
+            //     'phone' => $user->phone,
+            // ]);
             
-            // if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]);
+            if ($user->tg_id) Email::tg_send('forgot', $user->tg_id, ['url' => $forgot->url]);
 
             return $this->redirect(['view', 'id' => $model->id]);
         } else {

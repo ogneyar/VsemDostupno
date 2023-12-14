@@ -812,12 +812,19 @@ class DefaultController extends BaseController
                 }
 
             }            
-            
-            Email::tg_send('registr-small', Yii::$app->params['superadminChatId'], [
-                'tg_id' => $user->tg_id,
-                'name' => $user->getRespectedName(),
-                'phone' => $user->phone,
-            ]);
+            if ($get["role"] == "provider") {
+                Email::tg_send('registr-small-provider', Yii::$app->params['superadminChatId'], [
+                    'tg_id' => $user->tg_id,
+                    'name' => $user->getRespectedName(),
+                    'phone' => $user->phone,
+                ]);
+            }else {
+                Email::tg_send('registr-small', Yii::$app->params['superadminChatId'], [
+                    'tg_id' => $user->tg_id,
+                    'name' => $user->getRespectedName(),
+                    'phone' => $user->phone,
+                ]);
+            }
 
             if ($get["role"] != "provider") {
                 Email::tg_send('entity-request-tg', $user->tg_id, [
