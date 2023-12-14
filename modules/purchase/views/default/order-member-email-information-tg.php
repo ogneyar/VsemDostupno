@@ -3,6 +3,7 @@
 $index = 1;
 foreach ($model->purchaseOrderProducts as $k => $orderHasProduct)
 {
+    if ($index > 1)  echo("\r\n");
     if ($orderHasProduct->purchaseProduct->purchase_date == $date)
     {
         $text = $index . ") " . $orderHasProduct->name;

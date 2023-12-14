@@ -21,6 +21,7 @@ use app\modules\purchase\models\PurchaseProviderBalance;
 use app\modules\bots\api\Bot;
 
 
+
 class PurchaseNotificationController extends Controller
 {
     public function actionIndex()
@@ -36,10 +37,14 @@ class PurchaseNotificationController extends Controller
         $date = date('Y-m-d');
         // $date = '2021-11-01';
          $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();
+        //  $products = PurchaseProduct::find()->where(['stop_date' => '2023-12-13'])->andWhere(['status' => 'held'])->all();
          
         if ($products) {
             $orders_to_send = [];
-            foreach ($products as $product) {
+            // foreach ($products as $product) {
+            for($idx = 0; $idx < count($products); $idx++) {
+                $product = $products[$idx];
+
                 $product_total = PurchaseOrderProduct::getProductTotal($product->id);
                 
                 $provider = Provider::findOne($product->provider_id);
@@ -58,7 +63,10 @@ class PurchaseNotificationController extends Controller
                     $product->save();
                     
                     $order_products = PurchaseOrderProduct::find()->where(['purchase_product_id' => $product->id])->all();
-                    foreach ($order_products as $order_product) {
+                    // foreach ($order_products as $order_product) {
+                    for($index = 0; $index < count($order_products); $index++) {
+                        $order_product = $order_products[$index];
+
                         if ($order_product->status == 'held') continue;
                         $order_product->status = 'held';
                         $order_product->save();
@@ -68,6 +76,7 @@ class PurchaseNotificationController extends Controller
                             $fund_common->deduction_total += $fund_balance->total;
                             $fund_common->save();
                         }
+
                         if (!in_array($order_product->purchase_order_id, $orders_to_send) && !in_array("_".$order_product->purchase_order_id, $orders_to_send)) {
                             $orders_to_send[] = $order_product->purchase_order_id;
                         } 
@@ -79,22 +88,27 @@ class PurchaseNotificationController extends Controller
                     
                     // foreach ($orders_to_send as $purchase_order_id) {
                     for($i = 0; $i < count($orders_to_send); $i++) {
-                        // $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
+                        if ($orders_to_send[$i][0] == "_") continue;                        
+                        // $bot->sendMessage($master, "----- held_order_member -----" );                        
                         $order = PurchaseOrder::findOne($orders_to_send[$i]);
                         
                         $userOne = User::findOne(['email' => $order->email]);
-                        if ($userOne->tg_id && $orders_to_send[$i][0] != "_" && $product_total > 0) {
-                            // $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
+                        if ($userOne->tg_id && $product->purchase_total > 0) {
                             Email::tg_send('held_order_member', $userOne->tg_id, [ 
+                            // Email::tg_send('held_order_member', $master, [ 
                                 'fio' => $order->firstname . ' ' . $order->patronymic,
                                 'created_at' => date('d.m.Y', strtotime($order->created_at)),
-                                'order_number' => $order->order_number_copy,
-                                'order_id' => sprintf("%'.05d\n", $order->order_id),
+                                // 'order_number' => $order->order_number_copy,
+                                // 'order_number' => $order->order_number,
+                                'order_number' => "ПР/".date('d.m')."-".$order->id,
+                                'order_id' => $order->order_id ? sprintf("%'.05d\n", $order->order_id) : "",
                                 'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
                                 'purchase_date' => date('d.m.Y', strtotime($product->purchase_date))
                             ]);
-                            $orders_to_send[$i] = "_".$orders_to_send[$i];
+                        }else {
+                            // $bot->sendMessage($master, "----- нет tg_id -----" );
                         }
+                        $orders_to_send[$i] = "_".$orders_to_send[$i];
                     }
 
                     // для ручного управления датами закупок
@@ -127,7 +141,7 @@ class PurchaseNotificationController extends Controller
                     $new_product->save();
                     
                     // если у провайдера выключено ручное управление датами закупок и установлен флаг оповещения провайдера
-                    if ( ! $provider->purchases_management && $product->send_notification && $product_total > 0) {
+                    if ( ! $provider->purchases_management && $product->send_notification && $product->purchase_total > 0) {
                         $partners = PurchaseOrder::getPartnerIdByProvider($product->purchase_date, $product->provider_id);
                         if ($partners) {
                             foreach ($partners as $partner) {
@@ -157,12 +171,14 @@ class PurchaseNotificationController extends Controller
                             Account::swap($provider_account, $deposit, $provider_balance->total, 'Возврат пая по заявке №' . $order_product->purchaseOrder->order_number, false);
                         }
                         
-                        if (!in_array($order_product->purchase_order_id, $orders_to_send)) {
+                        if (!in_array($order_product->purchase_order_id, $orders_to_send) && !in_array("_".$order_product->purchase_order_id, $orders_to_send)) {
                             $orders_to_send[] = $order_product->purchase_order_id;
                         }
 
-                        if ($provider_account->user->tg_id) { 
+                        if ($provider_account->user->tg_id) {                             
+                            // $bot->sendMessage($master, "----- account-log -----" );                            
                             Email::tg_send('account-log', $provider_account->user->tg_id, [
+                            // Email::tg_send('account-log', $master, [
                                 'typeName' => $provider_account->typeName,
                                 'message' => 'Списан возврат от закупки',
                                 'amount' => -$provider_balance->total,
@@ -170,8 +186,10 @@ class PurchaseNotificationController extends Controller
                             ]);
                         }
                         
-                        if ($deposit->user->tg_id) { 
+                        if ($deposit->user->tg_id) {                             
+                            // $bot->sendMessage($master, "----- account-log -----" );                            
                             Email::tg_send('account-log', $deposit->user->tg_id, [
+                            // Email::tg_send('account-log', $master, [
                                 'typeName' => $deposit->typeName,
                                 'message' => 'Зачислен возврат от закупки',
                                 'amount' => $provider_balance->total + $fund_balance->total,
@@ -199,44 +217,56 @@ class PurchaseNotificationController extends Controller
                         $new_product->comment = $product->comment;
                         $new_product->send_notification = $product->send_notification;
                         $new_product->status = 'advance';
-                        // $new_product->copy = $product->id;
+                        $new_product->copy = $product->id;
                         $new_product->save();
 
                         $product->delete();
                     }
 
-                    if ($product_total > 0) {
-                        foreach ($orders_to_send as $val) {
+                    // if ($product->purchase_total > 0) { // тут не надо отключать!!!
+                        foreach ($orders_to_send as &$val) {
+                            if ($val[0] == "_") continue;   
+                            // $bot->sendMessage($master, "----- abortive_order_member -----" );
                             $order = PurchaseOrder::findOne($val);
                             
                             $userOne = User::findOne(['email' => $order->email]);
                             if ($userOne->tg_id) {
                                 Email::tg_send('abortive_order_member', $userOne->tg_id, [
+                                // Email::tg_send('abortive_order_member', $master, [
                                     'fio' => $order->firstname . ' ' . $order->patronymic,
                                     'created_at' => date('d.m.Y', strtotime($order->created_at)),
-                                    'order_number' => $order->order_number,
+                                    // 'order_number' => $order->order_number,
+                                    'order_number' => "ПР/".date('d.m')."-".$order->id,
                                     'order_products' => $order->getHtmlMemberEmailFormattedInformation($product->purchase_date),
                                     'new_purchase_date' => ($product->renewal && ! $provider->purchases_management) ? ' Новая закупка состоится ' . date('d.m.Y', strtotime($new_product->purchase_date)) : ''
                                 ]);
-                            }
+                            }else {
+                                // $bot->sendMessage($master, "----- нет tg_id -----" );
+                            }                            
+                            $val = "_".$val;
                         }
-                    }
+                    // }
                     
                     foreach ($order_products as $order_product) {
                         PurchaseOrder::setOrderStatus($order_product->purchase_order_id);
                     }
                     
-                    if ($product->provider->user->tg_id && $product_total > 0) {
-                        Email::tg_send('abortive_order_provider', $product->provider->user->tg_id, [
-                            'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
-                            'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
-                            'new_purchase_date' => ($product->renewal && ! $provider->purchases_management) ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
-                            'new_stop_date' => ($product->renewal && ! $provider->purchases_management) ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
-                            'purchase_total' => $product->purchase_total . ' рублей',
-                        ]);
+                    if ($product->purchase_total > 0) {
+                        if ($product->provider->user->tg_id) {
+                            // $bot->sendMessage($master, "----- abortive_order_provider -----" );
+                            Email::tg_send('abortive_order_provider', $product->provider->user->tg_id, [
+                            // Email::tg_send('abortive_order_provider', $master, [
+                                'fio' => $product->provider->user->firstname . ' ' . $product->provider->user->patronymic,
+                                'purchase_date' => date('d.m.Y', strtotime($product->purchase_date)),
+                                'new_purchase_date' => ($product->renewal && ! $provider->purchases_management) ? ' Новый сбор заявок объявлен на ' . date('d.m.Y', strtotime($new_product->purchase_date)) : '',
+                                'new_stop_date' => ($product->renewal && ! $provider->purchases_management) ? 'Заранее, ' . date('d.m.Y', strtotime($new_product->stop_date)) . ', мы сообщим Вам о результатах очередного сбора заявок.' : '',
+                                'purchase_total' => $product->purchase_total . ' рублей',
+                            ]);
+                        }
                     }
                     
                 }
+
             } // end foreach
 
 
@@ -305,8 +335,9 @@ class PurchaseNotificationController extends Controller
         
         // оповещение админа о завершившихся закупках
         $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => $date])->andWhere(['status' => 'held'])->all();
+        // $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => '2023-12-13'])->andWhere(['status' => 'held'])->all();
         if ($purchaseProducts) {
-
+            
             $id_providers = [];
             foreach($purchaseProducts as $purchase) {
 
@@ -324,30 +355,41 @@ class PurchaseNotificationController extends Controller
                         $date_timestamp = strtotime($purchase->purchase_date);
                         $send = "Сформирована заявка по товарам ".$provider->name." на ".date('d.m.Y', $date_timestamp)."\r\n";
                         
-                        $order_product = PurchaseOrderProduct::findOne(['purchase_product_id' => $purchase->id]);
-                        $purchase_order_id = $order_product->purchase_order_id;
-
-                        $order_products = PurchaseOrderProduct::find()
-                            ->where(['purchase_order_id' => $purchase_order_id])
-                            ->andWhere(['provider_id' => $provider->id])
-                            ->all();
+                        $array = [];
+                        foreach($purchaseProducts as $purch_prod) {
+                            $order_products = PurchaseOrderProduct::find()->where(['purchase_product_id' => $purch_prod->id])->all();
+                            foreach($order_products as $order_product) {                                
+                                $product_feature_id = $order_product->product_feature_id;
+                                $purchase_price = $order_product->purchase_price;
+                                $quantity = $order_product->quantity;
+                                $product_name = $order_product->name;
+                                $yes = true;
+                                for($i = 0; $i < count($array); $i++) {
+                                    if ($array[$i]['product_feature_id'] == $product_feature_id)
+                                    {
+                                        $yes = false;
+                                        $array[$i]['quantity'] += $quantity;
+                                    }
+                                }
+                                if ($yes) $array[] = [
+                                    'product_feature_id' => $product_feature_id,
+                                    'purchase_price' => $purchase_price,
+                                    'quantity' => $quantity,
+                                    'name' => $product_name,
+                                ];
+                            }
+                        }
 
                         $purchase_total_all = 0;
-                        // $total_all = 0;
                         $item = 0;
-                        foreach($order_products as $order_product) {
+                        foreach($array as $order_product) {
                             $item++;
-                            // $product_feature_id = $order_product->product_feature_id;
-                            $product_name = $order_product->name;
-                            $quantity = $order_product->quantity;
+                            $product_name = $order_product['name'];
+                            $quantity = $order_product['quantity'];
                             if ( fmod($quantity, 1) == 0 ) { // если дробная часть равна нулю
                                 $quantity = floor($quantity);
                             }
-                            $price = $order_product->price; // цена за штуку (с процентами)
-                            $total = $order_product->total; // итого (с процентами)
-                            // $total_all += $total;
-
-                            $purchase_price = $order_product->purchase_price; // цена закупки
+                            $purchase_price = $order_product['purchase_price']; // цена закупки
                             $purchase_total = $purchase_price * $quantity; // итого закупки
                             $purchase_total_all += $purchase_total;
 
@@ -369,6 +411,8 @@ class PurchaseNotificationController extends Controller
                                 ],
                             ]
                         ];          
+                        
+                        // $bot->sendMessage($master, "----- оповещение админа о завершившихся закупках -----" );
 
                         // $bot->sendMessage($master, $send, null, $InlineKeyboardMarkup);
                         $bot->sendMessage($admin, $send, null, $InlineKeyboardMarkup);
