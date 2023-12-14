@@ -85,7 +85,7 @@ class PurchaseNotificationController extends Controller
                         $userOne = User::findOne(['email' => $order->email]);
                         if ($userOne->tg_id && $orders_to_send[$i][0] != "_" && $product_total > 0) {
                             // $bot->sendMessage($master, "раз - " . $orders_to_send[$i]);
-                            Email::tg_send('held_order_member', $userOne->tg_id, [
+                            Email::tg_send('held_order_member', $userOne->tg_id, [ 
                                 'fio' => $order->firstname . ' ' . $order->patronymic,
                                 'created_at' => date('d.m.Y', strtotime($order->created_at)),
                                 'order_number' => $order->order_number_copy,

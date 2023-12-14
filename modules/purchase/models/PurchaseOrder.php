@@ -424,7 +424,8 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     
     public function getHtmlMemberEmailFormattedInformation($date)
     {
-        return Yii::$app->view->renderFile('@app/modules/purchase/views/default/order-member-email-information.php', [
+        // return Yii::$app->view->renderFile('@app/modules/purchase/views/default/order-member-email-information.php', [
+        return Yii::$app->view->renderFile('@app/modules/purchase/views/default/order-member-email-information-tg.php', [
             'model' => $this,
             'date' => $date,
         ]);
