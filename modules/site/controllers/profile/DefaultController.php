@@ -31,6 +31,7 @@ use app\models\Candidate;
 use app\models\NoticeEmail;
 use app\models\Category;
 use app\models\EmailLetters;
+use app\modules\bots\api\Bot;
 
 
 class DefaultController extends BaseController
@@ -679,6 +680,8 @@ class DefaultController extends BaseController
         $config = require(__DIR__ . '/../../../../config/urlManager.php');
         $baseUrl = $config['baseUrl'];
         
+        $bot = new Bot();
+        
         $get = Yii::$app->request->get();
         if (isset($get['token'])) {
             $register = Register::findOne(['token' => $get['token']]); 
@@ -720,14 +723,14 @@ class DefaultController extends BaseController
 
             try {
                 $user = new User();
-                $user->role = $get["role"] == "provider" ? User::ROLE_PROVIDER : User::ROLE_MEMBER;
+                $user->role = ($get["role"] && $get["role"] == User::ROLE_PROVIDER) ? User::ROLE_PROVIDER : User::ROLE_MEMBER;
                 $user->password = $model->password;
                 $user->password_repeat = $model->password_repeat;
                 $user->email = "tg".$get['tg']."@mail.ru";
                 $user->phone = $model->phone;
                 $user->ext_phones = "";
                 $user->firstname = $model->firstname;
-                $user->lastname = $get["role"] == "provider" ? $model->lastname : "lastname";
+                $user->lastname = ($get["role"] && $get["role"] == User::ROLE_PROVIDER) ? $model->lastname : "lastname";
                 $user->patronymic = $model->patronymic;
                 $user->created_ip = Yii::$app->getRequest()->getUserIP();
                 $user->citizen = "citizen";
@@ -747,16 +750,16 @@ class DefaultController extends BaseController
 
                 if (isset($get['tg']) && $get['tg'] != "false") $user->tg_id = $get['tg'];
                 else $user->tg_id = "";
+
                 
                 if (!$user->save()) { 
-                    // Email::tg_send('entity-request-tg', Yii::$app->params['master'], [
-                    //     'fio' => 'name',
-                    //     'u_role' => 'хз password: '.$model->password
-                    // ]);
+                    
+                    // $bot->sendMessage(Yii::$app->params['master'], 'tg_id: '.$user->tg_id. '\r\nrole: '.$user->role.'\r\nphone: '.$user->phone.'\r\nfirstname: '.$user->firstname.'\r\nlastname: '.$user->lastname.'\r\npatronymic: '.$user->patronymic.'\r\ncreated_ip: '.$user->created_ip.'\r\npassword: '.$user->password.'\r\nemail: '.$user->email);
+
                     throw new Exception('Ошибка создания пользователя!');
                 }
 
-                if ($get["role"] == "provider") {
+                if ($get["role"] && $get["role"] == "provider") {
                     $provider = new Provider();
                     $provider->user_id = $user->id;
                     $provider->name = $user->firstname;
@@ -766,7 +769,7 @@ class DefaultController extends BaseController
                     }
                 }else { 
                     $member = new Member();
-                    $member->partner_id = $model->partner;
+                    $member->partner_id =  $model->partner ? $model->partner : 1;
                     $member->user_id = $user->id;
                     if (!$member->save()) {
                         throw new Exception('Ошибка создания участника!');
@@ -801,7 +804,7 @@ class DefaultController extends BaseController
             ];
             $candidate = Candidate::isCandidate($c_params);
             if ($candidate) {
-                if ($get["role"] == "provider") {
+                if ($get["role"] && $get["role"] == "provider") {
                     Email::tg_send('register-candidate-provider-tg', Yii::$app->params['superadminChatId'], [
                         'link' => $candidate
                     ]);   
@@ -812,7 +815,7 @@ class DefaultController extends BaseController
                 }
 
             }            
-            if ($get["role"] == "provider") {
+            if ($get["role"] && $get["role"] == "provider") {
                 Email::tg_send('registr-small-provider', Yii::$app->params['superadminChatId'], [
                     'tg_id' => $user->tg_id,
                     'name' => $user->getRespectedName(),
@@ -826,7 +829,7 @@ class DefaultController extends BaseController
                 ]);
             }
 
-            if ($get["role"] != "provider") {
+            if ($get["role"] && $get["role"] != "provider") {
                 Email::tg_send('entity-request-tg', $user->tg_id, [
                     'fio' => $user->respectedName,
                     'u_role' => 'Поставщика'

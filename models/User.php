@@ -94,7 +94,7 @@ class User extends \yii\db\ActiveRecord
             // [['citizen', 'registration', 'passport', 'passport_department'], 'required', 'when' => function ($model) {return $model->role != self::ROLE_ADMIN && $model->role != self::ROLE_PROVIDER && $model->role != self::ROLE_SUPERADMIN;}],
             [['re_captcha'], 'required', 'except' => ['admin_creation', 'user_login']], 
             [['role', 'skills'], 'string'],
-            [['disabled', 'number', 'recommender_id', 'request', 'passport'], 'integer'],
+            [['disabled', 'number', 'recommender_id', 'request'], 'integer'],
             [['created_at', 'logged_in_at', 'birthdate', 'passport_date'], 'safe'],
             [['phone', 'ext_phones', 'firstname', 'lastname', 'patronymic', 'created_ip', 'logged_in_ip', 'password', 'auth_key', 'access_token', 'registration', 'residence', 'passport_department', 'recommender_info'], 'string', 'max' => 255],
             [['citizen'], 'string', 'max' => 50],
@@ -102,7 +102,7 @@ class User extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['email'], 'unique'],
             [['recommender_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['recommender_id' => 'id']],
-            [['password', 'password_repeat'], 'string', 'min' => 8, 'max' => 255],
+            [['password', 'password_repeat'], 'string', 'min' => 4, 'max' => 255],
             ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Не совпадает с паролем.'],
         ];
     }

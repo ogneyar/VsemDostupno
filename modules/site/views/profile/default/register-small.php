@@ -100,7 +100,7 @@ if ($get['tg']) {
 ?>
 
     <?php
-    if ($get['role'] && $get['role'] == "provider") {
+    if ($get['role'] && $get['role'] == "provider") { 
         echo $form->field($model, 'lastname');
     }
     ?>

@@ -2,6 +2,9 @@
 
 namespace app\modules\bots\api;
 
+use Yii;
+
+
 class Bot {
 
     // $token - созданный токен для нашего бота от @BotFather
@@ -16,9 +19,11 @@ class Bot {
 	/*
 	** @param str $token
 	*/
-    public function __construct($token)
+    // public function __construct($token)
+    public function __construct()
     {
-        $this->token = $token;
+        // $this->token = $token;
+        $this->token = Yii::$app->params['bot_token'];
     }    
     
 	/*
@@ -512,6 +517,23 @@ class Bot {
 		
 		return $response;
 	}
+
+
+
+	
+    // public static function send(
+	// 	$chat_id, 
+	// 	$text, // limit text 4096
+	// 	$parse_mode = null,
+	// 	$reply_markup = null,
+	// 	$reply_to_message_id = null,
+	// 	$disable_web_page_preview = false,
+	// 	$disable_notification = false
+	// )
+	// {
+	// 	// $this->token = Yii::$app->params['bot_token'];
+	// 	$this->sendMessage($chat_id, $text, $parse_mode, $reply_markup, $reply_to_message_id, $disable_web_page_preview, $disable_notification);
+	// }
 	
 	
 	
