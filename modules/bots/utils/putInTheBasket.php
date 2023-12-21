@@ -75,5 +75,15 @@ function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0)
     
     $allPrices = 0;
 
+    
+    $send = "⭐️⭐️⭐️⭐️⭐️";       
+    $ReplyKeyboardMarkup = [
+        'keyboard' => [ [ [ 'text' => 'В корзине товар' ] ] ],
+        'resize_keyboard' => true,
+        'selective' => true,
+    ];
+    $bot->sendMessage($from_id, $send, null, $ReplyKeyboardMarkup);
+
+
     getCart($bot, $from_id);
 }

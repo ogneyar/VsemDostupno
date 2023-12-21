@@ -72,25 +72,24 @@ function requestMessage($bot, $message, $master, $admin) {
                 [ 'text' => 'О нас' ]
             ],
             [
-                [ 'text' => 'Закупки' ]
+                [ 'text' => 'Услуги' ]
             ],
         ];
 
-        $cart = CartTg::findOne(['tg_id' => $chat_id]);
-        if ($cart) {
-            array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
-        }
-
-        // if ($chat_id == $master || $chat_id == $admin) {
+        // if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
+        // {
         //     array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
-        // }else {
-        //     $users = User::find()->where(['role' => [User::ROLE_MEMBER,User::ROLE_PARTNER]])->all();
-        //     foreach($users as $user) {
-        //         if ($chat_id == $user->tg_id) {
-        //             array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
-        //         }
-        //     }
         // }
+        // else if ($user->role != User::ROLE_PROVIDER)
+        // {
+        //     array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+        // }
+
+        // $cart = CartTg::findOne(['tg_id' => $chat_id]);
+        // if ($cart) {
+        //     array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
+        // }
+
 
         $ReplyKeyboardMarkup = [
             'keyboard' => $keyboard,
@@ -183,6 +182,39 @@ function requestMessage($bot, $message, $master, $admin) {
 
     /********************
     
+            УСЛУГИ
+
+    *********************/
+    if ($text == "Услуги" || $text == "/service")
+    {
+        $send = "Услуги.";
+     
+        $keyboard = [];
+        
+        if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
+        {
+            array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
+        }
+        else if ($user->role != User::ROLE_PROVIDER)
+        {
+            array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+        }
+        
+        array_push($keyboard, [ [ 'text' => 'Специалисты' ] ]);
+
+        $ReplyKeyboardMarkup = [
+            'keyboard' => $keyboard,
+            'resize_keyboard' => true,
+            'selective' => true,
+        ];
+
+        $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
+
+        return;
+    }
+
+    /********************
+    
            ПОМОЩЬ
 
     *********************/
@@ -192,9 +224,9 @@ function requestMessage($bot, $message, $master, $admin) {
     
         $KeyboardMarkup = [
             'keyboard' => [
-                [
-                    [ 'text' => 'Специалисты' ],
-                ],
+                // [
+                //     [ 'text' => 'Специалисты' ],
+                // ],
                 [
                     [ 'text' => 'Задать вопрос админу' ],
                 ],
@@ -217,19 +249,33 @@ function requestMessage($bot, $message, $master, $admin) {
     if ($text == "Специалисты" || $text == "/specialists")
     {
         $send = "Выберите";    
-        $KeyboardMarkup = [
-            'keyboard' => [
-                [
-                    [ 'text' => 'Задать вопрос админу' ],
-                ],
-            ],
-            'resize_keyboard' => true
-        ];
-        $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
+        // $KeyboardMarkup = [
+        //     'keyboard' => [
+        //         [
+        //             [ 'text' => 'Задать вопрос админу' ],
+        //         ],
+        //     ],
+        //     'resize_keyboard' => true
+        // ];
+        // $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
+        $keyboard = [];
+        if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
+        {
+            array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
+        }
+        else if ($user->role != User::ROLE_PROVIDER)
+        {
+            array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+        }
+        $ReplyKeyboardMarkup = [
+            'keyboard' => $keyboard,
+            'resize_keyboard' => true,
+            'selective' => true,
+        ];        
+        $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
+        
 
-
-        $send = "проффесиональное направление.";
-    
+        $send = "проффесиональное направление.";    
         $InlineKeyboardMarkup = [
             'inline_keyboard' => [
                 [
@@ -252,7 +298,6 @@ function requestMessage($bot, $message, $master, $admin) {
                 ]
             ]
         ];
-
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
 
         return;
@@ -710,9 +755,29 @@ function requestMessage($bot, $message, $master, $admin) {
             ];  
             $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
             
-        }else if ($user->role != User::ROLE_PROVIDER || $chat_id == "351009636") 
+        }else if ($user->role != User::ROLE_PROVIDER)// || $chat_id == "351009636") 
         {            
             // для пайщиков
+
+            $send = "⭐️⭐️⭐️⭐️⭐️";     
+            $keyboard = [];            
+            $cart = CartTg::findOne(['tg_id' => $chat_id]);
+            if ($cart) 
+            {
+                array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
+            }
+            else
+            {
+                // array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+                array_push($keyboard, [ [ 'text' => 'Специалисты' ] ]);
+            }
+            $ReplyKeyboardMarkup = [
+                'keyboard' => $keyboard,
+                'resize_keyboard' => true,
+                'selective' => true,
+            ];
+            $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
+
 
             $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
 
