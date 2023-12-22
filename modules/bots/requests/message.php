@@ -23,6 +23,7 @@ require_once __DIR__ . '/../utils/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/cart/getCart.php';
+require_once __DIR__ . '/../utils/cart/clearCart.php';
 require_once __DIR__ . '/../utils/continueSelection.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
 
@@ -71,10 +72,9 @@ function requestMessage($bot, $message, $master, $admin) {
                 [ 'text' => 'Приветствие' ],
                 [ 'text' => 'О нас' ]
             ],
-            [
-                [ 'text' => 'Услуги' ]
-            ],
         ];
+        
+        if ($chat_id == $master) array_push($keyboard, [ [ 'text' => 'Тест' ] ]);
 
         // if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
         // {
@@ -89,7 +89,6 @@ function requestMessage($bot, $message, $master, $admin) {
         // if ($cart) {
         //     array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
         // }
-
 
         $ReplyKeyboardMarkup = [
             'keyboard' => $keyboard,
@@ -157,25 +156,11 @@ function requestMessage($bot, $message, $master, $admin) {
     *******************/
     if ($text == "Тест" || $text == "/test")
     {
-        $send = "Вы зашли на тестовую страницу, отправьте запрос тестовому пользователю.";
-    
-        $tgCom = TgCommunication::findOne(['chat_id' => $chat_id]);
-
-        if (!$tgCom) {
-            $tgCom = new TgCommunication();
-        }
-            
-        $tgCom->chat_id = $chat_id;
-        $tgCom->to_chat_id = $master;
-        // $tgCom->to_chat_id = $admin;
+        $send = "Вы зашли на тестовую страницу";
         
-        if ( ! $tgCom->save() ) {            
-            $send = "Ошибка создания/сохранения экземпляра класса TgCommunication!";
-            $bot->sendMessage($chat_id, $send);
-            // throw new Exception($send);
-        }
-
-        $bot->sendMessage($chat_id, $send);
+        $HideKeyboardMarkup = [ 'hide_keyboard' => true ];
+        
+        $bot->sendMessage($chat_id, $send, null, $HideKeyboardMarkup);  
 
         return;
     }

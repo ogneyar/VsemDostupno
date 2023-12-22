@@ -290,8 +290,11 @@ function purchaseOrderCreate($bot, $from_id, $summa)
             } /* foreach ($purchase['data'] as $product)  */
 
             
+            $HideKeyboardMarkup = [ 'hide_keyboard' => true ];
             $send = date('d.m.Y') . " Вами произведён обмен паями\r\n";
-            $send .= $text;
+            $bot->sendMessage($from_id, $send, null, $HideKeyboardMarkup);  
+
+            $send = $text;
             $send .= "На общую сумму " . $total . "р.\r\n";
             $send .= "Доставка товара состоится " . date('d.m.Y', $purchase['purchase_date']);
 
