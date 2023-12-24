@@ -225,12 +225,14 @@ class EntryRequestController extends BaseController
                     'url' => 'https://будь-здоров.рус/web/profile/login',
                 ]);
             }else {
-                Email::send('active-profile-provider', $user->email, [
-                    'firstname' => $user->firstname,
-                    'patronymic' => $user->patronymic,
-                    'reg_number' => $user->number,
-                    'url' => Url::to(['/profile/login'], true),
-                ]);
+                if (strpos($user->email, 'tg') === false) {
+                    Email::send('active-profile-provider', $user->email, [
+                        'firstname' => $user->firstname,
+                        'patronymic' => $user->patronymic,
+                        'reg_number' => $user->number,
+                        'url' => Url::to(['/profile/login'], true),
+                    ]);
+                }
             }
         } else if (isset($user->member)) {
             if ($tg_id) {
@@ -242,12 +244,14 @@ class EntryRequestController extends BaseController
                     'url' => 'https://будь-здоров.рус/web/profile/login',
                 ]);
             }else {
-                Email::send('active-profile', $user->email, [
-                    'firstname' => $user->firstname,
-                    'patronymic' => $user->patronymic,
-                    'reg_number' => $user->number,
-                    'url' => Url::to(['/profile/login'], true),
-                ]);
+                if (strpos($user->email, 'tg') === false) {
+                    Email::send('active-profile', $user->email, [
+                        'firstname' => $user->firstname,
+                        'patronymic' => $user->patronymic,
+                        'reg_number' => $user->number,
+                        'url' => Url::to(['/profile/login'], true),
+                    ]);
+                }
             }
         }
         return $this->redirect(['index']);
