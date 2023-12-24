@@ -727,6 +727,17 @@ class DefaultController extends BaseController
                 $user->password = $model->password;
                 $user->password_repeat = $model->password_repeat;
                 $user->email = "tg".$get['tg']."@mail.ru";
+                $yes = true;
+                $i = 0;
+                do {
+                    $i++;
+                    $old_user = User::findOne(['email' => $user->email]);
+                    if ($old_user) {
+                        $user->email = "tg" . $get['tg'] . "_" . $i . "@mail.ru";
+                    }else {
+                        $yes = false;
+                    }
+                } while ($yes);
                 $user->phone = $model->phone;
                 $user->ext_phones = "";
                 $user->firstname = $model->firstname;

@@ -21,6 +21,9 @@ $web = $constants['WEB'];
 
 /* @var $this yii\web\View */
 $this->title = 'Упрощённая регистрация';
+if ($get['role'] && $get['role'] == "provider") { 
+    $this->title = 'Регистрация поставщика';
+}
 $this->params['breadcrumbs'] = [$this->title];
 
 $script = <<<JS
