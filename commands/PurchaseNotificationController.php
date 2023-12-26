@@ -70,11 +70,14 @@ class PurchaseNotificationController extends Controller
                         if ($order_product->status == 'held') continue;
                         $order_product->status = 'held';
                         $order_product->save();
-                        $fund_balance = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id, 'paid' => 0])->one();
-                        if ($fund_balance) {
-                            $fund_common = Fund::findOne($fund_balance->fund_id);
-                            $fund_common->deduction_total += $fund_balance->total;
-                            $fund_common->save();
+                        // $fund_balance = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id, 'paid' => 0])->one();
+                        $fund_balances = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id, 'paid' => 0])->all();
+                        if ($fund_balances) {
+                            foreach ($fund_balances as $fund_balance) {
+                                $fund_common = Fund::findOne($fund_balance->fund_id);
+                                $fund_common->deduction_total += $fund_balance->total;
+                                $fund_common->save();
+                            }
                         }
 
                         if (!in_array($order_product->purchase_order_id, $orders_to_send) && !in_array("_".$order_product->purchase_order_id, $orders_to_send)) {
@@ -161,11 +164,16 @@ class PurchaseNotificationController extends Controller
                         $order_product->status = 'abortive';
                         $order_product->save();
                         $deposit = $order_product->purchaseOrder->user->deposit;
-                        $fund_balance = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id])->one();
-                        $provider_balance = PurchaseProviderBalance::find()->where(['purchase_order_product_id' => $order_product->id])->one();
-                        if ($fund_balance) {
-                            Account::swap(null, $deposit, $fund_balance->total, 'Возврат членского взноса', false);
+                        // $fund_balance = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id])->one();
+                        $fund_balances = PurchaseFundBalance::find()->where(['purchase_order_product_id' => $order_product->id])->all();
+                        $fund_balances_total = 0;
+                        if ($fund_balances) {
+                            foreach ($fund_balances as $fund_balance) {
+                                Account::swap(null, $deposit, $fund_balance->total, 'Возврат членского взноса', false);
+                                $fund_balances_total += $fund_balance->total;
+                            }
                         }
+                        $provider_balance = PurchaseProviderBalance::find()->where(['purchase_order_product_id' => $order_product->id])->one();
                         if ($provider_balance) {
                             $provider_account = Account::findOne(['user_id' => $provider_balance->provider->user_id]);
                             Account::swap($provider_account, $deposit, $provider_balance->total, 'Возврат пая по заявке №' . $order_product->purchaseOrder->order_number, false);
@@ -192,7 +200,7 @@ class PurchaseNotificationController extends Controller
                             // Email::tg_send('account-log', $master, [
                                 'typeName' => $deposit->typeName,
                                 'message' => 'Зачислен возврат от закупки',
-                                'amount' => $provider_balance->total + $fund_balance->total,
+                                'amount' => $provider_balance->total + $fund_balances_total,
                                 'total' => $deposit->total,
                             ]); 
                         }

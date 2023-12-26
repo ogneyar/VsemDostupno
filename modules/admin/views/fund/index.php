@@ -195,24 +195,24 @@ $this->registerJs($script, $this::POS_END);
 <div class="fund-right-box">
     
     <div class="fund-buttons-container">
-        <div class="fund-btns-row-1">
+        <!-- <div class="fund-btns-row-1">
             <button id="add-fund-btn" type="button" class="btn btn-success">Добавить фонд</button>
             <button id="del-fund-btn" data-id="" type="button" class="btn btn-success" style="display: none;">Удалить фонд</button>
         </div>
         <div class="fund-btns-row-2">
             <button id="save-fund-btn" data-action="add" data-id="" type="button" class="btn btn-success" style="display: none;">Сохранить</button>
             <button id="cancel-fund-btn" type="button" class="btn btn-danger" style="display: none;">Отмена</button>
-        </div>
+        </div> -->
         <div class="fund-btns-row-3">
             <div>
                 <label>Общий баланс</label>
-                <input disabled placeholder="" value="<?=$balance?>" />
+                <input disabled placeholder="" value="<?=$balance?>" style="width: 120px;" />
             </div>
             <div
                 style="display: flex; flex-direction: row; align-items: center;"
             >
                 <label>Счёт ПО</label>
-                <input disabled placeholder="" value="<?=$po?>" />
+                <input disabled placeholder="" value="<?=$po?>" style="width: 120px;" />
                 <?php 
                     echo Html::beginTag('div', ['class'=>'dropdown']);
                     echo Html::button('Действия <span class="caret"></span>', [
@@ -235,11 +235,76 @@ $this->registerJs($script, $this::POS_END);
                     echo Html::endTag('div');
                 ?>
             </div>
+
             <div
                 style="display: flex; flex-direction: row; align-items: center;"
             >
                 <label>Счёт содружества</label>
-                <input disabled placeholder="" value="<?=$friend?>" />
+                <input disabled placeholder="" value="<?=$friend?>" style="width: 120px;" />
+                <div class='dropdown'>
+                    <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
+                    <?php echo DropdownX::widget([
+                        'items' => [
+                            [ 'label' => 'Списать сумму', 'url' => 'javascript:void(0);' ],
+                            [ 'label' => 'Архив', 'url' => 'javascript:void(0);' ],
+                        ],
+                    ])?>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: row; align-items: center;"
+            >
+                <label>Счета контрагентов</label>
+                <input disabled placeholder="" value="0" style="width: 120px;" />
+                <div class='dropdown'>
+                    <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
+                    <?php echo DropdownX::widget([
+                        'items' => [
+                            [ 'label' => 'Списать сумму', 'url' => 'javascript:void(0);' ],
+                            [ 'label' => 'Архив', 'url' => 'javascript:void(0);' ],
+                        ],
+                    ])?>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: row; align-items: center;"
+            >
+                <label>Инвестиционные счета</label>
+                <input disabled placeholder="" value="0" style="width: 120px;" />
+                <div class='dropdown'>
+                    <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
+                    <?php echo DropdownX::widget([
+                        'items' => [
+                            [ 'label' => 'Списать сумму', 'url' => 'javascript:void(0);' ],
+                            [ 'label' => 'Архив', 'url' => 'javascript:void(0);' ],
+                        ],
+                    ])?>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: row; align-items: center;"
+            >
+                <label>Партнёрские счета</label>
+                <input disabled placeholder="" value="0" style="width: 120px;" />
+                <div class='dropdown'>
+                    <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
+                    <?php echo DropdownX::widget([
+                        'items' => [
+                            [ 'label' => 'Списать сумму', 'url' => 'javascript:void(0);' ],
+                            [ 'label' => 'Архив', 'url' => 'javascript:void(0);' ],
+                        ],
+                    ])?>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: row; align-items: center;"
+            >
+                <label>Поставщики</label>
+                <input disabled placeholder="" value="0" style="width: 120px;" />
                 <div class='dropdown'>
                     <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
                     <?php echo DropdownX::widget([
@@ -258,7 +323,7 @@ $this->registerJs($script, $this::POS_END);
                 <input disabled placeholder="<?php 
                     if ($minus > 0) echo("-" . $minus); 
                     else echo($minus);
-                ?>" style="width:100px;" />
+                ?>" style="width:120px;" />
                 <input disabled placeholder="<?=$storage?>" style="width:120px;" />
                 <div class='dropdown'>
                     <button class='btn btn-default' data-toggle='dropdown'>Действия <span class="caret"></span></button>
