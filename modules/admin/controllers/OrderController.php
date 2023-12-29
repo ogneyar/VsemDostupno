@@ -585,18 +585,21 @@ class OrderController extends BaseController
                                 
                                 if ($body->deposit == '1') {
                                     $paid_for_provider = $orderHasProduct->quantity * $body->summ;
-                                    if (!Account::swap($user->deposit, $provider_account, $paid_for_provider, 'Перевод пая на счёт', false)) {
-                                        throw new Exception('Ошибка модификации счета пользователя!');
-                                    }
-                                    // try {
-                                    //     Email::send('account-log', $provider_account->user->email, [
-                                    //         'message' => 'Перевод пая на счёт',
-                                    //         'amount' => $paid_for_provider,
-                                    //         'total' => $provider_account->total,
-                                    //     ]);
-                                    // } catch (Exception $e) {
-                                    //     unset($e);
+
+                                    // if (!Account::swap($user->deposit, $provider_account, $paid_for_provider, 'Перевод пая на счёт', false)) {
+                                    //     throw new Exception('Ошибка модификации счета пользователя!');
                                     // }
+
+                                    $message = "Перевод пая на счёт";
+                                    // Снятие средств с покупателя
+                                    if (!Account::transfer($user->deposit, $user, $provider_account, -$paid_for_provider, $message, false)) {
+                                        throw new Exception('Ошибка сохранения счета Покупателя!');
+                                    }
+                                    // Зачисление средств поставщику
+                                    // if (!Account::transfer($provider_account, $user, $provider_account->user, $paid_for_provider, $message, false)) {
+                                    //     throw new Exception('Ошибка сохранения счета Продавца!');
+                                    // }
+
                                     if ($provider_account->user->tg_id) {
                                         Email::tg_send('account-log', $provider_account->user->tg_id, [
                                             'message' => 'Перевод пая на счёт',

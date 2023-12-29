@@ -275,17 +275,20 @@ function purchaseOrderCreate($bot, $from_id, $summa)
                 
                 $total_paid_for_provider += $provider_balance->total;
                 
-                // $message = "Перевод пая на счёт";
-                // if (!Account::transfer($user->deposit, $user, $provider_account, -$provider_balance->total, $message, true)) {
-                //     throw new Exception('Ошибка сохранения счета Покупателя!');
+                // if (!Account::swap($user->deposit, $provider_account, $provider_balance->total, 'Перевод пая на счёт', false)) {
+                //     throw new Exception('Ошибка модификации счета пользователя!');
                 // }
+
+                $message = "Перевод пая на счёт";
+                // Снятие средств с покупателя
+                if (!Account::transfer($user->deposit, $user, $provider_account, -$provider_balance->total, $message, false)) {
+                    throw new Exception('Ошибка сохранения счета Покупателя!');
+                }
+                // Зачисление средств поставщику
                 // if (!Account::transfer($provider_account, $user, $provider_account->user, $provider_balance->total, $message, false)) {
                 //     throw new Exception('Ошибка сохранения счета Продавца!');
                 // }
 
-                if (!Account::swap($user->deposit, $provider_account, $provider_balance->total, 'Перевод пая на счёт', false)) {
-                    throw new Exception('Ошибка модификации счета пользователя!');
-                }
                     
             } /* foreach ($purchase['data'] as $product)  */
 
