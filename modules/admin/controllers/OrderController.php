@@ -592,7 +592,7 @@ class OrderController extends BaseController
 
                                     $message = "Перевод пая на счёт";
                                     // Снятие средств с покупателя
-                                    if (!Account::transfer($user->deposit, $user, $provider_account, -$paid_for_provider, $message, false)) {
+                                    if (!Account::transfer($user->deposit, $user, $provider_account->user, -$paid_for_provider, $message, false)) {
                                         throw new Exception('Ошибка сохранения счета Покупателя!');
                                     }
                                     // Зачисление средств поставщику

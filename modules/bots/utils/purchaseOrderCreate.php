@@ -281,8 +281,8 @@ function purchaseOrderCreate($bot, $from_id, $summa)
 
                 $message = "Перевод пая на счёт";
                 // Снятие средств с покупателя
-                if (!Account::transfer($user->deposit, $user, $provider_account, -$provider_balance->total, $message, false)) {
-                    throw new Exception('Ошибка сохранения счета Покупателя!');
+                if (!Account::transfer($user->deposit, $user, $provider_account->user, -$provider_balance->total, $message, false)) {
+                    throw new Exception('Ошибка сохранения счета Покупателя!'); 
                 }
                 // Зачисление средств поставщику
                 // if (!Account::transfer($provider_account, $user, $provider_account->user, $provider_balance->total, $message, false)) {
