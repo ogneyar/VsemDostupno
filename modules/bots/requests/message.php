@@ -160,7 +160,18 @@ function requestMessage($bot, $message, $master, $admin) {
         
         $HideKeyboardMarkup = [ 'hide_keyboard' => true ];
         
-        $bot->sendMessage($chat_id, $send, null, $HideKeyboardMarkup);  
+        $bot->sendMessage($chat_id, $send, null, $HideKeyboardMarkup); 
+
+        $send = "А зачем?";
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [[[
+                // 'text' => "⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️\r\n⭐️Узнать в Яндексе⭐️\r\n⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️",
+                'text' => "Узнать в Яндексе",
+                'url' => "https://ya.ru"
+            ]]]
+        ];
+        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+
 
         return;
     }
