@@ -341,7 +341,7 @@ class PurchaseNotificationController extends Controller
         }
 
         
-        // оповещение админа о завершившихся закупках
+        // оповещение админа о свершившихся закупках
         $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => $date])->andWhere(['status' => 'held'])->all();
         // $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => '2023-12-13'])->andWhere(['status' => 'held'])->all();
         if ($purchaseProducts) {
@@ -365,7 +365,10 @@ class PurchaseNotificationController extends Controller
                         
                         $array = [];
                         foreach($purchaseProducts as $purch_prod) {
-                            $order_products = PurchaseOrderProduct::find()->where(['purchase_product_id' => $purch_prod->id])->all();
+                            $order_products = PurchaseOrderProduct::find()
+                                ->where(['purchase_product_id' => $purch_prod->id])
+                                ->andWhere(['provider_id' => $provider->id])
+                                ->all();
                             foreach($order_products as $order_product) {                                
                                 $product_feature_id = $order_product->product_feature_id;
                                 $purchase_price = $order_product->purchase_price;
