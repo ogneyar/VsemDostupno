@@ -26,6 +26,8 @@ require_once __DIR__ . '/../utils/cart/getCart.php';
 require_once __DIR__ . '/../utils/cart/clearCart.php';
 require_once __DIR__ . '/../utils/continueSelection.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
+// require_once __DIR__ . '/../utils/getPurchasesOld.php';
+require_once __DIR__ . '/../utils/getMainPurchases.php';
 
 
 
@@ -62,7 +64,7 @@ function requestMessage($bot, $message, $master, $admin) {
         ГЛАВНОЕ МЕНЮ
 
     ********************/
-    if ($text == "/start" || $text == "Старт" || $text == "/menu" || $text == "Главное меню" || $text == "Назад" ||  $text == "🌟Главное меню")
+    if ($text == "/start" || $text == "Старт" || $text == "/menu" || $text == "Главное меню" || $text == "Назад" ||  $text == "🌟Главное меню" || $text == "⭐️Главное меню⭐️")
     {    
 
         $send = "В голубом кружочке с низу, в меню, Вы найдёте ссылки на всю необходимую информацию";
@@ -71,6 +73,21 @@ function requestMessage($bot, $message, $master, $admin) {
             [
                 [ 'text' => 'Приветствие' ],
                 [ 'text' => 'О нас' ]
+            ],
+            [
+                [ 'text' => 'Услуги' ],
+            ],
+            [
+                [ 'text' => 'Новичкам' ],
+            ],
+            [
+                [ 'text' => 'Информация' ],
+            ],
+            [
+                [ 'text' => 'Регистрация' ],
+            ],
+            [
+                [ 'text' => 'Помощь' ],
             ],
         ];
         
@@ -183,7 +200,7 @@ function requestMessage($bot, $message, $master, $admin) {
     *********************/
     if ($text == "Услуги" || $text == "/service")
     {
-        $send = "Услуги.";
+        $send = "Тут должно быть описани страницы 'Услуги'.";
      
         $keyboard = [];
         
@@ -197,6 +214,7 @@ function requestMessage($bot, $message, $master, $admin) {
         }
         
         array_push($keyboard, [ [ 'text' => 'Специалисты' ] ]);
+        array_push($keyboard, [ [ 'text' => "⭐️Главное меню⭐️" ] ]);
 
         $ReplyKeyboardMarkup = [
             'keyboard' => $keyboard,
@@ -225,6 +243,9 @@ function requestMessage($bot, $message, $master, $admin) {
                 // ],
                 [
                     [ 'text' => 'Задать вопрос админу' ],
+                ],
+                [
+                    [ 'text' => '⭐️Главное меню⭐️' ],
                 ],
             ],
             'resize_keyboard' => true,
@@ -336,6 +357,9 @@ function requestMessage($bot, $message, $master, $admin) {
                 [
                     [ 'text' => 'Баланс' ],
                     [ 'text' => 'Общее' ],
+                ],
+                [
+                    [ 'text' => '⭐️Главное меню⭐️' ],
                 ],
             ],
             'resize_keyboard' => true
@@ -469,10 +493,11 @@ function requestMessage($bot, $message, $master, $admin) {
     ************************/
     if ($text == "/regist" || $text == "Регистрация" || $text == "Шаг назад")
     {
-        $send = "Существует два возможных варианта регистрации на сайте Будь-здоров.рус:
+        $send = "Существует три возможных варианта регистрации на сайте Будь-здоров.рус:
 
             1.    Упрощённая 
             2.    Полная
+            3.    Регистрация поставщика
 
         Упрощённая регистрация позволяет Вам делать заказы из личного кабинета на сайте, но без предоставления скидок и накоплений.
         
@@ -486,7 +511,10 @@ function requestMessage($bot, $message, $master, $admin) {
                 ],
                 [
                     [ 'text' => 'Регистрация поставщика товаров/услуг' ],
-                ]
+                ],
+                [
+                    [ 'text' => '⭐️Главное меню⭐️' ],
+                ],
             ],
             'resize_keyboard' => true
         ];
@@ -606,11 +634,11 @@ function requestMessage($bot, $message, $master, $admin) {
     }
         
     
-    /*********
+    /*******************
     
-     НОВИЧКАМ
+          НОВИЧКАМ
 
-    *********/
+    *******************/
     if ($text == "/newbie" || $text == "Новичкам" || $text == "/new")
     {    
         $send = "Дорогой друг, мы приветствуем тебя на нашем общем и увлекательном проекте. 🌈
@@ -626,7 +654,7 @@ function requestMessage($bot, $message, $master, $admin) {
                     [ 'text' => 'Регистрация' ]
                 ],
                 [
-                    [ 'text' => '🌟Главное меню' ]
+                    [ 'text' => '⭐️Главное меню⭐️' ]
                 ]
             ],
             'resize_keyboard' => true,
@@ -673,11 +701,11 @@ function requestMessage($bot, $message, $master, $admin) {
         return;
     }
 
-    /************
+    /****************
     
-        О НАС
+          О НАС
 
-    *************/
+    *****************/
     if ($text == "/about" || $text == "О нас")
     {    
         $send = "Коротко о нас.";
@@ -774,75 +802,10 @@ function requestMessage($bot, $message, $master, $admin) {
             ];
             $bot->sendMessage($chat_id, $send, null, $ReplyKeyboardMarkup);
 
-
-            $products = PurchaseProduct::find()->where(['status' => 'advance'])->all();
-
-            if ( ! $products[0] ) {
-                $send = "Нет действующих закупок.";
-                $bot->sendMessage($chat_id, $send);
-                return;
-            }
+            // getPurchasesOld($bot, $chat_id);
             
-            // $provider = Provider::findOne($provider_id);
-
-            $allCategories = [];
-            foreach($products as $product) {
-                $feature_id = $product->product_feature_id;
-                $product_feature = ProductFeature::findOne($feature_id);
-                $real_product_id = $product_feature->product_id;
-                $real_product = Product::findOne($real_product_id);
-                if ($real_product->visibility == 0) continue;
-                $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $real_product_id]);
-                $category_id = $categoryHasProduct->category_id;
-                $category = Category::findOne($category_id);
-                $yes = false;
-                foreach($allCategories as $oneCategory) {
-                    if ($oneCategory['category_id'] == $category_id && $oneCategory['purchase_date'] == strtotime($product->purchase_date)) $yes = true;
-                }
-                if ( ! $yes ) $allCategories[] = [
-                    'category_id' => $category_id, 
-                    'category_name' => $category->name,
-                    'purchase_id' => $product->id, 
-                    'purchase_date' => strtotime($product->purchase_date), 
-                ];
-            }
-
-            usort($allCategories, function($a, $b) {
-                if ($a['category_name'] > $b['category_name']) {
-                    return 1;
-                } elseif ($a['category_name'] < $b['category_name']) {
-                    return -1;
-                }
-                return 0;
-            });
-
-            usort($allCategories, function($a, $b) {
-                if ($a['purchase_date'] > $b['purchase_date']) {
-                    return 1;
-                } elseif ($a['purchase_date'] < $b['purchase_date']) {
-                    return -1;
-                }
-                return 0;
-            });
-
-            $send = "Общий список Закупок.";
-            
-            $inline_keyboard = [];
-            foreach($allCategories as $oneCategory) {
-                $text =  $oneCategory['category_name'] . " " . date('d.m.Y', $oneCategory['purchase_date']); 
-            
-                $inline_keyboard[] = [
-                    [
-                        'text' => $text,
-                        'callback_data' => 'listOfPurchases_' . $oneCategory['purchase_id']
-                    ],
-                ];
-            }
-            
-            $InlineKeyboardMarkup = [
-                'inline_keyboard' => $inline_keyboard
-            ];
-            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);    
+            // “Продукты” “Промтовары” “Здоровье”
+            getMainPurchases($bot, $chat_id);
         
         } 
         

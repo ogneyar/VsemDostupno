@@ -36,22 +36,25 @@ function getBalance($bot, $chat_id, $additional_text = null) {
         return;
     }
 
+    $number = $user->number;
+
     $send .= "Предоставляем выписку по Вашему счету.\r\n";
 
     if ($user->role == User::ROLE_MEMBER) {         
         if ($user->lastname == "lastname") { // пройдена упрощённая регистрация   
             $send .= "*Не зарегистрированный участник:*\r\n";
+            $send .= "*Рег.№ $number*\r\n";
         }else {
-            $send .= "*Пайщик - Участник:*\r\n";
+            $send .= "*Пайщик - Участник: Рег.№ $number*\r\n";
         }
     }
     else
     if ($user->role == User::ROLE_PARTNER) {
-        $send .= "*Пайщик - Партнёр:*\r\n";
+        $send .= "*Пайщик - Партнёр: Рег.№ $number*\r\n";
     }
     else
     if ($user->role == User::ROLE_PROVIDER) {           
-        $send .= "*Пайщик - Поставщик:*\r\n";
+        $send .= "*Пайщик - Поставщик: Рег.№ $number*\r\n";
     }
 
     if ($additional_text) $send .= $additional_text . "\r\n";

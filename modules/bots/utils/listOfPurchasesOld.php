@@ -4,13 +4,27 @@ use app\models\Category;
 use app\models\CategoryHasProduct;
 use app\models\Product;
 use app\models\ProductFeature;
+use app\models\ProductPrice;
+use app\models\Provider;
 use app\modules\purchase\models\PurchaseProduct;
 
 
-function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = false) 
-{
+function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = false) {
+    
+    $purchaseProduct = PurchaseProduct::findOne($purchase_id);
+    $provider_id = $purchaseProduct->provider_id;
+    $provider = Provider::findOne($provider_id);
+    $providerName = $provider->name;
+    $productFeature = ProductFeature::findOne($purchaseProduct->product_feature_id);
+    $product_id = $productFeature->product_id;
+    $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
+    $category_id = $categoryHasProduct->category_id;
+    $category = Category::findOne($category_id);
+    $categoryName = $category->name;
+
+    $send = date('d.m.Y', strtotime($purchaseProduct->purchase_date)) . "г., состоится закупка " . $categoryName . " от " . $providerName;
+
     if ($show_menu) {
-        $send = "⭐️⭐️⭐️⭐️⭐️";
         $KeyboardMarkup = [
             'keyboard' => [
                 [
@@ -22,19 +36,12 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
             ],
             'resize_keyboard' => true,
         ];
+
         $bot->sendMessage($from_id, $send, null, $KeyboardMarkup);
+    }else {
+        $bot->sendMessage($from_id, $send);
     }
-    
-    $max_quantity_raw = 4;
 
-    $purchaseProduct = PurchaseProduct::findOne($purchase_id);
-    
-    $productFeature = ProductFeature::findOne($purchaseProduct->product_feature_id);
-    $product_id = $productFeature->product_id;
-    $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
-    $category_id = $categoryHasProduct->category_id;
-
-    $inline_keyboard = [];
     $purchaseProducts = PurchaseProduct::find()->where(['purchase_date' => $purchaseProduct->purchase_date])->andWhere(['status' => 'advance'])->all();
     $quantity = 0;
     foreach($purchaseProducts as $purchaseProduct) {   
@@ -42,29 +49,31 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
         $product_id = $productFeature->product_id;
         $product = Product::findOne($product_id);
         $productName = $product->name;
+        $productPrice = ProductPrice::findOne(['product_feature_id' => $productFeature->id]);
         $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
 
         if ($categoryHasProduct->category_id == $category_id && $product->visibility) {
             $quantity++;
-            if ($quantity <= (($step - 1)*$max_quantity_raw)) continue;
-            if ($quantity > ($step*$max_quantity_raw)) continue;
+            if ($quantity <= (($step - 1)*4)) continue;
+            if ($quantity > ($step*4)) continue;
+            $send = $productName . "\r\n" . $productPrice->price . " / " . $productPrice->member_price;
 
-            $inline_keyboard[] = [
-                [
-                    'text' => $productName,
-                    'callback_data' => 'productWithAPhoto_' . $productFeature->id
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => "Выбрать",
+                            'callback_data' => 'productWithAPhoto_' . $productFeature->id
+                        ],
+                    ],
                 ],
             ];
-            
+            $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
         }
     }
 
-    $send = "И тут должен быть какой-то текст...";
-    $InlineKeyboardMarkup = [ 'inline_keyboard' => $inline_keyboard, ];
-    $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
-
         
-    if ($quantity > ($step*$max_quantity_raw)) {        
+    if ($quantity > ($step*4)) {        
         $step++;
         $send =  "Остальной перечень";
 
@@ -74,24 +83,6 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
                     [
                         'text' => "Смотреть",
                         'callback_data' => 'listOfPurchases_' . $purchase_id . "_" . $step
-                    ],
-                ],                
-            ]
-        ];
-
-        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
-    }else {
-        $category = Category::findOne($category_id);
-        $categoryName = $category->name;
-
-        $send =  "Всё! Вы просмотрели весь ассортимент $categoryName";
-
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' => [
-                [
-                    [
-                        'text' => "Просмотреть заново",
-                        'callback_data' => 'listOfPurchases_' . $purchase_id
                     ],
                 ],                
             ]

@@ -34,6 +34,7 @@ require_once __DIR__ . '/../utils/cart/clearCartPartly.php';
 require_once __DIR__ . '/../utils/cart/deleteOneProduct.php';
 require_once __DIR__ . '/../utils/cart/deleteOneProductPartly.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
+require_once __DIR__ . '/../utils/getPurchasesByParentId.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2027,6 +2028,21 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $product_id = $array[1]; 
 
         productWithAPhoto($bot, $from_id, $product_id);
+        
+        return;
+    }
+
+    /**************************************************************
+    
+           ПЕРЕЧЕНЬ ЗАКУПОК по номеру родительской категории
+
+    ***************************************************************/
+    if (strstr($data, '_', true) == 'getPurchasesByParentId')
+    {
+        $array = explode('_', $data); 
+        $category_parent_id = $array[1]; 
+
+        getPurchasesByParentId($bot, $from_id, $category_parent_id);
         
         return;
     }
