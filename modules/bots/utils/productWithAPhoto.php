@@ -1,5 +1,6 @@
 <?php
 
+use Yii;
 use app\models\Image;
 use app\models\Product;
 use app\models\ProductFeature;
@@ -17,8 +18,10 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
     
     $productPrice = ProductPrice::findOne(['product_feature_id' => $product_feature_id]);
     $productFeature = ProductFeature::findOne($product_feature_id);
-
+    
     $product_id = $productFeature->product_id;
+    $product = Product::findOne($product_id);
+
     $productHasPhoto = ProductHasPhoto::findOne(['product_id' => $product_id]);
     $photoId = $productHasPhoto->photo_id;
     $photo = Photo::findOne($photoId);
@@ -36,18 +39,25 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
         $bot->sendMessage($from_id, $send);
         return;
     }
+
+    $send = $product->name . "\r\n";
+    $send .= $productPrice->member_price . "/" . $productPrice->price . " <u>Ваша цена: ";
   
     if (! $user || $user->lastname == "lastname") {
-        $send = $productPrice->price . "р.";
+        $send .= $productPrice->price . "</u>";
     }else {
-        $send = $productPrice->member_price . "р.";
+        $send .= $productPrice->member_price . "</u>";
     }
 
-    if ($feature->is_weights) {
-        $send .= " за 1 кг.";
-    }else {
-        $send .=  " за 1 шт.";
-    }
+    // if ($feature->is_weights) {
+    //     $send .= " за 1 кг.";
+    // }else {
+    //     $send .=  " за 1 шт.";
+    // }
+
+    $send .= "\r\nСтоп заказ " . date('d.m.Y', strtotime($purchaseProduct->stop_date)) . "г. в 21ч.";
+    $send .= "\r\nДоставка   " . date('d.m.Y', strtotime($purchaseProduct->purchase_date)) . "г.";
+
 
     $InlineKeyboardMarkup = [
         'inline_keyboard' => [                            
@@ -68,8 +78,9 @@ function productWithAPhoto($bot, $from_id, $product_feature_id)
                 ],
             ],          
         ]
-    ];
+    ]; 
 
-    $bot->sendPhoto($from_id, "https://будь-здоров.рус/web" . $file, $send, null, $InlineKeyboardMarkup);
+    // $bot->sendPhoto($from_id, "https://будь-здоров.рус/web" . $file, $send, null, $InlineKeyboardMarkup);
+    $bot->sendPhoto($from_id, Yii::$app->params['url'] . $file, $send, "html", $InlineKeyboardMarkup);
       
 }

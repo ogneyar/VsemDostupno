@@ -25,7 +25,7 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
         $bot->sendMessage($from_id, $send, null, $KeyboardMarkup);
     }
     
-    $max_quantity_raw = 4;
+    $max_quantity_raw = 7;
 
     $purchaseProduct = PurchaseProduct::findOne($purchase_id);
     
@@ -33,6 +33,7 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
     $product_id = $productFeature->product_id;
     $categoryHasProduct = CategoryHasProduct::findOne(['product_id' => $product_id]);
     $category_id = $categoryHasProduct->category_id;
+    $category = Category::findOne($category_id);
 
     $inline_keyboard = [];
     $purchaseProducts = PurchaseProduct::find()->where(['purchase_date' => $purchaseProduct->purchase_date])->andWhere(['status' => 'advance'])->all();
@@ -59,7 +60,8 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
         }
     }
 
-    $send = "И тут должен быть какой-то текст...";
+    // $send = "И тут должен быть какой-то текст...";
+    $send = $category->name;
     $InlineKeyboardMarkup = [ 'inline_keyboard' => $inline_keyboard, ];
     $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
 
@@ -81,10 +83,8 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
 
         $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
     }else {
-        $category = Category::findOne($category_id);
-        $categoryName = $category->name;
 
-        $send =  "Всё! Вы просмотрели весь ассортимент $categoryName";
+        $send =  "Всё! Вы просмотрели весь ассортимент $category->name";
 
         $InlineKeyboardMarkup = [
             'inline_keyboard' => [
