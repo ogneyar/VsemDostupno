@@ -20,6 +20,7 @@ use app\modules\purchase\models\PurchaseProduct;
 
 require_once __DIR__ . '/../utils/formatPrice.php';
 require_once __DIR__ . '/../utils/getBalance.php';
+require_once __DIR__ . '/../utils/getBalanceByNumber.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/cart/getCart.php';
@@ -28,6 +29,8 @@ require_once __DIR__ . '/../utils/continueSelection.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
 // require_once __DIR__ . '/../utils/getPurchasesOld.php';
 require_once __DIR__ . '/../utils/getMainPurchases.php';
+require_once __DIR__ . '/../utils/account/getPay.php';
+require_once __DIR__ . '/../utils/account/getRole.php';
 
 
 
@@ -207,6 +210,7 @@ function requestMessage($bot, $message, $master, $admin) {
         if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
         {
             array_push($keyboard, [ [ 'text' => 'Даты закупок' ] ]);
+            array_push($keyboard, [ [ 'text' => 'Счета участников' ] ]);
         }
         else if ($user->role != User::ROLE_PROVIDER)
         {
@@ -742,7 +746,6 @@ function requestMessage($bot, $message, $master, $admin) {
         return;
     }
     
-
     
     
     /******************************
@@ -834,6 +837,29 @@ function requestMessage($bot, $message, $master, $admin) {
     if ($text == "/cart" || $text == "Корзина" || $text == "В корзине товар")
     {    
         getCart($bot, $chat_id);
+
+        return;
+    }
+
+    
+    /******************************
+    
+            СЧЕТА УЧАСТНИКОВ
+
+    *******************************/
+    if ($text == "Счета участников" || $text == "/accounts")
+    {
+        $tg_com = TgCommunication::findOne(['chat_id' => $chat_id]);
+        if ( ! $tg_com ) {
+            $tg_com = new TgCommunication();
+        }
+        $tg_com->chat_id = $chat_id;
+        $tg_com->to_chat_id = $chat_id;
+        $tg_com->from_whom = "accountsNumber";
+        $tg_com->save();
+
+        $send = "Внесите регистрационный номер участника в поле сообщения и отправьте его мне.";     
+        $bot->sendMessage($chat_id, $send);
 
         return;
     }
@@ -1127,7 +1153,75 @@ function requestMessage($bot, $message, $master, $admin) {
 
             return;
         }
+
+        // запрос регистрационного номера участника
+        if ($tgCom->from_whom == 'accountsNumber') 
+        {            
+            $number = preg_replace('/ /', "", $text);
+
+            if ( ! is_numeric($number) ) {
+                $bot->sendMessage($chat_id, "Необходимо ввести положительное число!");            
+                return;
+            }
+            
+            getBalanceByNumber($bot, $chat_id, $number);
+
+            $user = User::findOne(['number' => $number, 'disabled' => 0]);
+
+            $send = "Укажите в строке сообщени, сумму зачисления или списания для $user->firstname $user->patronymic Рег.№ $number";            
+            $bot->sendMessage($chat_id, $send);
+            
+            $tgCom->from_whom = "editDeposit_$number";
+            $tgCom->save();
+
+            return;
+        }
         
+        // изменение расчётного счёта контрагента
+        if (strstr($tgCom->from_whom, '_', true) == 'editDeposit') 
+        {                    
+            $array = explode('_', $tgCom->from_whom);
+            $number = $array[1];
+
+            $summa = preg_replace('/ /', "", $text);
+
+            if ( ! is_numeric($summa) ) {
+                $bot->sendMessage($chat_id, "Необходимо ввести число!");            
+                return;
+            }
+
+            $user = User::findOne(['number' => $number, 'disabled' => 0]);
+            // $deposit = $user->getAccount(Account::TYPE_DEPOSIT);
+
+            $message = "";
+            if ($summa > 0) {
+                // $message = "Зачисление средств админом через телеграм";
+                $message = "Зачисление средств";
+            }else {
+                // $message = "Списание средств админом через телеграм";
+                $message = "Списание средств";
+            }
+            if (!Account::transfer($user->deposit, null, $user, $summa, $message, true)) {                    
+                $bot->sendMessage($chat_id, "Ошибка сохранения счета!");            
+                return;
+            }
+
+            Email::tg_send('new-account-log', $chat_id, [
+                'role' => getRole($user),
+                'number' => $number,
+                'message' => $message,
+                'amount' => $summa,
+                'total' => $user->deposit->total,
+                'invest' => $user->bonus->total,
+                'pay' => getPay($user),
+            ]);
+            
+            $tgCom->delete();
+
+            return;
+        }
+        
+
         if ( ! $tgCom->from_whom || $tgCom->from_whom == "client") {
             if ( ! $user || $user->lastname == "lastname") {
                 $send = "Не зарегистрированный пользователь". "\r\n\r\n" . $text;

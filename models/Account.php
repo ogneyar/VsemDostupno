@@ -8,6 +8,11 @@ use app\models\Email;
 use app\models\User;
 use app\models\ProviderStock;
 
+
+require_once __DIR__ . '/../modules/bots/utils/account/getPay.php';
+require_once __DIR__ . '/../modules/bots/utils/account/getRole.php';
+
+
 /**
  * This is the model class for table "account".
  *
@@ -148,19 +153,22 @@ class Account extends \yii\db\ActiveRecord
             return false;
         }
 
-        if ($sendEmail) {
-            // Email::send('account-log', $account->user->email, [
+        if ($sendEmail) {            
+            // if ($account->user->tg_id) Email::tg_send('account-log', $account->user->tg_id, [
             //     'typeName' => $account->typeName,
             //     'message' => $message,
             //     'amount' => $amount,
             //     'total' => $account->total,
             // ]);
             
-            if ($account->user->tg_id) Email::tg_send('account-log', $account->user->tg_id, [
-                'typeName' => $account->typeName,
+            if ($account->user->tg_id) Email::tg_send('new-account-log', $account->user->tg_id, [
+                'role' => getRole($account->user),
+                'number' => $account->user->number,
                 'message' => $message,
                 'amount' => $amount,
-                'total' => $account->total,
+                'total' => $account->user->deposit->total,
+                'invest' => $account->user->bonus->total,
+                'pay' => getPay($account->user),
             ]);
         }
 
@@ -197,34 +205,40 @@ class Account extends \yii\db\ActiveRecord
 
         if ($sendEmail) {
             if ($from) {
-                // Email::send('account-log', $from->user->email, [
+                // if ($from->user->tg_id) Email::tg_send('account-log', $from->user->tg_id, [
                 //     'typeName' => $from->typeName,
                 //     'message' => $message,
                 //     'amount' => -$amount,
                 //     'total' => $from->total,
                 // ]);
-
-                if ($from->user->tg_id) Email::tg_send('account-log', $from->user->tg_id, [
-                    'typeName' => $from->typeName,
+                
+                if ($from->user->tg_id) Email::tg_send('new-account-log', $from->user->tg_id, [
+                    'role' => getRole($from->user),
+                    'number' => $from->user->number,
                     'message' => $message,
                     'amount' => -$amount,
-                    'total' => $from->total,
+                    'total' => $from->user->deposit->total,
+                    'invest' => $from->user->bonus->total,
+                    'pay' => getPay($from->user),
                 ]);
             }
 
             if ($to) {
-                // Email::send('account-log', $to->user->email, [
+                // if ($to->user->tg_id) Email::tg_send('account-log', $to->user->tg_id, [
                 //     'typeName' => $to->typeName,
                 //     'message' => $message,
                 //     'amount' => $amount,
                 //     'total' => $to->total,
                 // ]);
 
-                if ($to->user->tg_id) Email::tg_send('account-log', $to->user->tg_id, [
-                    'typeName' => $to->typeName,
+                if ($to->user->tg_id) Email::tg_send('new-account-log', $to->user->tg_id, [
+                    'role' => getRole($to->user),
+                    'number' => $to->user->number,
                     'message' => $message,
                     'amount' => $amount,
-                    'total' => $to->total,
+                    'total' => $to->user->deposit->total,
+                    'invest' => $to->user->bonus->total,
+                    'pay' => getPay($to->user),
                 ]);
             }
         }
