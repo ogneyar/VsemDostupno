@@ -787,17 +787,22 @@ function requestMessage($bot, $message, $master, $admin) {
             // для пайщиков
 
             $send = "⭐️⭐️⭐️⭐️⭐️";     
-            $keyboard = [];            
+            $keyboard = [
+                [
+                    [ 'text' => 'Показать все даты закупок' ],
+                ],            
+            ];           
             $cart = CartTg::findOne(['tg_id' => $chat_id]);
             if ($cart) 
             {
+                array_push($keyboard, [ [ 'text' => 'Все закупки по начатой дате' ] ]);
                 array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
             }
-            else
-            {
-                // array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
-                array_push($keyboard, [ [ 'text' => 'Специалисты' ] ]);
-            }
+            // else
+            // {
+            //     // array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
+            //     array_push($keyboard, [ [ 'text' => 'Специалисты' ] ]);
+            // }
             $ReplyKeyboardMarkup = [
                 'keyboard' => $keyboard,
                 'resize_keyboard' => true,
