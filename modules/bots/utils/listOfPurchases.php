@@ -1,5 +1,6 @@
 <?php
 
+use app\models\CartTg;
 use app\models\Category;
 use app\models\CategoryHasProduct;
 use app\models\Product;
@@ -10,16 +11,26 @@ use app\modules\purchase\models\PurchaseProduct;
 function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = false) 
 {
     if ($show_menu) {
+        $carts_tg = CartTg::find()->where(['tg_id' => $from_id])->all();
+
         $send = "⭐️⭐️⭐️⭐️⭐️";
+        $keyboard = [
+            [
+                [ 'text' => 'Показать все даты закупок' ],
+            ],            
+        ];
+
+        if ($carts_tg) {
+            $keyboard[] =  [
+                [ 'text' => 'Все закупки по начатой дате' ], // all purchases by the started date
+            ];
+            $keyboard[] =  [
+                [ 'text' => 'В корзине товар' ],
+            ];
+        }
+
         $KeyboardMarkup = [
-            'keyboard' => [
-                [
-                    [ 'text' => 'Показать все даты закупок' ],
-                ],
-                [
-                    [ 'text' => 'Все закупки по начатой дате' ], // all purchases by the started date
-                ],
-            ],
+            'keyboard' => $keyboard,
             'resize_keyboard' => true,
         ];
         $bot->sendMessage($from_id, $send, null, $KeyboardMarkup);

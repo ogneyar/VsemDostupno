@@ -97,7 +97,7 @@ function getPurchasesByParentId($bot, $chat_id, $parent_id, $show_menu = true)
         return 0;
     });
 
-    $send = "Тут должен быть какой-то текст ($category_parent_name).";
+    $send = "Общий список $category_parent_name.";
     
     $inline_keyboard = [];
     foreach($allCategories as $oneCategory) {

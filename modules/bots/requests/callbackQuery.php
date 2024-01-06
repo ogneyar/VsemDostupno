@@ -6,6 +6,7 @@ use app\modules\bots\api\Telegraph;
 use app\models\User;
 use app\models\TgCommunication;
 use app\models\Service;
+use app\models\CartTg;
 use app\models\Category;
 use app\models\CategoryHasProduct;
 use app\models\CategoryHasService;

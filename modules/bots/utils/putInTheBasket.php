@@ -78,7 +78,17 @@ function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0)
     
     $send = "⭐️⭐️⭐️⭐️⭐️";       
     $ReplyKeyboardMarkup = [
-        'keyboard' => [ [ [ 'text' => 'В корзине товар' ] ] ],
+        'keyboard' => [ 
+            [
+                [ 'text' => 'Показать все даты закупок' ],
+            ],        
+            [
+                [ 'text' => 'Все закупки по начатой дате' ], // all purchases by the started date
+            ],
+            [ 
+                [ 'text' => 'В корзине товар' ] 
+            ],
+        ],
         'resize_keyboard' => true,
         'selective' => true,
     ];

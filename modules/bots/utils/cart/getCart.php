@@ -48,7 +48,11 @@ function getCart($bot, $tg_id)
     }
 
     if ( ! $item ) {
-        $bot->sendMessage($tg_id, "Ваша корзина пуста!");
+        $HideKeyboard = [
+            'hide_keyboard' => true
+        ];
+        
+        $bot->sendMessage($tg_id, "Ваша корзина пуста!", null, $HideKeyboard);
         return $item;
     }
 
