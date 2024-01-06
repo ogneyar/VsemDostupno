@@ -26,7 +26,7 @@ if ($get && $get["agent"]) { // либо member, либо provider
             <br/>            
         </div>
         <div>
-            <a href="https://t.me/bud_zdorov_rus_bot?start=<?php echo $get["agent"]; ?>">
+            <a href="https://t.me/bud_zdorov_rus_bot?start=<?php echo $get["agent"]; ?>"> 
                 <!-- <button>Подключиться к боту</button> -->   
                 <?= Html::submitButton('Подключиться к боту', ['class' => 'btn btn-primary pull-center', 'name' => 'register-bot-button', 'id' => 'register-bot-button', 'disabled' => false]) ?>
             </a>

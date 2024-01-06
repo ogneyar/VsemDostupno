@@ -34,10 +34,10 @@ function getMainPurchases($bot, $chat_id)
 
         // “Продукты” “Промтовары” “Здоровье”
         $category_parent_name =  mb_convert_case(mb_strtolower($category_parent->name), MB_CASE_TITLE, "UTF-8");
-        if ($category_parent_name == "Напитки") {
-            $bot->sendMessage($chat_id, $category_parent_id);    
-            break;
-        }
+        // if ($category_parent_name == "Напитки") {
+        //     $bot->sendMessage($chat_id, $category_parent_id);    
+        //     break;
+        // }
 
         $yes = false;
         foreach($allCategories as $oneCategory) {
