@@ -147,6 +147,10 @@ function requestMessage($bot, $message, $master, $admin) {
             return;
 
         }else {
+            if ($user) {
+                $bot->sendMessage($chat_id, "Вы уже зарегестрированны!");
+                return;
+            }
 
             $send = "Здравствуй " . $first_name . "!\r\n\r\n";
             $send .= "Добро пожаловать, это регистрация на сайте Будь-Здоров.рус.\r\n";
