@@ -94,7 +94,9 @@ function requestMessage($bot, $message, $master, $admin) {
             ],
         ];
         
-        if ($chat_id == $master) array_push($keyboard, [ [ 'text' => 'Тест' ] ]);
+        // if ($chat_id == $master) array_push($keyboard, [ [ 'text' => 'Тест' ] ]);
+
+        array_push($keyboard, [ [ 'text' => 'Моя ссылка' ] ]);
 
         // if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
         // {
@@ -151,9 +153,22 @@ function requestMessage($bot, $message, $master, $admin) {
             $send .= "В боте Вы уже зарегестрированны. Для продолжения регистрации нажмите на кнопку ниже (прикреплена к этому сообщению).";
             $host = "https://будь-здоров.рус/web";
             // $host = "http://localhost:8080";
+
+            $recommender_id = null;
+
             if ($text_split[1] == "member") $action = "register";
             else if ($text_split[1] == "provider") $action = "register-provider";
+            else {
+                $split = explode("_", $text_split[1]);
+                if ($split[0] == "member") {
+                    $action = "register";
+                    $recommender_id = $split[1];
+                }
+            }
             $url = "$host/profile/$action?tg=$chat_id";
+            if ($recommender_id) {
+                $url .= "&recommender_id=$recommender_id";
+            }
             $InlineKeyboardMarkup = [
                 'inline_keyboard' => [[[
                     'text' => 'Продолжить',
@@ -191,6 +206,27 @@ function requestMessage($bot, $message, $master, $admin) {
             ]]]
         ];
         $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup);
+
+
+        return;
+    }
+
+    /***********************
+    
+           МОЯ ССЫЛКА
+
+    ***********************/
+    if ($text == "Моя ссылка" || $text == "/link")
+    {
+        $send = "Рекомендательская ссылка,  отправьте её для регистрации другу.";
+        
+        $bot->sendMessage($chat_id, $send);
+
+        $send = "[https://t.me/bud_zdorov_rus_bot?start=member_$user->number](https://t.me/bud_zdorov_rus_bot?start=member_$user->number)";
+        // $send = "[https://t.me/bud_zdorov_rus_bot?start=member_$user->id](https://t.me/bud_zdorov_rus_bot?start=member_$user->id)";
+        // $send = "```https://t.me/bud_zdorov_rus_bot?start=member_$user->id```";
+        
+        $bot->sendMessage($chat_id, $send, "markdown");
 
 
         return;

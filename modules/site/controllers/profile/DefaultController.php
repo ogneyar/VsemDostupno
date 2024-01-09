@@ -167,6 +167,16 @@ class DefaultController extends BaseController
 
     public function actionRegister()
     {
+        // $model = new RegisterForm();
+        // if ($model->load(Yii::$app->request->post())) {
+        //     echo $model->recommender_id;
+        //     return $this->render('register', [
+        //         'model' => $model,
+        //         'menu_first_level' => $menu_first_level ? $menu_first_level : [],
+        //         'recommender_id' => $model->recommender_id
+        //     ]);
+        // }
+
         $config = require(__DIR__ . '/../../../../config/urlManager.php');
         $baseUrl = $config['baseUrl'];
         
@@ -204,7 +214,12 @@ class DefaultController extends BaseController
         }
 
         $model = new RegisterForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) { 
+        $load = $model->load(Yii::$app->request->post());
+        if (isset($get['recommender_id'])) {
+            $model->recommender_id = $get['recommender_id'];
+        }
+        if ($load && $model->validate()) { 
+        // if ($model->load(Yii::$app->request->post()) && $model->validate()) { 
         // if ($model->load(Yii::$app->request->post())) {
 
             $transaction = Yii::$app->db->beginTransaction();
@@ -235,6 +250,7 @@ class DefaultController extends BaseController
 
                 $recommender = User::findOne(['number' => $model->recommender_id]); 
                 $user->recommender_id = $recommender->id ? $recommender->id : 95;
+                // $user->recommender_id = $model->recommender_id ? $model->recommender_id : 95;
 
                 $user->re_captcha = $model->re_captcha;
 

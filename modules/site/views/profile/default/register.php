@@ -57,19 +57,27 @@ $this->registerJs($script, $this::POS_END);
     ],
 ]); ?>
 
-    <div class="row">
-        <div class="col-md-offset-2 col-md-6">
-            <p>Введите номер рекомендателя.</p> 
-        </div>
-    </div>
-    <?= $form->field($model, 'recommender_id', [
-        'inputOptions' => [
-            'data-toggle' => 'tooltip',
-            'title' => 'Напишите номер рекомендателя.',
-        ],
-    ]) ?>
 
-    <?= $form->field($model, 'recommender_info')->hiddenInput(['value'=> ''])->label(false) ?>
+    <?php 
+    if ( ! isset($get['recommender_id']) ) {
+    ?>
+        <div class="row">
+            <div class="col-md-offset-2 col-md-6">
+                <p>Введите номер рекомендателя.</p> 
+            </div>
+        </div>
+        <?= $form->field($model, 'recommender_id', [
+            'inputOptions' => [
+                'data-toggle' => 'tooltip',
+                'title' => 'Напишите номер рекомендателя.',
+            ],
+        ]) ?>
+    <?php
+    }
+    ?>
+    
+
+    <?= $form->field($model, 'recommender_info')->hiddenInput(['value'=> 'test'])->label(false) ?>
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
