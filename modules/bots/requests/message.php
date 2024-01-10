@@ -96,7 +96,9 @@ function requestMessage($bot, $message, $master, $admin) {
         
         // if ($chat_id == $master) array_push($keyboard, [ [ 'text' => 'Тест' ] ]);
 
-        array_push($keyboard, [ [ 'text' => 'Моя ссылка' ] ]);
+        if ($user && !($user->role == User::ROLE_MEMBER && $user->lastname == "lastname")) {
+            array_push($keyboard, [ [ 'text' => 'Моя ссылка' ] ]);
+        }
 
         // if ($user->role == User::ROLE_ADMIN || $user->role == User::ROLE_SUPERADMIN || $chat_id == $admin || $chat_id == $master) 
         // {
@@ -152,11 +154,18 @@ function requestMessage($bot, $message, $master, $admin) {
                 return;
             }
 
-            $send = "Здравствуй " . $first_name . "!\r\n\r\n";
-            $send .= "Добро пожаловать, это регистрация на сайте Будь-Здоров.рус.\r\n";
-            $send .= "В боте Вы уже зарегестрированны. Для продолжения регистрации нажмите на кнопку ниже (прикреплена к этому сообщению).";
+            // $send = "Здравствуй " . $first_name . "!\r\n\r\n";
+            // $send .= "Добро пожаловать, это регистрация на сайте Будь-Здоров.рус.\r\n";
+            // $send .= "В боте Вы уже зарегестрированны. Для продолжения регистрации нажмите на кнопку ниже (прикреплена к этому сообщению).";
+
+            $send = "Мы приветствуем Вас!!!\r\n\r\n";
+            $send .= "Добро пожаловать на страницу регистрации участников Клуба Будь здоров!\r\n";
+            $send .= "В телеграмм канале регистрация прошла успешно. Для управления функциями своего личного кабинета,";
+            $send .= " необходимо пройти регистрацию на сайте. Ниже, нажмите кнопку “Продолжить”";
+            
             $host = "https://будь-здоров.рус/web";
             // $host = "http://localhost:8080";
+
 
             $recommender_id = null;
 
