@@ -31,6 +31,7 @@ require_once __DIR__ . '/../utils/homeDelivery.php';
 require_once __DIR__ . '/../utils/getMainPurchases.php';
 require_once __DIR__ . '/../utils/account/getPay.php';
 require_once __DIR__ . '/../utils/account/getRole.php';
+require_once __DIR__ . '/../utils/purchasesByTheStartedDate.php';
 
 
 
@@ -871,7 +872,9 @@ function requestMessage($bot, $message, $master, $admin) {
     ************************************/
     if ($text == "/purchases_by_the_started_date" || $text == "Все закупки по начатой дате" || $text == "Показать закупки по начатой дате")
     {    
-        continueSelection($bot, $chat_id, /*purchases_by_the_started_date=*/true);
+        // continueSelection($bot, $chat_id, /*purchases_by_the_started_date=*/true);
+
+        purchasesByTheStartedDate($bot, $chat_id);
 
         return;
     }

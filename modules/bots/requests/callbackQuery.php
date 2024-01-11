@@ -2350,11 +2350,10 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     {                
         clearCart($from_id, $bot, /*send_info=*/true);
 
-        $HideKeyboard = [
-            'hide_keyboard' => true
-        ];
+        // $HideKeyboard = [ 'hide_keyboard' => true ];
+        // $bot->sendMessage($from_id, "В кнопке Меню выберите необходимое действие", null, $HideKeyboard);
 
-        $bot->sendMessage($from_id, "В кнопке Меню выберите необходимое действие", null, $HideKeyboard);
+        $bot->sendMessage($from_id, "В кнопке Меню выберите необходимое действие");
         
         return;
     }
