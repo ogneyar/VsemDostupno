@@ -5,7 +5,7 @@ use app\models\CartTg;
 
 function calculation($bot, $tg_id, $summa) {
 
-    $cart = CartTg::find()->where(['tg_id' => $tg_id])-all();
+    $cart = CartTg::find()->where(['tg_id' => $tg_id])->all();
 
     if ($cart && sizeof($cart) > 1) {
 
