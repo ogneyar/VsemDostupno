@@ -25,7 +25,7 @@ function continueSelection($bot, $tg_id, $purchases_by_the_started_date = false)
 
     if ( ! $purchases_by_the_started_date ) 
     {
-        listOfPurchases($bot, $tg_id, $purchase_id, /*step=*/1, /*show_menu=*/true);
+    listOfPurchases($bot, $tg_id, $purchase_id, /*step=*/1, /*show_menu=*/true, /*without_search=*/true);
     
         return;
     }

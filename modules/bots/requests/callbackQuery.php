@@ -2197,7 +2197,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
                 [
                     [
                         'text' => "Отменить",
-                        'callback_data' => 'cancelAPurchase' // !!!!!!! НЕ РЕАЛИЗОВАНО !!!!!!
+                        'callback_data' => 'cancelAPurchase'
                     ],
                 ],
             ]
