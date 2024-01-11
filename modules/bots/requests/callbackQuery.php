@@ -36,6 +36,7 @@ require_once __DIR__ . '/../utils/cart/deleteOneProduct.php';
 require_once __DIR__ . '/../utils/cart/deleteOneProductPartly.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
 require_once __DIR__ . '/../utils/getPurchasesByParentId.php';
+require_once __DIR__ . '/../utils/calculation.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
