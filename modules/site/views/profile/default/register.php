@@ -77,7 +77,7 @@ $this->registerJs($script, $this::POS_END);
     ?>
     
 
-    <?= $form->field($model, 'recommender_info')->hiddenInput(['value'=> 'test'])->label(false) ?>
+    <?= $form->field($model, 'recommender_info')->hiddenInput(['value'=> ''])->label(false) ?>
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
