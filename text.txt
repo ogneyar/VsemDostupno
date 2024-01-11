@@ -6,6 +6,7 @@ ALTER TABLE `subscriber_payment` ADD `number_of_times` INT NOT NULL DEFAULT '0' 
 
 
 CREATE TABLE `subscriber_messages` (`id` INT PRIMARY KEY AUTO_INCREMENT,`user_id` INT NOT NULL,`created_at` DATETIME NOT NULL,`amount` DOUBLE NOT NULL);
+CREATE TABLE `tg_save_purchase_date` (`id` INT PRIMARY KEY AUTO_INCREMENT,`chat_id` INT NOT NULL,`purchase_date` INT NOT NULL);
 
 
 

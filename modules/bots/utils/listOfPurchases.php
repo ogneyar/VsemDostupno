@@ -5,6 +5,7 @@ use app\models\Category;
 use app\models\CategoryHasProduct;
 use app\models\Product;
 use app\models\ProductFeature;
+use app\models\TgSavePurchaseDate;
 use app\modules\purchase\models\PurchaseProduct;
 
 
@@ -106,5 +107,14 @@ function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = f
 
         $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
     }
+
+    // сохраняем дату, для работы метода - Показать закупки по начатой дате
+    $tgSavePurchaseDate = TgSavePurchaseDate::findOne(['chat_id' => $from_id]);
+    if ( ! $tgSavePurchaseDate ) {
+        $tgSavePurchaseDate = new TgSavePurchaseDate();
+        $tgSavePurchaseDate->chat_id = $from_id;
+    }
+    $tgSavePurchaseDate->purchase_date = strtotime($purchaseProduct->purchase_date);
+    $tgSavePurchaseDate->save();
 
 }
