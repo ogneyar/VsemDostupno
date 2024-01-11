@@ -2184,27 +2184,8 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $array = explode('_', $data); 
         $summa = $array[1]; 
         
-        $send = "При нажатии кнопки “Далее”, c Вашего лицевого счёта будет списана сумма ". $summa ."р., как обмен паями";
-        
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' =>  [
-                [
-                    [
-                        'text' => "Далее",
-                        'callback_data' => 'calculationThen_' . $summa
-                    ],
-                ],
-                [
-                    [
-                        'text' => "Отменить",
-                        'callback_data' => 'cancelAPurchase'
-                    ],
-                ],
-            ]
-        ];
+        calculation($bot, $from_id, $summa);
 
-        $bot->sendMessage($from_id, $send, null, $InlineKeyboardMarkup);
-        
         return;
     }
 
@@ -2220,6 +2201,21 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $summa = $array[1]; 
         
         purchaseOrderCreate($bot, $from_id, $summa);
+        
+        return;
+    }
+
+    /**************************
+    
+           РАСЧЁТ по дате
+
+    ***************************/
+    if (strstr($data, '_', true) == 'calculationByDate')
+    {
+        // $array = explode('_', $data); 
+        // $date = $array[1]; 
+        
+        // purchaseOrderCreateByDate($bot, $from_id, $date);
         
         return;
     }
