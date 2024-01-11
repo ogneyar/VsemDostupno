@@ -2060,7 +2060,7 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         if ($array[2]) $step = $array[2]; // шаг по 4 штуки
         else $step = 1;
 
-        listOfPurchases($bot, $from_id, $purchase_id, $step);
+        listOfPurchases($bot, $from_id, $purchase_id, $step, true);
         
         return;
     }

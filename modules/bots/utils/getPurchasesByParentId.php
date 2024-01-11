@@ -25,14 +25,14 @@ function getPurchasesByParentId($bot, $chat_id, $parent_id, $show_menu = true)
         $send = "⭐️⭐️⭐️⭐️⭐️";
         $keyboard = [
             [
-                [ 'text' => 'Показать все даты закупок' ],
+                [ 'text' => 'Быстрый поиск товара' ],
+            ],            
+            [
+                [ 'text' => 'Показать все категории закупок' ],
             ],            
         ];
 
         if ($carts_tg) {
-            $keyboard[] =  [
-                [ 'text' => 'Все закупки по начатой дате' ], // all purchases by the started date
-            ];
             $keyboard[] =  [
                 [ 'text' => 'В корзине товар' ],
             ];

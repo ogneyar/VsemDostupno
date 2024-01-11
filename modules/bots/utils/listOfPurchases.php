@@ -8,25 +8,21 @@ use app\models\ProductFeature;
 use app\modules\purchase\models\PurchaseProduct;
 
 
-function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = false) 
+function listOfPurchases($bot, $from_id, $purchase_id, $step = 1, $show_menu = false, $without_search = false) 
 {
     if ($show_menu) {
         $carts_tg = CartTg::find()->where(['tg_id' => $from_id])->all();
 
         $send = "⭐️⭐️⭐️⭐️⭐️";
-        $keyboard = [
-            [
-                [ 'text' => 'Показать все даты закупок' ],
-            ],            
-        ];
+        $keyboard = [];
+
+        if ( ! $without_search ) $keyboard[] =  [ [ 'text' => 'Быстрый поиск товара' ], ];
+
+        $keyboard[] =  [ [ 'text' => 'Показать закупки по начатой дате' ], ];
+        $keyboard[] =  [ [ 'text' => 'Показать все категории закупок' ], ];
 
         if ($carts_tg) {
-            $keyboard[] =  [
-                [ 'text' => 'Все закупки по начатой дате' ], // all purchases by the started date
-            ];
-            $keyboard[] =  [
-                [ 'text' => 'В корзине товар' ],
-            ];
+            $keyboard[] =  [ [ 'text' => 'В корзине товар' ], ];
         }
 
         $KeyboardMarkup = [

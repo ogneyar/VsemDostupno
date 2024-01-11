@@ -14,6 +14,11 @@ function deleteOneProduct($bot, $tg_id, $product_feature_id)
 
     $cart = CartTg::findOne(['tg_id' => $tg_id, 'product_feature_id' => $product_feature_id]);
 
+    if ( ! $cart ) {        
+        $bot->sendMessage($tg_id, "Ваша корзина пуста!");
+        return;
+    }
+
     $send = $cart->quantity . " ед. ";
 
     $product = Product::findOne($cart->product_id);
@@ -33,7 +38,21 @@ function deleteOneProduct($bot, $tg_id, $product_feature_id)
 
     $send .= $product->name . " - " . $price . " за 1 шт. - вернулась на полку магазина из Вашей корзины";
     
-    $bot->sendMessage($tg_id, $send);
+    $keyboard = [
+        [
+            [ 'text' => 'Показать закупки по начатой дате' ],
+        ],            
+        [
+            [ 'text' => 'Показать все категории закупок' ],
+        ],            
+    ];
+
+    $KeyboardMarkup = [
+        'keyboard' => $keyboard,
+        'resize_keyboard' => true,
+    ];
+
+    $bot->sendMessage($tg_id, $send, null, $KeyboardMarkup);
 
     getCart($bot, $tg_id);
 

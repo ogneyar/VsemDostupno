@@ -252,7 +252,7 @@ function requestMessage($bot, $message, $master, $admin) {
     *********************/
     if ($text == "Услуги" || $text == "/service")
     {
-        $send = "Тут должно быть описани страницы 'Услуги'.";
+        $send = "⭐️⭐️⭐️⭐️⭐️";
      
         $keyboard = [];
         
@@ -802,7 +802,7 @@ function requestMessage($bot, $message, $master, $admin) {
         ЗАКУПКИ, управление ими
 
     *******************************/
-    if ($text == "/purchase_date" || $text == "Даты закупок" || $text == "Закупки" || $text == "Показать все даты закупок")
+    if ($text == "/purchase_date" || $text == "Даты закупок" || $text == "Закупки" || $text == "Показать все даты закупок" || $text == "Показать все категории закупок")
     {    
         $user = User::findOne(['tg_id' => $chat_id, 'disabled' => 0]);
         
@@ -835,23 +835,17 @@ function requestMessage($bot, $message, $master, $admin) {
         {            
             // для пайщиков
 
-            $send = "⭐️⭐️⭐️⭐️⭐️";     
-            $keyboard = [
-                [
-                    [ 'text' => 'Показать все даты закупок' ],
-                ],            
-            ];           
+            $send = "⭐️⭐️⭐️⭐️⭐️";
+            $keyboard = [];           
+
             $cart = CartTg::findOne(['tg_id' => $chat_id]);
             if ($cart) 
             {
-                array_push($keyboard, [ [ 'text' => 'Все закупки по начатой дате' ] ]);
                 array_push($keyboard, [ [ 'text' => 'В корзине товар' ] ]);
             }
-            // else
-            // {
-            //     // array_push($keyboard, [ [ 'text' => 'Закупки' ] ]);
-            //     array_push($keyboard, [ [ 'text' => 'Специалисты' ] ]);
-            // }
+
+            array_push($keyboard, [ [ 'text' => 'Быстрый поиск товара' ] ]);
+            
             $ReplyKeyboardMarkup = [
                 'keyboard' => $keyboard,
                 'resize_keyboard' => true,
@@ -875,7 +869,7 @@ function requestMessage($bot, $message, $master, $admin) {
            ЗАКУПКИ по начатой дате 
 
     ************************************/
-    if ($text == "/purchases_by_the_started_date" || $text == "Все закупки по начатой дате")
+    if ($text == "/purchases_by_the_started_date" || $text == "Все закупки по начатой дате" || $text == "Показать закупки по начатой дате")
     {    
         continueSelection($bot, $chat_id, /*purchases_by_the_started_date=*/true);
 

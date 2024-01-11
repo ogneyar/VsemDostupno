@@ -28,6 +28,11 @@ function deleteOneProductPartly($bot, $tg_id, $product_feature_id, $quantity = 0
     
     $cart = CartTg::findOne(['tg_id' => $tg_id, 'product_feature_id' => $product_feature_id]);
 
+    if ( ! $cart ) {        
+        $bot->sendMessage($tg_id, "Ваша корзина пуста!");
+        return;
+    }
+    
     $cart->quantity = $quantity;
 
     if ( ! $cart->save() ) {
@@ -49,7 +54,21 @@ function deleteOneProductPartly($bot, $tg_id, $product_feature_id, $quantity = 0
 
     $send = $quantity . " ед. " . $product->name . " - " . $price . " за 1 шт. -  Уже в Вашей корзине";
 
-    $bot->sendMessage($tg_id, $send);
+    $keyboard = [
+        [
+            [ 'text' => 'Показать закупки по начатой дате' ],
+        ],            
+        [
+            [ 'text' => 'Показать все категории закупок' ],
+        ],            
+    ];
+
+    $KeyboardMarkup = [
+        'keyboard' => $keyboard,
+        'resize_keyboard' => true,
+    ];
+
+    $bot->sendMessage($tg_id, $send, null, $KeyboardMarkup);
 
     getCart($bot, $tg_id);
 

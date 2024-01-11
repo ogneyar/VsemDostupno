@@ -1,6 +1,7 @@
 <?php
 
 use Yii;
+use app\models\CartTg;
 use app\models\Image;
 use app\models\Product;
 use app\models\ProductFeature;
@@ -14,6 +15,33 @@ use app\modules\purchase\models\PurchaseProduct;
 
 function productWithAPhoto($bot, $from_id, $product_feature_id) 
 {
+
+    $carts_tg = CartTg::find()->where(['tg_id' => $from_id])->all();
+
+    $send = "⭐️⭐️⭐️⭐️⭐️";
+    $keyboard = [    
+        [
+            [ 'text' => 'Показать закупки по начатой дате' ],
+        ],            
+        [
+            [ 'text' => 'Показать все категории закупок' ],
+        ],            
+    ];
+
+    if ($carts_tg) {
+        $keyboard[] =  [
+            [ 'text' => 'В корзине товар' ],
+        ];
+    }
+
+    $KeyboardMarkup = [
+        'keyboard' => $keyboard,
+        'resize_keyboard' => true,
+    ];
+    $bot->sendMessage($from_id, $send, null, $KeyboardMarkup);
+
+
+
     $user = User::findOne(['tg_id' => $from_id]);
     
     $productPrice = ProductPrice::findOne(['product_feature_id' => $product_feature_id]);
