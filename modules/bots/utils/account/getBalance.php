@@ -1,12 +1,8 @@
 <?php
 
-// use Yii;
 use DateTime;
 use app\models\User;
-// use app\models\Forgot;
-// use app\models\Email;
 use app\models\Account;
-// use app\models\TgCommunication;
 
 
 function getBalance($bot, $chat_id, $additional_text = null) {

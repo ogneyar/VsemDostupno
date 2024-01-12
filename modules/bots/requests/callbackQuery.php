@@ -21,14 +21,13 @@ use app\models\Provider;
 use app\models\ProviderHasProduct;
 use app\modules\purchase\models\PurchaseProduct;
 
-require_once __DIR__ . '/../utils/getBalance.php';
+require_once __DIR__ . '/../utils/account/getBalance.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/listOfProducts.php';
 require_once __DIR__ . '/../utils/productWithAPhoto.php';
 require_once __DIR__ . '/../utils/listOfPurchases.php';
 require_once __DIR__ . '/../utils/assortment.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
-require_once __DIR__ . '/../utils/purchaseOrderCreate.php';
 require_once __DIR__ . '/../utils/getDescription.php';
 require_once __DIR__ . '/../utils/continueSelection.php';
 require_once __DIR__ . '/../utils/cart/clearCartPartly.php';
@@ -36,7 +35,8 @@ require_once __DIR__ . '/../utils/cart/deleteOneProduct.php';
 require_once __DIR__ . '/../utils/cart/deleteOneProductPartly.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
 require_once __DIR__ . '/../utils/getPurchasesByParentId.php';
-require_once __DIR__ . '/../utils/calculation.php';
+require_once __DIR__ . '/../utils/calculate/calculation.php';
+require_once __DIR__ . '/../utils/calculate/purchaseOrderCreate.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2184,7 +2184,12 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     {
         $array = explode('_', $data); 
         $summa = $array[1]; 
+        // $together = false;
+        // if ($array[2]) {
+        //     $together = true;
+        // }
         
+        // calculation($bot, $from_id, $summa, $together);
         calculation($bot, $from_id, $summa);
 
         return;
@@ -2202,21 +2207,6 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
         $summa = $array[1]; 
         
         purchaseOrderCreate($bot, $from_id, $summa);
-        
-        return;
-    }
-
-    /**************************
-    
-           РАСЧЁТ по дате
-
-    ***************************/
-    if (strstr($data, '_', true) == 'calculationByDate')
-    {
-        // $array = explode('_', $data); 
-        // $date = $array[1]; 
-        
-        // purchaseOrderCreateByDate($bot, $from_id, $date);
         
         return;
     }

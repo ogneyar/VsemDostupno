@@ -19,8 +19,6 @@ use app\models\ProviderHasProduct;
 use app\modules\purchase\models\PurchaseProduct;
 
 require_once __DIR__ . '/../utils/formatPrice.php';
-require_once __DIR__ . '/../utils/getBalance.php';
-require_once __DIR__ . '/../utils/getBalanceByNumber.php';
 require_once __DIR__ . '/../utils/editPricePurchase.php';
 require_once __DIR__ . '/../utils/putInTheBasket.php';
 require_once __DIR__ . '/../utils/cart/getCart.php';
@@ -29,9 +27,12 @@ require_once __DIR__ . '/../utils/continueSelection.php';
 require_once __DIR__ . '/../utils/homeDelivery.php';
 // require_once __DIR__ . '/../utils/getPurchasesOld.php';
 require_once __DIR__ . '/../utils/getMainPurchases.php';
+require_once __DIR__ . '/../utils/account/getBalance.php';
+require_once __DIR__ . '/../utils/account/getBalanceByNumber.php';
 require_once __DIR__ . '/../utils/account/getPay.php';
 require_once __DIR__ . '/../utils/account/getRole.php';
 require_once __DIR__ . '/../utils/purchasesByTheStartedDate.php';
+require_once __DIR__ . '/../utils/search/searchProducts.php';
 
 
 
@@ -915,6 +916,29 @@ function requestMessage($bot, $message, $master, $admin) {
         return;
     }
 
+    
+    /******************************
+    
+         БЫСТРЫЙ ПОИСК ТОВАРА
+
+    *******************************/
+    if ($text == "Быстрый поиск товара" || $text == "/search")
+    {
+        $tg_com = TgCommunication::findOne(['chat_id' => $chat_id]);
+        if ( ! $tg_com ) {
+            $tg_com = new TgCommunication();
+        }
+        $tg_com->chat_id = $chat_id;
+        $tg_com->to_chat_id = $chat_id;
+        $tg_com->from_whom = "searchProducts";
+        $tg_com->save();
+
+        $send = "Для быстрого поиска нужного Вам товара, в строке “Сообщение”, укажите ключевое слово и отправьте его.";     
+        $bot->sendMessage($chat_id, $send);
+
+        return;
+    }
+
 
 
     /******************************************
@@ -1018,10 +1042,10 @@ function requestMessage($bot, $message, $master, $admin) {
             $provider_id = $providerHasProduct->provider_id;            
             $step = 1;
 
-/*
-            Эта часть из callbaqckQuery
-            УПРАВЛЕНИЕ ЦЕНАМИ ЗАКУПОК
-*/
+
+            //Эта часть из callbaqckQuery
+            //УПРАВЛЕНИЕ ЦЕНАМИ ЗАКУПОК
+
             editPricePurchase($bot, $chat_id, $provider_id, $step);
             
             return;
@@ -1266,6 +1290,16 @@ function requestMessage($bot, $message, $master, $admin) {
                 'invest' => $user->bonus->total,
                 'pay' => getPay($user),
             ]);
+            
+            $tgCom->delete();
+
+            return;
+        }
+        
+        // быстрый поиск товара
+        if ($tgCom->from_whom == 'searchProducts') 
+        {
+            searchProducts($bot, $tgCom->to_chat_id, $text);
             
             $tgCom->delete();
 

@@ -21,8 +21,8 @@ use app\modules\purchase\models\PurchaseProviderBalance;
 use app\modules\purchase\models\PurchaseFundBalance;
 use app\modules\purchase\models\PurchaseProduct;
 
-require_once __DIR__ . '/cart/getCart.php';
-require_once __DIR__ . '/cart/clearCart.php';
+require_once __DIR__ . '/../cart/getCart.php';
+require_once __DIR__ . '/../cart/clearCart.php';
 
 
 function purchaseOrderCreate($bot, $from_id, $summa)
