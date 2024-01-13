@@ -15,7 +15,7 @@ function deleteOneProduct($bot, $tg_id, $product_feature_id)
     $cart = CartTg::findOne(['tg_id' => $tg_id, 'product_feature_id' => $product_feature_id]);
 
     if ( ! $cart ) {        
-        $bot->sendMessage($tg_id, "Ваша корзина пуста!");
+        $bot->sendMessage($tg_id, "Этого товара уже нет в корзине!");
         return;
     }
 

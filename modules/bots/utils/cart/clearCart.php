@@ -33,7 +33,7 @@ function clearCart($tg_id, $bot = null, $send_info = false)
                     'keyboard' => $keyboard,
                     'resize_keyboard' => true,
                 ];
-                $bot->sendMessage($from_id, $send, null, $KeyboardMarkup);
+                $bot->sendMessage($tg_id, $send, null, $KeyboardMarkup);
 
             }else $bot->sendMessage($tg_id, "Ваша корзина пуста!");
         }

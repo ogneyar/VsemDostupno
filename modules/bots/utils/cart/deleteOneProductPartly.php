@@ -11,6 +11,13 @@ require_once __DIR__ . '/getCart.php';
 
 function deleteOneProductPartly($bot, $tg_id, $product_feature_id, $quantity = 0) 
 {
+    $cart = CartTg::findOne(['tg_id' => $tg_id, 'product_feature_id' => $product_feature_id]);
+
+    if ( ! $cart ) {        
+        $bot->sendMessage($tg_id, "Этого товара уже нет в корзине!");
+        return;
+    }    
+
     if ($quantity == 0) {
         $tg_com = TgCommunication::findOne(['chat_id' => $tg_id]);
         if ( ! $tg_com ) {
@@ -23,13 +30,6 @@ function deleteOneProductPartly($bot, $tg_id, $product_feature_id, $quantity = 0
 
         $send = "В строке “Сообщение”, цифрой, укажите требуемое количество этого товара и отправьте уведомление для изменения";
         $bot->sendMessage($tg_id, $send);
-        return;
-    }
-    
-    $cart = CartTg::findOne(['tg_id' => $tg_id, 'product_feature_id' => $product_feature_id]);
-
-    if ( ! $cart ) {        
-        $bot->sendMessage($tg_id, "Ваша корзина пуста!");
         return;
     }
     
