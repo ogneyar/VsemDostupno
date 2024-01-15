@@ -87,7 +87,7 @@ class Email extends \yii\db\ActiveRecord
     }
 
     
-    public static function tg_send($name, $to, $params = [])
+    public static function tg_send($name, $to, $params = [], $KeyboardMarkup = null)
     {
         $config = require(__DIR__ . '/../config/constants.php');
         // $web = $config['WEB'];
@@ -137,7 +137,7 @@ class Email extends \yii\db\ActiveRecord
 
             $toChatIds = is_array($to) ? $to : [$to];
             foreach ($toChatIds as $chat_id) {
-                $bot->sendMessage($chat_id, $send);
+                $bot->sendMessage($chat_id, $send, null, $KeyboardMarkup);
             }
         }
     }

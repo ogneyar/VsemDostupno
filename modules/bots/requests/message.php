@@ -933,7 +933,8 @@ function requestMessage($bot, $message, $master, $admin) {
         $tg_com->from_whom = "searchProducts";
         $tg_com->save();
 
-        $send = "Для быстрого поиска нужного Вам товара, в строке “Сообщение”, укажите ключевое слово и отправьте его.";     
+        // $send = "Для быстрого поиска нужного Вам товара, в строке “Сообщение”, укажите ключевое слово и отправьте его.";     
+        $send = "Укажите ключевое слово.";     
         $bot->sendMessage($chat_id, $send);
 
         return;

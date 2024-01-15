@@ -21,7 +21,8 @@ function putInTheBasket($bot, $from_id, $product_feature_id, $quantity = 0)
         $tg_com->from_whom = "putInTheBasket_" . $product_feature_id;
         $tg_com->save();
 
-        $send = "В строке “Сообщение” укажите желаемое количество едениц товара, цифрой, и отправьте её для сбора в Вашу корзину покупок";
+        // $send = "В строке “Сообщение” укажите желаемое количество едениц товара, цифрой, и отправьте её для сбора в Вашу корзину покупок";
+        $send = "Укажите количество единиц";
         $bot->sendMessage($from_id, $send);
         return;
     }

@@ -2196,11 +2196,11 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
     }
 
 
-    /*******************
+    /***************************************
     
-           РАСЧЁТ
+           РАСЧЁТ (нажатие кнопки ДАЛЕЕ)
 
-    ********************/
+    ****************************************/
     if (strstr($data, '_', true) == 'calculationThen')
     {
         $array = explode('_', $data); 

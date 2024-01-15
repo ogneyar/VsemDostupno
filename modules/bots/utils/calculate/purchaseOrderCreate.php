@@ -293,11 +293,13 @@ function purchaseOrderCreate($bot, $from_id, $summa)
             } /* foreach ($purchase['data'] as $product)  */
 
             
-            $HideKeyboardMarkup = [ 'hide_keyboard' => true ];
-            $send = date('d.m.Y') . " Вами произведён обмен паями\r\n";
-            $bot->sendMessage($from_id, $send, null, $HideKeyboardMarkup);  
+            // $HideKeyboardMarkup = [ 'hide_keyboard' => true ];
+            // $send = date('d.m.Y') . " Вами произведён обмен паями\r\n";
+            // $bot->sendMessage($from_id, $send, null, $HideKeyboardMarkup);  
 
-            $send = $text;
+
+            $send = date('d.m.Y') . " Вами произведён обмен паями\r\n";
+            $send .= $text;
             $send .= "На общую сумму " . $total . "р.\r\n";
             $send .= "Доставка товара состоится " . date('d.m.Y', $purchase['purchase_date']);
 
@@ -335,13 +337,22 @@ function purchaseOrderCreate($bot, $from_id, $summa)
                 // $message = 'Списание на закупку';
                 $message = 'Обмен паями';
                 
+                $keyboard = [];                
+                $keyboard[] =  [ [ 'text' => 'Быстрый поиск товара' ], ];
+                $keyboard[] =  [ [ 'text' => 'Показать закупки по начатой дате' ], ];
+                $keyboard[] =  [ [ 'text' => 'Показать все категории закупок' ], ];
+                $KeyboardMarkup = [
+                    'keyboard' => $keyboard,
+                    'resize_keyboard' => true,
+                ];
+
                 if ($user->tg_id) {
                     Email::tg_send('account-log-tg', $user->tg_id, [
                         'typeName' => $deposit->typeName,
                         'message' => $message,
                         'amount' => -$order->paid_total,
                         'total' => $deposit->total,
-                    ]);       
+                    ], $KeyboardMarkup);       
                 }            
             }      
                 
