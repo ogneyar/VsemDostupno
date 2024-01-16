@@ -37,6 +37,7 @@ require_once __DIR__ . '/../utils/homeDelivery.php';
 require_once __DIR__ . '/../utils/getPurchasesByParentId.php';
 require_once __DIR__ . '/../utils/calculate/calculation.php';
 require_once __DIR__ . '/../utils/calculate/purchaseOrderCreate.php';
+require_once __DIR__ . '/../utils/search/search.php';
 
 
 function requestCallbackQuery($bot, $callback_query, $master, $admin) {
@@ -2420,6 +2421,19 @@ function requestCallbackQuery($bot, $callback_query, $master, $admin) {
 
         // printTheAct($bot, $from_id, $purchase_order_id);
         $bot->sendMessage($from_id, "Не реализовано!");
+        
+        return;
+    }
+
+
+    /**************************
+    
+        БЫСТРЫЙ ПОИСК ТОВАРА
+
+    ***************************/
+    if ($data == 'searchProducts')
+    {
+        search($bot, $from_id);
         
         return;
     }

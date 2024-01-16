@@ -32,6 +32,7 @@ require_once __DIR__ . '/../utils/account/getBalanceByNumber.php';
 require_once __DIR__ . '/../utils/account/getPay.php';
 require_once __DIR__ . '/../utils/account/getRole.php';
 require_once __DIR__ . '/../utils/purchasesByTheStartedDate.php';
+require_once __DIR__ . '/../utils/search/search.php';
 require_once __DIR__ . '/../utils/search/searchProducts.php';
 
 
@@ -924,18 +925,7 @@ function requestMessage($bot, $message, $master, $admin) {
     *******************************/
     if ($text == "Быстрый поиск товара" || $text == "/search")
     {
-        $tg_com = TgCommunication::findOne(['chat_id' => $chat_id]);
-        if ( ! $tg_com ) {
-            $tg_com = new TgCommunication();
-        }
-        $tg_com->chat_id = $chat_id;
-        $tg_com->to_chat_id = $chat_id;
-        $tg_com->from_whom = "searchProducts";
-        $tg_com->save();
-
-        // $send = "Для быстрого поиска нужного Вам товара, в строке “Сообщение”, укажите ключевое слово и отправьте его.";     
-        $send = "Укажите ключевое слово.";     
-        $bot->sendMessage($chat_id, $send);
+        search($bot, $chat_id);
 
         return;
     }
@@ -1300,7 +1290,7 @@ function requestMessage($bot, $message, $master, $admin) {
         // быстрый поиск товара
         if ($tgCom->from_whom == 'searchProducts') 
         {
-            searchProducts($bot, $tgCom->to_chat_id, $text);
+            searchProducts($bot, $tgCom->to_chat_id, $text, true);
             
             $tgCom->delete();
 
@@ -1346,28 +1336,40 @@ function requestMessage($bot, $message, $master, $admin) {
     }
 
     
-    if ($chat_id != $admin) {
 
-        $send = "Вы желаете задать вопрос?";
+    $array = explode(' ', $text); 
+    if (count($array) < 3) {
 
-        $InlineKeyboardMarkup = [
-            'inline_keyboard' => [[
-                [
-                    'text' => 'Да',
-                    'callback_data' => 'question_yes'
-                ],
-                [
-                    'text' => 'Нет',
-                    'callback_data' => 'question_no'
-                    ],
-            ]]
-        ];  
-        $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup, $message_id);
-		
+        // поиск товара
+        searchProducts($bot, $chat_id, $text);
+
         return;
-		
-	}else {        
-        $bot->sendMessage($chat_id, "Ваше сообщение НЕ БУДЕТ отправлено администратору!\r\n\r\nВы и есть администратор!!!");
+
+    }else {
+            
+        if ($chat_id != $admin) {
+
+            $send = "Вы желаете задать вопрос?";
+
+            $InlineKeyboardMarkup = [
+                'inline_keyboard' => [[
+                    [
+                        'text' => 'Да',
+                        'callback_data' => 'question_yes'
+                    ],
+                    [
+                        'text' => 'Нет',
+                        'callback_data' => 'question_no'
+                        ],
+                ]]
+            ];  
+            $bot->sendMessage($chat_id, $send, null, $InlineKeyboardMarkup, $message_id);
+
+        }else {        
+
+            $bot->sendMessage($chat_id, "Ваше сообщение НЕ БУДЕТ отправлено администратору!\r\n\r\nВы и есть администратор!!!");
+            
+        }
 		
         return;
     }

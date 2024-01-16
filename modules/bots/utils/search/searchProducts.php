@@ -1,21 +1,15 @@
 <?php
 
+use app\models\CartTg;
 use app\models\Product;
 use app\models\ProductFeature;
 use app\modules\purchase\models\PurchaseProduct;
 
-function searchProducts($bot, $tg_id, $search) {
+function searchProducts($bot, $tg_id, $search, $withButtons = false) {
 
     $purchaseProducts = PurchaseProduct::find()->where(['status' => 'advance'])->all();
 
-    if ( ! $purchaseProducts ) {
-        $send = "Ничего не найдено по искомому запросу:\r\n\r\n" . $search;
-        $bot->sendMessage($tg_id, $send);
-        return;
-    }
-
     $found = false;
-    // $arrayPurchases = [];
     $inline_keyboard = [];
 
     foreach ($purchaseProducts as $purchaseProduct) {
@@ -26,7 +20,6 @@ function searchProducts($bot, $tg_id, $search) {
         $productName = $product->name;
         
         if (mb_strpos(mb_strtolower($productName), mb_strtolower($search), 0, "UTF-8") !== false) {
-            // array_push($arrayPurchases, $purchaseProduct);
             if ($product->visibility) {
                 $found = true;
                 $inline_keyboard[] = [
@@ -36,15 +29,55 @@ function searchProducts($bot, $tg_id, $search) {
                     ],
                 ];                
             }
-            // $send = "Урраааа нашёл!!!";
-            // $bot->sendMessage($tg_id, $send);
-            // break;
         }
     }
 
     if ( ! $found ) {
-        $send = "Ничего не найдено по искомому запросу:\r\n\r\n" . $search;
-        $bot->sendMessage($tg_id, $send);
+
+        if ($withButtons) {
+            $send = "⭐️⭐️⭐️⭐️⭐️";
+            $keyboard = [ 
+                [
+                    [ 'text' => 'Показать закупки по начатой дате' ],
+                ],        
+                [
+                    [ 'text' => 'Показать все категории закупок' ],
+                ],
+            ];
+            
+            $cart = CartTg::find()->where(['tg_id' => $tg_id])->all();
+
+            if ($cart) {
+                $keyboard[] =  [
+                    [ 'text' => 'В корзине товар' ],
+                ];
+            }
+
+            $keyboardMarkup = [
+                'keyboard' => $keyboard,
+                'resize_keyboard' => true,
+            ];
+            $bot->sendMessage($tg_id, $send, null, $keyboardMarkup);
+        }
+        // else {
+        //     $send = "Ничего не найдено по запросу:\r\n\r\n" . $search;
+        //     $bot->sendMessage($tg_id, $send);
+        // }
+
+        $send = "Ничего не найдено по запросу:\r\n\r\n" . $search;
+            
+        $InlineKeyboardMarkup = [
+            'inline_keyboard' => [                            
+                [
+                    [
+                        'text' => "Искать другой товар?",
+                        'callback_data' => 'searchProducts'
+                    ],
+                ],          
+            ]
+        ]; 
+        $bot->sendMessage($tg_id, $send, null, $InlineKeyboardMarkup);
+
         return;
     }
 
