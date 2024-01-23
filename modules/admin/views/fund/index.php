@@ -137,7 +137,7 @@ $this->registerJs($script, $this::POS_END);
                     'headerOptions' => ['style' => 'min-width: 55%;']
                 ],
                 [
-                    'label' => '',
+                    'label' => 'Зачисления на счёт',
                     'attribute' => 'deduction_total'
                 ],
                 [
@@ -166,7 +166,7 @@ $this->registerJs($script, $this::POS_END);
                                         ]
                                     ],
                                     [
-                                        'label' => 'Начисление',
+                                        'label' => 'Зачисление',
                                         'url' => 'javascript:void(0);',
                                         'options' => [
                                             'data-toggle' => 'modal',
@@ -175,6 +175,10 @@ $this->registerJs($script, $this::POS_END);
                                             'data-fund-name' => $model->name,
                                             'class' => 'transfer-open'
                                         ]
+                                    ],
+                                    [
+                                        'label' => 'Архив',
+                                        'url' => 'fund/archive'
                                     ],
                                     [
                                         'label' => 'Распределение',
@@ -193,6 +197,8 @@ $this->registerJs($script, $this::POS_END);
 </div>
 
 <div class="fund-right-box">
+
+    <h4>&nbsp;&nbsp;Cчета сверки</h4>    
     
     <div class="fund-buttons-container">
         <!-- <div class="fund-btns-row-1">

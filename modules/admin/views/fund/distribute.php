@@ -8,6 +8,7 @@ use kartik\dropdown\DropdownX;
 use yii\bootstrap\Modal;
 
 $this->title = 'Распределить Фонды между контрагентами';
+$this->params['breadcrumbs'][] = ['label' => 'Фонды', 'url' => ['/admin/fund']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -56,3 +57,4 @@ $this->registerJs($script, $this::POS_END);
     этого фонда от каждой покупки зачисляется на рекомендательский счёт контрагента.
 </label>
 <br /><br />
+</div>

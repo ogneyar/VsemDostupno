@@ -1,13 +1,31 @@
+CREATE TABLE `subscriber_messages` (`id` INT PRIMARY KEY AUTO_INCREMENT,`user_id` INT NOT NULL,`created_at` DATETIME NOT NULL,`amount` DOUBLE NOT NULL);
+CREATE TABLE `tg_save_purchase_date` (`id` INT PRIMARY KEY AUTO_INCREMENT,`chat_id` INT NOT NULL,`purchase_date` INT NOT NULL);
+CREATE TABLE `archive` (
+    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `date` DATETIME NOT NULL,
+    `operation` varchar(255) NOT NULL,
+    `account_name` varchar(255) NOT NULL,
+    `amount` DOUBLE NOT NULL,
+    `reason` varchar(255) NOT NULL,
+    `fio` varchar(255) NOT NULL,
+    `number` INT NOT NULL
+);
+
 INSERT INTO `account` (`id`, `user_id`, `type`, `total`) VALUES (NULL, '347', 'storage', '0.00');
+INSERT INTO `archive` (`date`, `operation`, `account_name`, `amount`, `reason`, `fio`, `number`) 
+VALUES (
+    '2024-01-23 14:06:11', 
+    'operation', 
+    'account_name', 
+    10100.25, 
+    'reason', 
+    'fio', 
+    334
+);
 
 
 ALTER TABLE `subscriber_payment` ADD `visible` TINYINT NOT NULL DEFAULT '1' COMMENT 'Показать админу?' AFTER `amount`;
 ALTER TABLE `subscriber_payment` ADD `number_of_times` INT NOT NULL DEFAULT '0' COMMENT 'Который раз не оплатил' AFTER `visible`;
-
-
-CREATE TABLE `subscriber_messages` (`id` INT PRIMARY KEY AUTO_INCREMENT,`user_id` INT NOT NULL,`created_at` DATETIME NOT NULL,`amount` DOUBLE NOT NULL);
-CREATE TABLE `tg_save_purchase_date` (`id` INT PRIMARY KEY AUTO_INCREMENT,`chat_id` INT NOT NULL,`purchase_date` INT NOT NULL);
-
 
 
 select user.firstname from member join user on user.id = member.user_id where member.id = 213;

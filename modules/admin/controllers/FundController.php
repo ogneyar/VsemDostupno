@@ -4,6 +4,7 @@ namespace app\modules\admin\controllers;
 
 use Yii;
 use app\models\Account;
+use app\models\Archive;
 use app\models\Fund;
 use app\models\User;
 use yii\helpers\ArrayHelper;
@@ -74,7 +75,22 @@ class FundController extends BaseController
     
     public function actionDistribute()
     {
-         return $this->render('distribute', []);
+        return $this->render('distribute', []);
+    }
+
+    public function actionArchive()
+    {
+        $archive = Archive::find()->all();
+
+        // второй вариант передачи данных
+        $dataProvider = new ActiveDataProvider([
+            'query' => Archive::find(),
+        ]);
+
+        return $this->render('archive', [
+            'archive' => $archive,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     public function actionAdd()
