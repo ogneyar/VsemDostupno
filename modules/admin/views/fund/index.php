@@ -1,19 +1,30 @@
 <?php
 
+use DateTime;
+use app\models\Archive;
+use app\models\Parameter;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use kartik\dropdown\DropdownX;
 use yii\bootstrap\Modal;
+use yii\web\JsExpression;
+use kartik\select2\Select2;
 
 $this->title = 'Фонды';
 $this->params['breadcrumbs'][] = $this->title;
 
-$funds_select = [];
-foreach ($dataProvider->getModels() as $fund) {
-    $funds_select[$fund->id] = $fund->name;
-}
+// $archive = new Archive(); 
+// $dTime = new DateTime();
+// $archive->date = $dTime->format("Y-m-d H:i:s");
+// $archive->operation = "нет";
+// $archive->account_name = "нет";
+// $archive->amount = 42;
+// $archive->reason = "нет";
+// $archive->fio = "нет";
+// $archive->number = 42;
+// $archive->save();
 ?>
 <div class="fund-box">
 <div class="fund-left-box">
@@ -114,8 +125,8 @@ $script = <<<JS
             $("#amount-to-input").val($(this).attr("data-fund"));
             $("#amount-to").val("");
             $("#amount-from").val("");
-            $("#transfer-from-lbl").html('Из ' + $(this).attr("data-fund-name"));
-            $("#transfer-to-lbl").html('В ' + $(this).attr("data-fund-name"));
+            $("#transfer-from-lbl").html('Укажите сумму списания с ' + $(this).attr("data-fund-name"));
+            $("#transfer-to-lbl").html('Укажите сумму зачисления в ' + $(this).attr("data-fund-name"));
         });
     })
 JS;
@@ -351,6 +362,8 @@ $this->registerJs($script, $this::POS_END);
 </div>
 </div>
 
+
+
 <?php Modal::begin([
     'id' => 'transfer-from-modal',
     'options' => ['tabindex' => false,],
@@ -365,12 +378,57 @@ $this->registerJs($script, $this::POS_END);
     </div>
     
     <div class="form-group">
-        <label for="weight">Сумма</label>
+        <label>Укажите сумму</label>
         <?= Html::textInput('amount', null, ['class' => 'form-control', 'id' => 'amount-to']); ?>
     </div>
     <input type="hidden" id="amount-from-input" value="">
 
+    <div class="form-group">
+        <label>Причина списания</label>
+        <?= Html::textInput('text', null, [
+            'class' => 'form-control', 
+            'id' => 'amount-reason', 
+            'list' => 'reason_messages',
+            'autocomplete' => 'off',
+        ]); ?>
+    </div>
+
+    <datalist id="reason_messages">
+        <?php foreach (explode(';', Parameter::getValueByName('reason_messages')) as $message): ?>
+            <option value="<?= Html::encode($message) ?>" />
+        <?php endforeach ?>
+    </datalist>
+
+    <div class="form-group">
+        <label>Укажите кому возвращается пай</label>
+        <?//= Html::textInput('amount', null, ['class' => 'form-control', 'id' => 'amount-to']); ?>
+        <?= Select2::widget([
+            'id' => 'amount-user-id',
+            'name' => 'amount-user-id',
+            'options' => ['placeholder' => 'Введите покупателя ...'],
+            'pluginOptions' => [
+                'allowClear' => true,
+                'minimumInputLength' => 1,
+                'language' => substr(Yii::$app->language, 0, 2),
+                'ajax' => [
+                    'url' => Url::to(['/api/profile/admin/user/search']),
+                    'dataType' => 'json',
+                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                ],
+                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+            ],
+            'pluginEvents' => [
+                'select2:select' => new JsExpression('function() { $("#edit-account").prop("disabled", false); }'),
+                'select2:unselect' => new JsExpression('function() { $("#edit-account").prop("disabled", true); }'),
+            ],
+        ]) ?>
+    </div>
+
 <?php Modal::end(); ?>
+
+
 
 <?php Modal::begin([
     'id' => 'transfer-to-modal',

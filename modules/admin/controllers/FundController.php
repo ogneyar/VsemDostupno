@@ -3,6 +3,7 @@
 namespace app\modules\admin\controllers;
 
 use Yii;
+use DateTime;
 use app\models\Account;
 use app\models\Archive;
 use app\models\Fund;
@@ -61,6 +62,21 @@ class FundController extends BaseController
                 }
             }
         }
+
+        
+        $funds_select = [];
+        foreach ($dataProvider->getModels() as $fund) {
+            $funds_select[$fund->id] = $fund->name;
+        }
+        $reason_select = [];
+        $reason_select[] = "Транспортные издержки";
+        $reason_select[] = "Фасовка товаров";
+        $reason_select[] = "Канцтовары, расходные материалы";
+        $reason_select[] = "Закупка оборудования";
+        $reason_select[] = "Коммунальные издержки";
+        $reason_select[] = "Услуги связи";
+        $reason_select[] = "Обмен паями";
+
         
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -70,6 +86,8 @@ class FundController extends BaseController
             'minus' => $minus,
             'subscrib' => $subscrib,
             'storage' => $storage,
+            'funds_select' => $funds_select,
+            'reason_select' => $reason_select,
         ]);
     }
     
@@ -143,11 +161,14 @@ class FundController extends BaseController
         }
     }
     
-    public function actionTransfer()
+    public function actionTransfer() 
     {
         $fund_from_id = $_POST['from_id'];
         $fund_to_id = isset($_POST['to_id']) ? $_POST['to_id'] : 0;
         $amount = $_POST['amount'];
+
+        $reason = isset($_POST['reason']) ? $_POST['reason'] : null;
+        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
         
         $fund_from = Fund::find()->where(['id' => $fund_from_id])->one();
         if ($amount <= $fund_from->deduction_total) {
@@ -158,6 +179,20 @@ class FundController extends BaseController
                 $fund_to->deduction_total += $amount;
                 $fund_to->save();
             }
+
+            // Запись данных в архив
+            $archive = new Archive();
+            $dTime = new DateTime();
+            $archive->date = $dTime->format("Y-m-d H:i:s");
+            $archive->operation = "Произведено списание средств";
+            if ($fund_to_id) $archive->operation = "Произведено зачисление средств";
+            $archive->account_name = $fund_from->name;
+            $archive->amount = $amount;
+            $archive->reason = $reason;
+            $user = User::findOne($user_id);
+            $archive->fio = $user->getShortName();
+            $archive->number = $user->number;
+            $archive->save();
         }
     }
 
