@@ -127,6 +127,7 @@ $script = <<<JS
             $("#amount-from").val("");
             $("#transfer-from-lbl").html('Укажите сумму списания с ' + $(this).attr("data-fund-name"));
             $("#transfer-to-lbl").html('Укажите сумму зачисления в ' + $(this).attr("data-fund-name"));
+            $("#amount-fund-name").val($(this).attr("data-fund-name"));
         });
     })
 JS;
@@ -381,7 +382,10 @@ $this->registerJs($script, $this::POS_END);
         <label>Укажите сумму</label>
         <?= Html::textInput('amount', null, ['class' => 'form-control', 'id' => 'amount-to']); ?>
     </div>
+
     <input type="hidden" id="amount-from-input" value="">
+
+    <input type="hidden" id="amount-fund-name" value="">
 
     <div class="form-group">
         <label>Причина списания</label>
@@ -415,14 +419,14 @@ $this->registerJs($script, $this::POS_END);
                     'dataType' => 'json',
                     'data' => new JsExpression('function(params) { return {q:params.term}; }')
                 ],
-                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                'templateResult' => new JsExpression('function(user) { return user.text; }'),
-                'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                // 'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                // 'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                // 'templateSelection' => new JsExpression('function (user) { return user.text; }'),
             ],
-            'pluginEvents' => [
-                'select2:select' => new JsExpression('function() { $("#edit-account").prop("disabled", false); }'),
-                'select2:unselect' => new JsExpression('function() { $("#edit-account").prop("disabled", true); }'),
-            ],
+            // 'pluginEvents' => [
+            //     'select2:select' => new JsExpression('function() { $("#edit-account").prop("disabled", false); }'),
+            //     'select2:unselect' => new JsExpression('function() { $("#edit-account").prop("disabled", true); }'),
+            // ],
         ]) ?>
     </div>
 
@@ -443,15 +447,15 @@ $this->registerJs($script, $this::POS_END);
         <label id="transfer-to-lbl"></label>
     </div>
     
-    <div class="form-group">
+    <!-- <div class="form-group">
         <label for="tare">Начислить из</label>
-        <?= Html::dropDownList(
+        <?/*= Html::dropDownList(
             'fund-from',
             '',
             $funds_select,
             ['class' => 'form-control', 'id' => 'fund-from-select']
-        ); ?>
-    </div>
+        ); */?>
+    </div> -->
     
     <div class="form-group">
         <label for="weight">Сумма</label>
@@ -459,4 +463,42 @@ $this->registerJs($script, $this::POS_END);
     </div>
     <input type="hidden" id="amount-to-input" value="">
 
+    <!-- <input type="hidden" id="amount-fund-to-name" value=""> -->
+
+    <div class="form-group">
+        <label>Причина зачисления</label>
+        <?= Html::textInput('text', null, [
+            'class' => 'form-control', 
+            'id' => 'amount-to-reason', 
+            'list' => 'reason_to_messages',
+            'autocomplete' => 'off',
+        ]); ?>
+    </div>
+
+    <datalist id="reason_to_messages">
+        <?php foreach (explode(';', Parameter::getValueByName('reason_to_messages')) as $message): ?>
+            <option value="<?= Html::encode($message) ?>" />
+        <?php endforeach ?>
+    </datalist>
+
+    <div class="form-group">
+        <label>Укажите оператора данного действия</label>
+        <?//= Html::textInput('amount', null, ['class' => 'form-control', 'id' => 'amount-to']); ?>
+        <?= Select2::widget([
+            'id' => 'amount-to-user-id',
+            'name' => 'amount-to-user-id',
+            'options' => ['placeholder' => 'Введите покупателя ...'],
+            'pluginOptions' => [
+                'allowClear' => true,
+                'minimumInputLength' => 1,
+                'language' => substr(Yii::$app->language, 0, 2),
+                'ajax' => [
+                    'url' => Url::to(['/api/profile/admin/user/search']),
+                    'dataType' => 'json',
+                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                ],
+            ],
+        ]) ?>
+    </div>
+    
 <?php Modal::end(); ?>

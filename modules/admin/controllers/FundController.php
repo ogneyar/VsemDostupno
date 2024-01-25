@@ -37,6 +37,10 @@ class FundController extends BaseController
         foreach($accounts as $acc) {
             $balance += $acc->total;
         }
+        $funds = Fund::find()->all();
+        foreach($funds as $fund) {
+            $balance += $fund->deduction_total;
+        }
 
         $minus = 0;
         $accounts = Account::find()->where(['type' => Account::TYPE_SUBSCRIPTION])->all();
@@ -162,31 +166,34 @@ class FundController extends BaseController
     }
     
     public function actionTransfer() 
-    {
+    {       
         $fund_from_id = $_POST['from_id'];
-        $fund_to_id = isset($_POST['to_id']) ? $_POST['to_id'] : 0;
+        $fund_to_id = $_POST['to_id'];
         $amount = $_POST['amount'];
-
-        $reason = isset($_POST['reason']) ? $_POST['reason'] : null;
-        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+        $reason = $_POST['reason'];
+        $user_id = $_POST['user_id'];
         
-        $fund_from = Fund::find()->where(['id' => $fund_from_id])->one();
-        if ($amount <= $fund_from->deduction_total) {
-            $fund_from->deduction_total -= $amount;
-            $fund_from->save();
-            if ($fund_to_id != 0) {
-                $fund_to = Fund::find()->where(['id' => $fund_to_id])->one();
-                $fund_to->deduction_total += $amount;
-                $fund_to->save();
+        $fund = null;
+        if ($fund_from_id) {
+            $fund = Fund::find()->where(['id' => $fund_from_id])->one();
+            if ($amount <= $fund->deduction_total) {
+                $fund->deduction_total -= $amount;
+                $fund->save();
             }
+        }else if ($fund_to_id) {
+            $fund = Fund::find()->where(['id' => $fund_to_id])->one();
+            $fund->deduction_total += $amount;
+            $fund->save();
+        }
 
+        if ($fund) {
             // Запись данных в архив
             $archive = new Archive();
             $dTime = new DateTime();
             $archive->date = $dTime->format("Y-m-d H:i:s");
             $archive->operation = "Произведено списание средств";
             if ($fund_to_id) $archive->operation = "Произведено зачисление средств";
-            $archive->account_name = $fund_from->name;
+            $archive->account_name = $fund->name;
             $archive->amount = $amount;
             $archive->reason = $reason;
             $user = User::findOne($user_id);
@@ -194,6 +201,7 @@ class FundController extends BaseController
             $archive->number = $user->number;
             $archive->save();
         }
+
     }
 
     
