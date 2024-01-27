@@ -2,6 +2,10 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use app\models\Member;
+use app\models\Partner;
+use app\models\Provider;
+use app\models\User;
 
 $this->title = 'Архив';
 $this->params['breadcrumbs'][] = ['label' => 'Фонды', 'url' => ['/admin/fund']];
@@ -66,7 +70,32 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Номер регистрации',
-            'attribute' => 'number'
+            'attribute' => 'number',
+            'content' => function ($model) {
+                $id = null;
+                $client = null;
+                $user = User::findOne(['number' => $model->number]); 
+
+                if ( ! $user ) return $model->number;
+
+                $role = $user->role;
+                if ($role == User::ROLE_MEMBER) {
+                    $client = Member::findOne(['user_id' => $user->id]);
+                }else if ($role == User::ROLE_PARTNER) {
+                    $client = Partner::findOne(['user_id' => $user->id]);
+                }else if ($role == User::ROLE_PROVIDER) {
+                    $client = Provider::findOne(['user_id' => $user->id]);
+                }
+                
+                if ( ! $client ) return $model->number;
+
+                $id = $client->id;
+                    
+                $host = Yii::$app->params['host'];
+                $url = "$host/admin/$role/view?id=$id";
+
+                return "<a href='$url'>$model->number</a>";
+            }
         ]
     ],
     
