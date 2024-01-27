@@ -14,18 +14,8 @@ use kartik\select2\Select2;
 
 $this->title = 'Фонды';
 $this->params['breadcrumbs'][] = $this->title;
-
-// $archive = new Archive(); 
-// $dTime = new DateTime();
-// $archive->date = $dTime->format("Y-m-d H:i:s");
-// $archive->operation = "нет";
-// $archive->account_name = "нет";
-// $archive->amount = 42;
-// $archive->reason = "нет";
-// $archive->fio = "нет";
-// $archive->number = 42;
-// $archive->save();
 ?>
+
 <div class="fund-box">
 <div class="fund-left-box">
 <div class="fund-index">
@@ -117,7 +107,9 @@ $this->registerJs($script, $this::POS_END);
     <h4>ПРОИЗВЕДЁННЫЕ ОТЧИСЛЕНИЯ</h4>
     
     <?php Pjax::begin(['id' => 'fund-deduction-pjax']); ?>
+
 <?php
+$updateVisibilityButtons = Url::to(['/api/profile/admin/fund/update-visibility-buttons']);
 $script = <<<JS
     $(function () {
         $(".transfer-open").click(function() {
@@ -128,6 +120,27 @@ $script = <<<JS
             $("#transfer-from-lbl").html('Укажите сумму списания с ' + $(this).attr("data-fund-name"));
             $("#transfer-to-lbl").html('Укажите сумму зачисления в ' + $(this).attr("data-fund-name"));
             $("#amount-fund-name").val($(this).attr("data-fund-name"));
+        });
+
+        $('input[type="checkbox"][class="update-visibility-buttons"]').on('change', function () {
+            $.ajax({
+                url: '$updateVisibilityButtons',
+                type: 'POST',
+                data: {
+                    id: $(this).attr('data-visibility-fund-id'),
+                    visibility: $(this).is(':checked') ? 1 : 0
+                },
+                success: function (data) {
+                    if (!(data && data.success)) {
+                        alert('Ошибка обновления видимости кнопок!');
+                    }
+                },
+                error: function () {
+                    alert('Ошибка обновления видимости кнопок!!!');
+                },
+            });
+
+            return false;
         });
     })
 JS;
@@ -202,6 +215,14 @@ $this->registerJs($script, $this::POS_END);
                         }
                     ],
                 ],
+                [
+                    'label' => '',
+                    'attribute' => 'visibility_buttons',
+                    'content' => function ($model) {
+                        return '<input type="checkbox" ' . ($model->visibility_buttons ? 'checked' : '') 
+                            . ' data-visibility-fund-id="' . $model->id . '" class="update-visibility-buttons">';
+                    }
+                ],                
             ],
         ]); ?>
     <?php Pjax::end(); ?>

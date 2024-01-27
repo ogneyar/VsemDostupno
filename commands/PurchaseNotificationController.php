@@ -3,6 +3,7 @@ namespace app\commands;
 
 use Yii;
 use yii\console\Controller;
+use app\models\Archive;
 use app\models\Email;
 use app\models\User;
 use app\models\Provider;
@@ -34,11 +35,9 @@ class PurchaseNotificationController extends Controller
         $admin = Yii::$app->params['adminChatId'];
         $bot = new Bot($token);        
 
-        $date = date('Y-m-d');
-        // $date = '2021-11-01';
-         $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();
-        //  $products = PurchaseProduct::find()->where(['stop_date' => '2023-12-13'])->andWhere(['status' => 'held'])->all();
-         
+        $date = date('Y-m-d'); // $date = '2021-11-01';
+
+        $products = PurchaseProduct::find()->where(['<=', 'stop_date', $date])->andWhere(['status' => 'advance'])->all();         
         if ($products) {
             $orders_to_send = [];
             // foreach ($products as $product) {
@@ -343,7 +342,6 @@ class PurchaseNotificationController extends Controller
         
         // оповещение админа о свершившихся закупках
         $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => $date])->andWhere(['status' => 'held'])->all();
-        // $purchaseProducts = PurchaseProduct::find()->where(['stop_date' => '2023-12-13'])->andWhere(['status' => 'held'])->all();
         if ($purchaseProducts) {
             
             $id_providers = [];
@@ -431,6 +429,23 @@ class PurchaseNotificationController extends Controller
                 }
             }
         }
+
+        
+        /*
+        * Очистка архива (удаляются записи старше 45 дней)
+        */
+        $archives = Archive::find()->all();
+        foreach ($archives as $archive) {
+            $archive_date = strtotime($archive->date);
+            $now = strtotime($date);
+            $difference = $now - $archive_date;
+            $hours = $difference / (60 * 60 * 24); // количество дней
+
+            if ($hours > 45) {
+                $archive->delete();
+            }
+        }
+
          
     }
     

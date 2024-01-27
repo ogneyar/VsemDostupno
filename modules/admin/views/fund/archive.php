@@ -69,5 +69,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'number'
         ]
     ],
+    
+    'layout'=>"{pager}\n{summary}\n{items}\n{pager}",
+    
 ]); ?>
 
