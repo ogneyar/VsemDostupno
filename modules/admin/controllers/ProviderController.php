@@ -52,8 +52,14 @@ class ProviderController extends BaseController
      */
     public function actionIndex()
     {
+        $query = null;
+        if (isset($_GET['number'])) {
+            $query = Provider::find()->joinWith('user')->where('user.request = 0')->andWhere(['user.number' => $_GET['number']]);
+        }else {
+            $query = Provider::find()->joinWith('user')->where('user.request = 0');
+        }
         $dataProvider = new ActiveDataProvider([
-            'query' => Provider::find()->joinWith('user')->where('user.request = 0'),
+            'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
 

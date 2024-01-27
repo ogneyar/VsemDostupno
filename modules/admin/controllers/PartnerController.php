@@ -44,8 +44,14 @@ class PartnerController extends BaseController
      */
     public function actionIndex()
     {
+        $query = null;
+        if (isset($_GET['number'])) {
+            $query = Partner::find()->joinWith('user')->where('user.request = 0')->andWhere(['user.number' => $_GET['number']]);
+        }else {
+            $query = Partner::find()->joinWith('user')->where('user.request = 0');
+        }
         $dataProvider = new ActiveDataProvider([
-            'query' => Partner::find(),
+            'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
 

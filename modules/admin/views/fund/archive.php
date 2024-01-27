@@ -92,7 +92,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 $id = $client->id;
                     
                 $host = Yii::$app->params['host'];
-                $url = "$host/admin/$role/view?id=$id";
+                // $url = "$host/admin/$role/view?id=$id";
+                $url = "$host/admin/$role?number=$user->number"; 
 
                 return "<a href='$url'>$model->number</a>";
             }
