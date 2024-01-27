@@ -16,6 +16,8 @@ $this->title = 'Фонды';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
+<!-- <div id="fund-loader" style="background:red;width:100%;height:100wh;z-index:1000;">dfghghgfhdh</div> -->
+
 <div class="fund-box">
 <div class="fund-left-box">
 <div class="fund-index">
@@ -134,6 +136,7 @@ $script = <<<JS
                     if (!(data && data.success)) {
                         alert('Ошибка обновления видимости кнопок!');
                     }
+                    window.location.reload();
                 },
                 error: function () {
                     alert('Ошибка обновления видимости кнопок!!!');
@@ -171,6 +174,41 @@ $this->registerJs($script, $this::POS_END);
                     'template' => '{actions}',
                     'buttons' => [
                         'actions' => function ($url, $model) {
+                            
+                            $items = [];
+                            if ( ! $model->no_buttons ) { // no_buttons - отсутствие кнопок
+                                array_push($items, [
+                                    'label' => 'Списание',
+                                    'url' => 'javascript:void(0);',
+                                    'options' => [
+                                        'data-toggle' => 'modal',
+                                        'data-target' => '#transfer-from-modal',
+                                        'data-fund' => $model->id,
+                                        'data-fund-name' => $model->name,
+                                        'class' => 'transfer-open'
+                                    ]
+                                ]);
+                                array_push($items,  [
+                                    'label' => 'Зачисление',
+                                    'url' => 'javascript:void(0);',
+                                    'options' => [
+                                        'data-toggle' => 'modal',
+                                        'data-target' => '#transfer-to-modal',
+                                        'data-fund' => $model->id,
+                                        'data-fund-name' => $model->name,
+                                        'class' => 'transfer-open'
+                                    ]
+                                ]);
+                                array_push($items, [
+                                    'label' => 'Архив',
+                                    'url' => 'fund/archive'
+                                ]);
+                            }
+                            array_push($items, [
+                                'label' => 'Распределение',
+                                'url' => 'fund/distribute'
+                            ]);
+
                             return Html::beginTag('div', ['class'=>'dropdown']) .
                                 Html::button('Действия <span class="caret"></span>', [
                                     'type'=>'button',
@@ -178,38 +216,7 @@ $this->registerJs($script, $this::POS_END);
                                     'data-toggle'=>'dropdown'
                                 ]) .
                                 DropdownX::widget([
-                                'items' => [
-                                    [
-                                        'label' => 'Списание',
-                                        'url' => 'javascript:void(0);',
-                                        'options' => [
-                                            'data-toggle' => 'modal',
-                                            'data-target' => '#transfer-from-modal',
-                                            'data-fund' => $model->id,
-                                            'data-fund-name' => $model->name,
-                                            'class' => 'transfer-open'
-                                        ]
-                                    ],
-                                    [
-                                        'label' => 'Зачисление',
-                                        'url' => 'javascript:void(0);',
-                                        'options' => [
-                                            'data-toggle' => 'modal',
-                                            'data-target' => '#transfer-to-modal',
-                                            'data-fund' => $model->id,
-                                            'data-fund-name' => $model->name,
-                                            'class' => 'transfer-open'
-                                        ]
-                                    ],
-                                    [
-                                        'label' => 'Архив',
-                                        'url' => 'fund/archive'
-                                    ],
-                                    [
-                                        'label' => 'Распределение',
-                                        'url' => 'fund/distribute'
-                                    ],
-                                ],
+                                'items' => $items,
                             ]) .
                             Html::endTag('div');
                         }
@@ -217,9 +224,9 @@ $this->registerJs($script, $this::POS_END);
                 ],
                 [
                     'label' => '',
-                    'attribute' => 'visibility_buttons',
+                    'attribute' => 'no_buttons',
                     'content' => function ($model) {
-                        return '<input type="checkbox" ' . ($model->visibility_buttons ? 'checked' : '') 
+                        return '<input type="checkbox" ' . ($model->no_buttons ? 'checked' : '') 
                             . ' data-visibility-fund-id="' . $model->id . '" class="update-visibility-buttons">';
                     }
                 ],                

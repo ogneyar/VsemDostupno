@@ -80,7 +80,7 @@ class FundController extends BaseController
         $reason_select[] = "Коммунальные издержки";
         $reason_select[] = "Услуги связи";
         $reason_select[] = "Обмен паями";
-
+        
         
         return $this->render('index', [
             'dataProvider' => $dataProvider,

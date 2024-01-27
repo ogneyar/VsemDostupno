@@ -37,7 +37,7 @@ class FundController extends BaseController
             throw new NotFoundHttpException('Страница не найдена.');
         }
 
-        $model->visibility_buttons = $post['visibility'];
+        $model->no_buttons = $post['visibility'];
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 

@@ -50,7 +50,7 @@ class Fund extends \yii\db\ActiveRecord
             'name' => 'Фонды',
             'percent' => 'Процент',
             'deduction_total' => 'Сумма отчислений',
-            'visibility_buttons' => 'Видимость кнопок Списать / Зачислить',
+            'no_buttons' => 'Отсутствие кнопок Списать / Зачислить',
         ];
     }
      
